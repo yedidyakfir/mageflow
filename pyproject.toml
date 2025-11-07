@@ -1,0 +1,22 @@
+[project]
+name = "orchestrator"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "yedidyakfir",email = "yedidyakfir@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10, <4.0"
+dependencies = [
+    "rapyer (>=1.0.1,<2.0.0)",
+    "pydantic (>=2.12.4,<3.0.0)",
+    "dynaconf (>=3.2.12,<4.0.0)"
+]
+
+[tool.poetry.group.dev.dependencies]
+black = ">=25.9.0,<26.0.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
