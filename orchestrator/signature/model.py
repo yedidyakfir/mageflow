@@ -12,6 +12,7 @@ from rapyer import AtomicRedisModel
 from rapyer.errors.base import KeyNotFound
 
 from orchestrator.errors import MissingSignatureError
+from orchestrator.init import orchestrator_config
 from orchestrator.models.message import ReturnValue
 from orchestrator.signature.consts import TASK_ID_PARAM_NAME
 from orchestrator.signature.status import TaskStatus, SignatureStatus, PauseActionTypes
@@ -90,7 +91,7 @@ class TaskSignature(AtomicRedisModel):
     ) -> Self:
         if not input_validator:
             input_validator = await load_validator(
-                dono_hatchet_config.redis_client, task_name
+                orchestrator_config.redis_client, task_name
             )
 
         model_fields = list(cls.__pydantic_fields__)
@@ -107,7 +108,7 @@ class TaskSignature(AtomicRedisModel):
 
     @classmethod
     async def delete_signature(cls, task_id: TaskIdentifierType):
-        result = await dono_hatchet_config.redis_client.remove(task_id)
+        result = await orchestrator_config.redis_client.remove(task_id)
         return result
 
     async def add_callbacks(
