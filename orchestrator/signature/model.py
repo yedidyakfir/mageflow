@@ -287,7 +287,7 @@ class TaskSignature(AtomicRedisModel):
 
     async def suspend(self):
         """
-        Task suspention will try and stop the task at before it starts
+        Task suspension will try and stop the task at before it starts
         """
         await self.change_status(SignatureStatus.SUSPENDED)
 
@@ -298,7 +298,7 @@ class TaskSignature(AtomicRedisModel):
 
     async def interrupt(self):
         """
-        Task interrupt will try to aggresivley take hold of the async loop and stop the task
+        Task interrupt will try to aggressively take hold of the async loop and stop the task
         """
         raise NotImplementedError()
 
@@ -328,17 +328,3 @@ def extract_class_and_id(
     class_name, pk = task_id.split(":", 1)
     signature_class = SIGNATURES_NAME_MAPPING.get(class_name, TaskSignature)
     return signature_class, pk
-
-
-async def sign(task: str | HatchetTaskType, **kwargs):
-    if isinstance(task, str):
-        return await TaskSignature.from_task_name(task, **kwargs)
-    else:
-        return await TaskSignature.from_task(task, **kwargs)
-
-
-load_signature = TaskSignature.from_id_safe
-resume_task = TaskSignature.resume_from_id
-lock_task = TaskSignature.lock_from_id
-resume = TaskSignature.resume_from_id
-pause = TaskSignature.pause_from_id
