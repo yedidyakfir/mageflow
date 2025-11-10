@@ -1,7 +1,7 @@
 import inspect
 from typing import Any
 
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, create_model, ConfigDict
 
 ParamValidationType = dict[str, tuple[type, Any]]
 
@@ -21,7 +21,11 @@ def extract_validators(data: dict) -> ParamValidationType:
 
 
 def create_model_from_validators(validators: ParamValidationType) -> type[BaseModel]:
-    return create_model("DynamicModel", **validators)
+    return create_model(
+        "DynamicModel",
+        __config__=ConfigDict(arbitrary_types_allowed=True),
+        **validators,
+    )
 
 
 def create_dynamic_model(data: dict) -> BaseModel:
