@@ -7,8 +7,8 @@ from rapyer.fields import Key
 
 
 class HatchetTaskModel(AtomicRedisModel):
-    task_name: Annotated[str, Key()]
-    hatchet_task_name: str
+    orchestrator_task_name: Annotated[str, Key()]
+    task_name: str
     input_validator: Optional[type[BaseModel]] = None
 
     @classmethod

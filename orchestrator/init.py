@@ -57,8 +57,8 @@ async def register_workflows():
     for reg_task in REGISTERED_TASKS:
         workflow, orchestrator_task_name = reg_task
         hatchet_task = HatchetTaskModel(
-            task_name=orchestrator_task_name,
-            hatchet_task_name=workflow.name,
+            orchestrator_task_name=orchestrator_task_name,
+            task_name=workflow.name,
             input_validator=workflow.input_validator,
         )
         await hatchet_task.save()
