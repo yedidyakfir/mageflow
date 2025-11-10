@@ -1,3 +1,6 @@
+import inspect
+from typing import Any
+
 from pydantic import BaseModel, create_model
 
 ParamValidationType = dict[str, tuple[type, Any]]
@@ -25,3 +28,10 @@ def create_dynamic_model(data: dict) -> BaseModel:
     validators = extract_validators(data)
     model_type = create_model_from_validators(validators)
     return model_type(**data)
+
+
+async def flexible_call(func, *args, **kwargs):
+    if inspect.iscoroutinefunction(func):
+        return await func(*args, **kwargs)
+    else:
+        return func(*args, **kwargs)

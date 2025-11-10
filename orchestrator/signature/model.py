@@ -94,7 +94,7 @@ class TaskSignature(AtomicRedisModel):
         cls, task_name: str, input_validator: type[BaseModel] = None, **kwargs
     ) -> Self:
         if not input_validator:
-            task_def = await HatchetTaskModel.get(task_name)
+            task_def = await HatchetTaskModel.safe_get(task_name)
             input_validator = task_def.input_validator if task_def else None
 
         model_fields = list(cls.__pydantic_fields__)
@@ -128,7 +128,7 @@ class TaskSignature(AtomicRedisModel):
     async def workflow(self, use_return_field: bool = True, **task_additional_params):
         input_validators = self.model_validators
         total_kwargs = self.kwargs | task_additional_params
-        task_def = await HatchetTaskModel.get(self.task_name)
+        task_def = await HatchetTaskModel.safe_get(self.task_name)
         task = task_def.task_name if task_def else self.task_name
 
         return_field = "results" if use_return_field else None

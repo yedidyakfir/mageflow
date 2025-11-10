@@ -1,3 +1,5 @@
+from orchestrator.callbacks import register_task, handle_task_callback
+from orchestrator.init import init_from_dynaconf, init_orchestrator_hatchet_tasks
 from orchestrator.signature.model import TaskSignature
 from orchestrator.signature.types import HatchetTaskType
 
@@ -15,4 +17,15 @@ lock_task = TaskSignature.lock_from_id
 resume = TaskSignature.resume_from_id
 pause = TaskSignature.pause_from_id
 
-__all__ = ["load_signature", "resume_task", "lock_task", "resume", "pause", "sign"]
+__all__ = [
+    "load_signature",
+    "resume_task",
+    "lock_task",
+    "resume",
+    "pause",
+    "sign",
+    "init_from_dynaconf",
+    "init_orchestrator_hatchet_tasks",
+    "register_task",
+    "handle_task_callback",
+]
