@@ -2,13 +2,13 @@ from typing import TypeVar
 
 from hatchet_sdk import Hatchet
 
-from orchestrator import handle_task_callback
-from orchestrator.callbacks import AcceptParams, register_task
+from orchestrator.callbacks import AcceptParams, register_task, handle_task_callback
 
 
 class HatchetOrchestrator(Hatchet):
+    # To support the __getattribute__func
     hatchet = None
-    param_config = None  # To support the __getattribute__func
+    param_config = None
 
     def __init__(
         self, hatchet: Hatchet, param_config: AcceptParams = AcceptParams.NO_CTX
