@@ -40,7 +40,7 @@ async def test_signature_creation_and_execution_with_redis_cleanup_sanity(
     # Assert
     await asyncio.sleep(3)
     runs = await get_runs(hatchet, ctx_metadata)
-    assert_signature_done(runs, signature, test_ctx)
+    assert_signature_done(runs, signature, base_data=test_ctx)
     await assert_redis_is_clean(redis_client)
 
 
@@ -67,8 +67,8 @@ async def test_signature_with_success_callbacks_execution_and_redis_cleanup_sani
     await asyncio.sleep(5)
     runs = await get_runs(hatchet, ctx_metadata)
     for success_id in main_signature.success_callbacks:
-        assert_signature_done(runs, success_id, test_ctx)
-    assert_signature_done(runs, main_signature, test_ctx)
+        assert_signature_done(runs, success_id)
+    assert_signature_done(runs, main_signature, base_data=test_ctx)
     await assert_redis_is_clean(redis_client)
 
 
@@ -91,7 +91,7 @@ async def test_signature_with_error_callbacks_execution_and_redis_cleanup_sanity
     # Assert
     await asyncio.sleep(5)
     runs = await get_runs(hatchet, ctx_metadata)
-    assert_signature_done(runs, error_callback_signature, test_ctx)
+    assert_signature_done(runs, error_callback_signature, base_data=test_ctx)
     await assert_redis_is_clean(redis_client)
 
 
@@ -115,7 +115,7 @@ async def test_signature_from_registered_task_name_execution_and_redis_cleanup_s
     # Assert
     await asyncio.sleep(3)
     runs = await get_runs(hatchet, ctx_metadata)
-    assert_signature_done(runs, signature, test_ctx)
+    assert_signature_done(runs, signature, base_data=test_ctx)
     await assert_redis_is_clean(redis_client)
 
 
@@ -129,10 +129,12 @@ async def test_task_with_success_callback_execution_and_redis_cleanup_sanity(
         hatchet_client_init.hatchet,
     )
 
-    success_callback_signature = await orchestrator.sign(task1_callback)
+    success_callback_signature = await orchestrator.sign(
+        task1_callback, base_data=test_ctx
+    )
     message = ContextMessage(base_data=test_ctx)
     task = await orchestrator.sign(
-        task2, success_callbacks=[success_callback_signature.id]
+        task2, success_callbacks=[success_callback_signature.id], base_data=test_ctx
     )
 
     # Act
@@ -141,8 +143,8 @@ async def test_task_with_success_callback_execution_and_redis_cleanup_sanity(
     # Assert
     await asyncio.sleep(3)
     runs = await get_runs(hatchet, ctx_metadata)
-    assert_signature_done(runs, success_callback_signature, test_ctx)
-    assert_signature_done(runs, task, test_ctx)
+    assert_signature_done(runs, success_callback_signature, base_data=test_ctx)
+    assert_signature_done(runs, task, base_data=test_ctx)
     await assert_redis_is_clean(redis_client)
 
 
@@ -159,7 +161,7 @@ async def test_task_with_failure_callback_execution_and_redis_cleanup_sanity(
     error_callback_signature = await orchestrator.sign(error_callback)
     message = ContextMessage(base_data=test_ctx)
     task = await orchestrator.sign(
-        fail_task, error_callbacks=[error_callback_signature]
+        fail_task, error_callbacks=[error_callback_signature], base_data=test_ctx
     )
 
     # Act
@@ -168,8 +170,8 @@ async def test_task_with_failure_callback_execution_and_redis_cleanup_sanity(
     # Assert
     await asyncio.sleep(10)
     runs = await get_runs(hatchet, ctx_metadata)
-    assert_signature_done(runs, task, test_ctx, allow_fails=True)
-    assert_signature_done(runs, error_callback_signature, test_ctx)
+    assert_signature_done(runs, task, base_data=test_ctx, allow_fails=True)
+    assert_signature_done(runs, error_callback_signature, base_data=test_ctx)
     await assert_redis_is_clean(redis_client)
 
 

@@ -52,20 +52,20 @@ def get_task_param(wf: V1TaskSummary, param_name: str):
     return wf.additional_metadata.get(TASK_DATA_PARAM_NAME, {}).get(param_name)
 
 
-def assert_task_done(runs: HatchetRuns, task, test_ctx=None, results=None):
+def assert_task_done(runs: HatchetRuns, task, input_params=None, results=None):
     __tracebackhide__ = False  # force pytest to show this frame
     workflows_by_name = {wf.workflow_name: wf for wf in runs}
-    return _assert_task_done(task.name, workflows_by_name, test_ctx, results)
+    return _assert_task_done(task.name, workflows_by_name, input_params, results)
 
 
 def assert_signature_done(
     runs: HatchetRuns,
     task_sign: TaskSignature | TaskIdentifierType,
-    test_ctx=None,
     results=None,
     check_called_once=True,
     check_finished_once=True,
     allow_fails=False,
+    **input_params,
 ) -> V1TaskSummary:
     if isinstance(task_sign, TaskSignature):
         task_sign = task_sign.id
@@ -84,13 +84,15 @@ def assert_signature_done(
         ), f"Task {task_sign} was called more than once or not at all: {task_id_calls}"
 
     wf_by_task_id = map_wf_by_id(runs, also_not_done=True)
-    return _assert_task_done(task_sign, wf_by_task_id, test_ctx, results, allow_fails)
+    return _assert_task_done(
+        task_sign, wf_by_task_id, input_params, results, allow_fails
+    )
 
 
 def _assert_task_done(
     task_id: str,
     wf_map: WF_MAPPING_TYPE,
-    test_ctx: dict,
+    input_params: dict,
     results=None,
     allow_fails=False,
 ) -> V1TaskSummary:
@@ -98,8 +100,8 @@ def _assert_task_done(
     task_workflow = wf_map[task_id]
     if not allow_fails:
         assert task_workflow.status == V1TaskStatus.COMPLETED
-    if test_ctx is not None:
-        assert task_workflow.input["input"]["context"] == test_ctx
+    if input_params is not None:
+        assert input_params.items() <= task_workflow.input["input"].items()
     if results is not None:
         assert task_workflow.output["hatchet_results"] == results
     return task_workflow

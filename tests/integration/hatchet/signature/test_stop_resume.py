@@ -73,7 +73,7 @@ async def test_signature_pause_with_callback_redis_cleanup_sanity(
     # Assert
     await asyncio.sleep(10)
     runs = await get_runs(hatchet, ctx_metadata)
-    assert_signature_done(runs, main_signature, test_ctx)
+    assert_signature_done(runs, main_signature, base_data=test_ctx)
     await assert_task_was_paused(runs, callback_signature)
     # Remove to check all beside this
     await callback_signature.remove()
