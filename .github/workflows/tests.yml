@@ -59,6 +59,7 @@ jobs:
           echo "HATCHET_API_KEY=$HATCHET_API_KEY"
           echo "HATCHET_API_KEY=$HATCHET_API_KEY" >> $GITHUB_ENV
           echo "DYNACONF_HATCHET__API_KEY=$HATCHET_API_KEY" >> $GITHUB_ENV
+          echo "DYNACONF_HATCHET__TLS_CONFIG={\"strategy\": \"none\"}}" >> $GITHUB_ENV
           echo "DYNACONF_REDIS__URL=redis://localhost:6379/" >> $GITHUB_ENV
           echo "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED=True" >> $GITHUB_ENV
 
