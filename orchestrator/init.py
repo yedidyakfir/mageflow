@@ -24,7 +24,7 @@ class OrchestratorConfigModel(ConfigModel):
             self.redis_client = redis.asyncio.from_url(settings.redis.url)
             token = settings.hatchet.api_key
 
-            config_obj = ClientConfig(token=token, **dict(settings.hatchet))
+            config_obj = ClientConfig(token=token, **settings.hatchet.to_dict())
             self.hatchet_client = Hatchet(debug=True, config=config_obj)
 
 

@@ -20,7 +20,7 @@ settings = Dynaconf(
 )
 config_obj = ClientConfig(
     token=settings.hatchet.api_key,
-    **dict(settings.hatchet),
+    **settings.hatchet.to_dict(),
     # tls_config_strategy="none",
     healthcheck=HealthcheckConfig(enabled=True),
 )
