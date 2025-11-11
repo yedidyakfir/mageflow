@@ -1,6 +1,8 @@
 name: Python tests
 
 on:
+  push:
+    branches: [main]
   pull_request:
     types: [opened, ready_for_review, reopened, closed, synchronize]
   workflow_dispatch:
