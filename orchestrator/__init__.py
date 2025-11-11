@@ -1,4 +1,5 @@
 from orchestrator.callbacks import register_task, handle_task_callback
+from orchestrator.client import Orchestrator
 from orchestrator.init import init_from_dynaconf, init_orchestrator_hatchet_tasks
 from orchestrator.signature.model import TaskSignature
 from orchestrator.signature.types import HatchetTaskType
@@ -28,4 +29,5 @@ __all__ = [
     "init_orchestrator_hatchet_tasks",
     "register_task",
     "handle_task_callback",
+    "Orchestrator",
 ]
