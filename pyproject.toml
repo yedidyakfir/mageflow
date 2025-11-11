@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.11, <4.0"
 dependencies = [
     "rapyer (>=1.0.2,<2.0.0)",
-    "dynaconf (>=3.2.12,<4.0.0)"
+    "dynaconf (>=3.2.12,<4.0.0)",
+    "hatchet-sdk (>=1.21.1,<2.0.0)"
 ]
 
 [tool.poetry.group.dev.dependencies]
