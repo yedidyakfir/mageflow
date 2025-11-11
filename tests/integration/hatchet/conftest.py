@@ -11,6 +11,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Generator, Callable, AsyncGenerator
 
+import orchestrator
 import psutil
 import pytest
 import pytest_asyncio
@@ -18,10 +19,9 @@ import redis
 import requests
 from hatchet_sdk import Hatchet
 from hatchet_sdk.clients.admin import TriggerWorkflowOptions
-from redis.asyncio.client import Redis
-
-import orchestrator
+from orchestrator.init import orchestrator_config
 from orchestrator.task.model import HatchetTaskModel
+from redis.asyncio.client import Redis
 from tests.integration.hatchet.worker import (
     config_obj,
     settings,
@@ -54,22 +54,20 @@ async def hatchet_client_init(
     real_redis, hatchet
 ) -> AsyncGenerator[HatchetInitData, None]:
     worker_data = HatchetInitData(redis_client=real_redis, hatchet=hatchet)
-    settings.redis_client = real_redis
-    settings.hatchet_client = hatchet
-    # Load the subclasses of the task signature
-    await orchestrator.init_from_dynaconf()
 
     yield worker_data
 
 
-@pytest.fixture(scope="function", autouse=True)
-def init_settings(hatchet_client_init: HatchetInitData):
+@pytest_asyncio.fixture(scope="function", loop_scope="session", autouse=True)
+async def init_settings(hatchet_client_init: HatchetInitData):
     redis_client, hatchet = (
         hatchet_client_init.redis_client,
         hatchet_client_init.hatchet,
     )
-    settings.redis_client = redis_client
-    settings.hatchet_client = hatchet
+    orchestrator_config.redis_client = redis_client
+    orchestrator_config.hatchet_client = hatchet
+    # Load the subclasses of the task signature
+    await init_orchestrator()
 
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session", autouse=True)

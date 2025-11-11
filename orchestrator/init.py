@@ -33,8 +33,11 @@ orchestrator_config = OrchestratorConfigModel()
 
 async def init_from_dynaconf():
     orchestrator_config.set_from_dynaconf()
-    await register_workflows()
+    await init_orchestrator()
 
+
+async def init_orchestrator():
+    await register_workflows()
     await update_register_signature_models()
 
 
