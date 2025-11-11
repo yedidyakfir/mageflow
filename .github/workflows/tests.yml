@@ -57,6 +57,8 @@ jobs:
           sleep 10
           HATCHET_API_KEY=$(docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml exec hatchet-lite /hatchet-admin token create --config /config --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)
           echo "HATCHET_API_KEY=$HATCHET_API_KEY"
+          echo "HATCHET_API_KEY=$HATCHET_API_KEY" >> $GITHUB_ENV
+          echo "DYNACONF_HATCHET__API_KEY=$HATCHET_API_KEY" >> $GITHUB_ENV
           echo "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED=True" >> $GITHUB_ENV
 
       - name: Run Tests
