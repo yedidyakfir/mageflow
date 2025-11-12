@@ -5,6 +5,14 @@ from pydantic import BaseModel
 from redis.asyncio.client import Redis
 
 from config import settings
+from orchestrator import register_task
+from orchestrator.chain.messages import ChainSuccessTaskCommandMessage
+from orchestrator.chain.workflows import (
+    chain_end_task,
+    ON_CHAIN_ERROR,
+    ON_CHAIN_END,
+    chain_error_task,
+)
 from orchestrator.task.model import HatchetTaskModel
 
 REGISTERED_TASKS: list[tuple] = []
@@ -77,17 +85,17 @@ async def lifespan_initialize():
 
 def init_orchestrator_hatchet_tasks(hatchet: Hatchet):
     # Chain tasks
-    # hatchet_chain_done = hatchet.task(
-    #     name=InfrastructureTasks.on_chain_done,
-    #     input_validator=ChainSuccessTaskCommandMessage,
-    # )
-    # hatchet_chain_error = hatchet.task(name=InfrastructureTasks.on_chain_error)
-    # chain_done_task = hatchet_chain_done(chain_end_task)
-    # on_chain_error_task = hatchet_chain_error(chain_error_task)
-    # register_chain_done = register_task(InfrastructureTasks.on_chain_done)
-    # register_chain_error = register_task(InfrastructureTasks.on_chain_error)
-    # chain_done_task = register_chain_done(chain_done_task)
-    # on_chain_error_task = register_chain_error(on_chain_error_task)
+    hatchet_chain_done = hatchet.task(
+        name=ON_CHAIN_END,
+        input_validator=ChainSuccessTaskCommandMessage,
+    )
+    hatchet_chain_error = hatchet.task(name=ON_CHAIN_ERROR)
+    chain_done_task = hatchet_chain_done(chain_end_task)
+    on_chain_error_task = hatchet_chain_error(chain_error_task)
+    register_chain_done = register_task(ON_CHAIN_END)
+    register_chain_error = register_task(ON_CHAIN_ERROR)
+    chain_done_task = register_chain_done(chain_done_task)
+    on_chain_error_task = register_chain_error(on_chain_error_task)
 
     # Swarm tasks
     # swarm_start = hatchet.task(
@@ -113,8 +121,8 @@ def init_orchestrator_hatchet_tasks(hatchet: Hatchet):
     # swarm_error = register_swarm_error(swarm_error)
 
     return [
-        # on_chain_error_task,
-        # chain_done_task,
+        on_chain_error_task,
+        chain_done_task,
         # swarm_start,
         # swarm_done,
         # swarm_error,
