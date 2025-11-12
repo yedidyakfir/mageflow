@@ -76,5 +76,5 @@ async def test__swarm_soft_paused_data_is_saved_in_redis__then_resume_check_fini
     assert_paused(runs, pause_time, resume_time)
     assert_task_did_not_repeat(runs)
 
-    assert_swarm_task_done(runs, swarm_signature, batch_tasks, test_ctx)
+    assert_swarm_task_done(runs, swarm_signature, batch_tasks)
     await assert_redis_is_clean(redis_client)

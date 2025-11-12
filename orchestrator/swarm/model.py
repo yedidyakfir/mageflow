@@ -107,7 +107,7 @@ class SwarmTaskSignature(TaskSignature):
 
     async def aio_run_no_wait(self, msg: BaseModel, **kwargs):
         await self.task_kwargs.aupdate(**msg.model_dump(mode="json"))
-        workflow = await self.workflow(use_return_field=False, context=msg.context)
+        workflow = await self.workflow(use_return_field=False)
         return await workflow.aio_run_no_wait(msg, **kwargs)
 
     async def workflow(self, use_return_field: bool = True, **task_additional_params):
@@ -223,7 +223,7 @@ class SwarmTaskSignature(TaskSignature):
         await self.tasks_results.load()
         tasks_results = [res for res in self.tasks_results]
 
-        full_kwargs = {"context": msg.context} | self.task_kwargs | self.kwargs | kwargs
+        full_kwargs = self.task_kwargs | self.kwargs | kwargs
         await super().activate_success(tasks_results, **full_kwargs)
         await self.remove(with_success=False)
 
