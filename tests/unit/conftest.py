@@ -3,6 +3,7 @@ import pytest
 import pytest_asyncio
 from hatchet_sdk import Hatchet, ClientConfig
 
+from orchestrator.chain.model import ChainTaskSignature
 from orchestrator.signature.model import SIGNATURES_NAME_MAPPING, TaskSignature
 from orchestrator.startup import update_register_signature_models
 from tests.integration.hatchet.worker import settings
@@ -37,7 +38,7 @@ def hatchet_mock():
 def init_models(redis_client):
     models = [
         # SwarmTaskSignature,
-        # ChainTaskSignature,
+        ChainTaskSignature,
         TaskSignature,
         # BatchItemTaskSignature,
     ]

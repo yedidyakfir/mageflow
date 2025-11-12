@@ -2,6 +2,7 @@ import rapyer
 import redis
 from hatchet_sdk import Hatchet, ClientConfig
 from pydantic import BaseModel
+from rapyer.base import REDIS_MODELS
 from redis.asyncio.client import Redis
 
 from config import settings
@@ -46,8 +47,7 @@ async def update_register_signature_models():
 
     await rapyer.init_rapyer(orchestrator_config.redis_client)
 
-    # TODO - use the redis list
-    signature_classes = [TaskSignature]
+    signature_classes = [cls for cls in REDIS_MODELS if issubclass(cls, TaskSignature)]
     SIGNATURES_NAME_MAPPING.update(
         {
             signature_class.__name__: signature_class
