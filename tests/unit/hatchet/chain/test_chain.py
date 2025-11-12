@@ -1,7 +1,7 @@
 import pytest
 
 import orchestrator
-from orchestrator.chain.workflows import ON_CHAIN_ERROR, ON_CHAIN_END
+from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
 from orchestrator.signature.model import TaskSignature
 from orchestrator.chain.model import ChainTaskSignature
 from tests.integration.hatchet.models import ContextMessage

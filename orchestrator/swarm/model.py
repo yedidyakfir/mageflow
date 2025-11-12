@@ -13,6 +13,15 @@ from orchestrator.signature.creator import (
 from orchestrator.signature.model import TaskSignature
 from orchestrator.signature.status import SignatureStatus
 from orchestrator.signature.types import TaskIdentifierType
+from orchestrator.swarm.consts import (
+    BATCH_TASK_NAME_INITIALS,
+    SWARM_TASK_ID_PARAM_NAME,
+    SWARM_ITEM_TASK_ID_PARAM_NAME,
+    ON_SWARM_END,
+    ON_SWARM_ERROR,
+    ON_SWARM_START,
+)
+from orchestrator.swarm.messages import SwarmResultsMessage
 from orchestrator.utils.pythonic import deep_merge
 
 
@@ -104,7 +113,7 @@ class SwarmTaskSignature(TaskSignature):
     async def workflow(self, use_return_field: bool = True, **task_additional_params):
         # Use on swarm start task name for wf
         task_name = self.task_name
-        self.task_name = InfrastructureTasks.on_swarm_start
+        self.task_name = ON_SWARM_START
         workflow = await super().workflow(
             **task_additional_params, use_return_field=True
         )
@@ -162,14 +171,12 @@ class SwarmTaskSignature(TaskSignature):
             SWARM_ITEM_TASK_ID_PARAM_NAME: batch_task.id,
         }
         on_success_swarm_item = await TaskSignature.from_task_name(
-            task_name=InfrastructureTasks.on_swarm_done,
-            input_validator=SwarmTaskCommandMessage,
+            task_name=ON_SWARM_END,
+            input_validator=SwarmResultsMessage,
             task_identifiers=swarm_identifiers,
         )
         on_error_swarm_item = await TaskSignature.from_task_name(
-            task_name=InfrastructureTasks.on_swarm_error,
-            input_validator=SwarmTaskCommandMessage,
-            task_identifiers=swarm_identifiers,
+            task_name=ON_SWARM_ERROR, task_identifiers=swarm_identifiers
         )
         task.success_callbacks.append(on_success_swarm_item.id)
         task.error_callbacks.append(on_error_swarm_item.id)
