@@ -9,6 +9,7 @@ from orchestrator.signature.model import TaskSignature
 from orchestrator.signature.status import TaskStatus
 from orchestrator.signature.types import HatchetTaskType, TaskIdentifierType
 from orchestrator.startup import init_from_dynaconf
+from orchestrator.swarm.creator import swarm
 
 try:
     # Python 3.12+
@@ -63,4 +64,5 @@ __all__ = [
     "handle_task_callback",
     "Orchestrator",
     "chain",
+    "swarm",
 ]
