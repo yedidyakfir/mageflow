@@ -59,68 +59,39 @@ def task(request):
     [
         [
             SignParamOptions(),
-            TaskSignature(
-                task_name="test_task",
-                kwargs={},
-                workflow_params={},
-                task_identifiers={},
-            ),
+            TaskSignature(task_name="test_task"),
         ],
         [
             SignParamOptions(kwargs={"param1": "value1"}),
-            TaskSignature(
-                task_name="test_task",
-                kwargs={"param1": "value1"},
-                workflow_params={},
-                task_identifiers={},
-            ),
+            TaskSignature(task_name="test_task", kwargs={"param1": "value1"}),
         ],
         [
             SignParamOptions(workflow_params={"workflow_param": "value"}),
             TaskSignature(
-                task_name="test_task",
-                kwargs={},
-                workflow_params={"workflow_param": "value"},
-                task_identifiers={},
+                task_name="test_task", workflow_params={"workflow_param": "value"}
             ),
         ],
         [
             SignParamOptions(creation_time=datetime(2023, 1, 1)),
-            TaskSignature(
-                task_name="test_task",
-                kwargs={},
-                workflow_params={},
-                creation_time=datetime(2023, 1, 1),
-                task_identifiers={},
-            ),
+            TaskSignature(task_name="test_task", creation_time=datetime(2023, 1, 1)),
         ],
         [
             SignParamOptions(task_identifiers={"identifier": "test_id"}),
             TaskSignature(
-                task_name="test_task",
-                kwargs={},
-                workflow_params={},
-                task_identifiers={"identifier": "test_id"},
+                task_name="test_task", task_identifiers={"identifier": "test_id"}
             ),
         ],
         [
             SignParamOptions(success_callbacks=["TaskSignature:success_task_1"]),
             TaskSignature(
                 task_name="test_task",
-                kwargs={},
-                workflow_params={},
                 success_callbacks=["TaskSignature:success_task_1"],
-                task_identifiers={},
             ),
         ],
         [
             SignParamOptions(error_callbacks=["TaskSignature:error_task_1"]),
             TaskSignature(
-                task_name="test_task",
-                kwargs={},
-                workflow_params={},
-                error_callbacks=["TaskSignature:error_task_1"],
-                task_identifiers={},
+                task_name="test_task", error_callbacks=["TaskSignature:error_task_1"]
             ),
         ],
         [
@@ -133,14 +104,11 @@ def task(request):
             ),
             TaskSignature(
                 task_name="test_task",
-                kwargs={},
-                workflow_params={},
                 success_callbacks=[
                     "TaskSignature:success_task_1",
                     "TaskSignature:success_task_2",
                 ],
                 error_callbacks=["TaskSignature:error_task_1"],
-                task_identifiers={},
             ),
         ],
         [
