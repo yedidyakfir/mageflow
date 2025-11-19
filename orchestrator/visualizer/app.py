@@ -135,10 +135,10 @@ async def create_app():
     def display_task_info(node_data):
         if node_data is None:
             return [
-                html.H4("Task Information", style={"margin": "0 0 10px 0"}),
+                html.H4("Task Information", className="task-info-header"),
                 html.P(
                     "Click on a task node to see its details here.",
-                    style={"color": "#666"},
+                    className="task-info-placeholder",
                 ),
             ]
 
