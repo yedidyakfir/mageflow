@@ -99,16 +99,16 @@ class EmptyBuilder(Builder):
         if self.error_tasks:
             components.extend(
                 [
-                    html.H5("Error Tasks:", style={"margin": "15px 0 5px 0"}),
+                    html.H5("Error Tasks:", className="section-header"),
                     html.Ul(
                         [
                             html.Li(
                                 task_id,
-                                style={"fontSize": "11px", "fontFamily": "monospace"},
+                                className="callback-item",
                             )
                             for task_id in self.error_tasks
                         ],
-                        style={"margin": "0", "paddingLeft": "20px"},
+                        className="callback-list",
                     ),
                 ]
             )
