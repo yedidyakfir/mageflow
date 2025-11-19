@@ -63,33 +63,14 @@ async def create_app():
     ctx = create_builders(tasks)
     start_tasks = find_unmentioned_tasks(ctx)
 
-    # Create tabs for each start task with inline styles
+    # Create tabs for each start task with CSS classes
     tabs = [
         dcc.Tab(
             label=ctx.get(task_id).task_name,
             value=task_id,
             id=f"tab-{task_id}",
-            style={
-                "height": "40px",
-                "width": "120px",
-                "lineHeight": "40px",
-                "padding": "0 10px",
-                "textAlign": "center",
-                "overflow": "hidden",
-                "textOverflow": "ellipsis",
-                "whiteSpace": "nowrap",
-            },
-            selected_style={
-                "height": "40px",
-                "width": "auto",
-                "minWidth": "120px",
-                "maxWidth": "300px",
-                "lineHeight": "40px",
-                "padding": "0 10px",
-                "textAlign": "center",
-                "overflow": "visible",
-                "whiteSpace": "nowrap",
-            },
+            className="tab-style",
+            selected_className="tab-selected",
         )
         for task_id in start_tasks
     ]
