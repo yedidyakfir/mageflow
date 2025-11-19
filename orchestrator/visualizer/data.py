@@ -7,7 +7,6 @@ from orchestrator.signature.model import TaskSignature
 
 
 async def extract_signatures() -> list[TaskSignature]:
-    # await create()
     redis_models = rapyer.find_redis_models()
     signature_models = [
         klass for klass in redis_models if issubclass(klass, TaskSignature)
@@ -50,6 +49,7 @@ async def create_chain(name: str):
 
 async def create():
     chain_task1 = await create_chain("chain1")
+    return
     chain_task2 = await create_chain("chain2")
     chain_task3 = await create_chain("chain3")
     chain_task4 = await create_chain("chain4")

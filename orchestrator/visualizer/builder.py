@@ -2,11 +2,24 @@ import dataclasses
 from queue import Queue
 from typing import Generic, TypeVar
 
+from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
 from orchestrator.chain.model import ChainTaskSignature
 from orchestrator.signature.model import TaskSignature
+from orchestrator.swarm.consts import ON_SWARM_ERROR, ON_SWARM_START, ON_SWARM_END
 from orchestrator.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
 
 T = TypeVar("T", bound=TaskSignature)
+INTERNAL_TASKS = [
+    ON_CHAIN_ERROR,
+    ON_CHAIN_END,
+    ON_SWARM_START,
+    ON_SWARM_ERROR,
+    ON_SWARM_END,
+]
+
+
+def is_internal_task(task_name: str) -> bool:
+    return any(task_name.endswith(internal_task) for internal_task in INTERNAL_TASKS)
 
 
 @dataclasses.dataclass
@@ -20,8 +33,12 @@ class GraphData:
 class TaskBuilder(Generic[T]):
     def __init__(self, task: T):
         self.task = task
+        self.ctx: dict[str, "TaskBuilder"] = {}
 
-    def draw(self, ctx: dict[str, "TaskBuilder"]) -> GraphData:
+    def set_ctx(self, ctx: dict[str, "TaskBuilder"]):
+        self.ctx = ctx
+
+    def draw(self) -> GraphData:
         task_node = {"data": {"id": self.task.id, "label": self.task.task_name}}
 
         success_edges = [
@@ -39,16 +56,43 @@ class TaskBuilder(Generic[T]):
             next_tasks=self.task.success_callbacks + self.task.error_callbacks,
         )
 
+    def drawn_tasks(self):
+        return [self.task.id]
+
     def mentioned_tasks(self) -> list[str]:
         return self.task.success_callbacks + self.task.error_callbacks
 
+    @property
+    def task_name(self):
+        return self.task.task_name
+
+    def remove_success_internal_tasks(self):
+        success_task = {
+            success: self.ctx.get(success) for success in self.task.success_callbacks
+        }
+        self.task.success_callbacks = [
+            key
+            for key, success in success_task.items()
+            if success and not is_internal_task(success.task_name)
+        ]
+
+    def remove_errors_internal_tasks(self):
+        error_tasks = {
+            error: self.ctx.get(error) for error in self.task.error_callbacks
+        }
+        self.task.error_callbacks = [
+            key
+            for key, error in error_tasks.items()
+            if error and not is_internal_task(error.task_name)
+        ]
+
 
 class ChainTaskBuilder(TaskBuilder[ChainTaskSignature]):
-    def draw(self, ctx: dict[str, TaskBuilder]) -> GraphData:
-        base_node = super().draw(ctx)
+    def draw(self) -> GraphData:
+        base_node = super().draw()
 
-        sub_tasks = [ctx.get(task_id) for task_id in self.task.tasks]
-        draw_tasks = [task_builder.draw(ctx) for task_builder in sub_tasks]
+        sub_tasks = [self.ctx.get(task_id) for task_id in self.task.tasks]
+        draw_tasks = [task_builder.draw() for task_builder in sub_tasks]
         for drawn_task in draw_tasks:
             drawn_task.main_node["data"]["parent"] = base_node.main_node["data"]["id"]
             base_node.nodes.extend(drawn_task.nodes)
@@ -59,24 +103,39 @@ class ChainTaskBuilder(TaskBuilder[ChainTaskSignature]):
         return base_node
 
     def mentioned_tasks(self) -> list[str]:
-        return super().mentioned_tasks() + self.task.tasks
+        sub_tasks = [
+            self.ctx.get(task_id) for task_id in self.task.tasks if task_id in self.ctx
+        ]
+        sub_task_mentions = [
+            task_id
+            for builder in sub_tasks
+            for task_id in builder.mentioned_tasks()
+            if task_id not in self.task.tasks
+        ]
+        return super().mentioned_tasks() + sub_task_mentions
+
+    def drawn_tasks(self):
+        return super().drawn_tasks() + self.task.tasks
 
 
 class BatchItemTaskBuilder(TaskBuilder[BatchItemTaskSignature]):
-    def draw(self, ctx: dict[str, TaskBuilder]) -> GraphData:
-        original_task = ctx.get(self.task.original_task_id)
-        return original_task.draw(ctx)
+    def draw(self) -> GraphData:
+        original_task = self.ctx.get(self.task.original_task_id)
+        return original_task.draw()
+
+    def drawn_tasks(self):
+        return super().drawn_tasks() + [self.task.original_task_id]
 
     def mentioned_tasks(self) -> list[str]:
-        return super().mentioned_tasks() + [self.task.original_task_id]
+        return []
 
 
 class SwarmTaskBuilder(TaskBuilder[SwarmTaskSignature]):
-    def draw(self, ctx: dict[str, TaskBuilder]) -> GraphData:
-        base_node = super().draw(ctx)
+    def draw(self) -> GraphData:
+        base_node = super().draw()
 
-        swarm_tasks = [ctx.get(task_id) for task_id in self.task.tasks]
-        draw_tasks = [task_builder.draw(ctx) for task_builder in swarm_tasks]
+        swarm_tasks = [self.ctx.get(task_id) for task_id in self.task.tasks]
+        draw_tasks = [task_builder.draw() for task_builder in swarm_tasks]
         for drawn_task in draw_tasks:
             drawn_task.main_node["data"]["parent"] = base_node.main_node["data"]["id"]
             base_node.nodes.append(drawn_task.main_node)
@@ -86,8 +145,20 @@ class SwarmTaskBuilder(TaskBuilder[SwarmTaskSignature]):
 
         return base_node
 
+    def drawn_tasks(self):
+        return super().drawn_tasks() + self.task.tasks
+
     def mentioned_tasks(self) -> list[str]:
-        return super().mentioned_tasks() + self.task.tasks
+        sub_tasks = [
+            self.ctx.get(task_id) for task_id in self.task.tasks if task_id in self.ctx
+        ]
+        sub_task_mentions = [
+            task_id
+            for builder in sub_tasks
+            for task_id in builder.mentioned_tasks()
+            if task_id not in self.task.tasks
+        ]
+        return super().mentioned_tasks() + sub_task_mentions
 
 
 task_mapping = {
@@ -108,6 +179,16 @@ def find_unmentioned_tasks(ctx: dict[str, TaskBuilder]) -> list[str]:
 def build_graph(tasks: list[TaskSignature]) -> list[dict]:
     ctx = {task.id: task_mapping.get(type(task))(task) for task in tasks}
     base_tasks_keys = find_unmentioned_tasks(ctx)
+
+    # Initialize tasks
+    for task_id in ctx.keys():
+        task_builder = ctx.get(task_id)
+        task_builder.set_ctx(ctx)
+
+        # Remove internal tasks
+        task_builder.remove_errors_internal_tasks()
+        task_builder.remove_success_internal_tasks()
+
     tasks_to_draw = Queue()
     drawn_tasks = []
     for task_id in base_tasks_keys:
@@ -119,19 +200,19 @@ def build_graph(tasks: list[TaskSignature]) -> list[dict]:
         task_id = tasks_to_draw.get()
         if task_id in drawn_tasks:
             continue
-        drawn_tasks.append(task_id)
 
         task_builder = ctx.get(task_id)
+        drawn_tasks.extend(task_builder.drawn_tasks())
         if not task_builder:
             continue
-        graph_data = task_builder.draw(ctx)
+        graph_data = task_builder.draw()
 
         elements.append(graph_data.main_node)
         elements.extend(graph_data.nodes)
         elements.extend(graph_data.edges)
 
-        for task_id in task_builder.mentioned_tasks():
-            if task_id in ctx:
-                tasks_to_draw.put(task_id)
+        for new_task_id in task_builder.mentioned_tasks():
+            if new_task_id in ctx:
+                tasks_to_draw.put(new_task_id)
 
     return elements

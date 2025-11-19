@@ -2,13 +2,14 @@ import dash_cytoscape as cyto
 from dash import Dash, html
 
 from orchestrator.visualizer.builder import build_graph
-from orchestrator.visualizer.data import extract_signatures
+from orchestrator.visualizer.data import extract_signatures, create
 
 # Load extra layouts
 cyto.load_extra_layouts()
 
 
 async def create_app():
+    # await create()
     app = Dash(__name__)
     stylesheet = [
         # Default node style (leaf + parents)
