@@ -1,5 +1,5 @@
 import dash_cytoscape as cyto
-from dash import Dash, html
+from dash import Dash, html, dcc, Input, Output, callback
 
 from orchestrator.visualizer.builder import (
     build_graph,
@@ -60,16 +60,32 @@ async def create_app():
 
     # Get the complex scenario data
     tasks = await extract_signatures()
-
-    # Build the graph
     ctx = create_builders(tasks)
     start_tasks = find_unmentioned_tasks(ctx)
-    elements = build_graph(start_tasks[0], ctx)
+
+    # Create tabs for each start task
+    tabs = [
+        dcc.Tab(label=ctx.get(task_id).task_name, value=task_id, id=f"tab-{task_id}")
+        for task_id in start_tasks
+    ]
 
     app.layout = html.Div(
         [
-            cyto.Cytoscape(
-                id="nested-dag-tasks",
+            dcc.Tabs(
+                id="task-tabs",
+                value=start_tasks[0] if start_tasks else None,
+                children=tabs,
+            ),
+            html.Div(id="tab-content"),
+        ]
+    )
+
+    @callback(Output("tab-content", "children"), [Input("task-tabs", "value")])
+    def render_content(active_tab):
+        if active_tab:
+            elements = build_graph(active_tab, ctx)
+            return cyto.Cytoscape(
+                id=f"cytoscape-{active_tab}",
                 elements=elements,
                 style={"width": "100%", "height": "600px"},
                 layout={
@@ -83,8 +99,7 @@ async def create_app():
                 },
                 stylesheet=stylesheet,
             )
-        ]
-    )
+        return html.Div("No task selected")
 
     app.run(debug=True)
 
