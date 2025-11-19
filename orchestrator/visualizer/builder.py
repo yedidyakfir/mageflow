@@ -42,6 +42,10 @@ class Builder(ABC):
     def id(self):
         pass
 
+    @abc.abstractmethod
+    def present_info(self) -> list[dict]:
+        pass
+
 
 class EmptyBuilder(Builder):
     def __init__(
@@ -72,6 +76,12 @@ class EmptyBuilder(Builder):
             main_node=task_node,
             edges=success_edges + error_edges,
         )
+
+    def present_info(self) -> list[dict]:
+        return [
+            {"type": "list", "label": "Success Tasks", "items": self.success_tasks},
+            {"type": "list", "label": "Error Tasks", "items": self.error_tasks},
+        ]
 
 
 class TaskBuilder(Builder, Generic[T]):
@@ -134,6 +144,38 @@ class TaskBuilder(Builder, Generic[T]):
             if error and not is_internal_task(error.task_name)
         ]
 
+    def present_info(self) -> list[dict]:
+        info = [
+            {
+                "type": "field",
+                "label": "Creation Time",
+                "value": str(self.task.creation_time),
+            },
+            {
+                "type": "field",
+                "label": "Status",
+                "value": str(self.task.task_status.status),
+            },
+            {"type": "code", "label": "Parameters", "value": dict(self.task.kwargs)},
+            {
+                "type": "list",
+                "label": "Success Callbacks",
+                "items": list(self.task.success_callbacks),
+            },
+            {
+                "type": "list",
+                "label": "Error Callbacks",
+                "items": list(self.task.error_callbacks),
+            },
+            {
+                "type": "code",
+                "label": "Task Identifiers",
+                "value": dict(self.task.task_identifiers),
+            },
+        ]
+
+        return info
+
 
 class ChainTaskBuilder(TaskBuilder[ChainTaskSignature]):
     def draw(self) -> GraphData:
@@ -188,6 +230,11 @@ class BatchItemTaskBuilder(TaskBuilder[BatchItemTaskSignature]):
         if self.task.original_task_id in self.ctx:
             return self.ctx.get(self.task.original_task_id).mentioned_tasks()
         return []
+
+    def present_info(self) -> list[dict]:
+        if self.task.original_task_id in self.ctx:
+            return self.ctx.get(self.task.original_task_id).present_info()
+        return super().present_info()
 
 
 class SwarmTaskBuilder(TaskBuilder[SwarmTaskSignature]):
