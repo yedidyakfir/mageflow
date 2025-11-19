@@ -183,60 +183,46 @@ class TaskBuilder(Builder, Generic[T]):
                     html.Strong("Creation Time: "),
                     html.Span(str(self.task.creation_time)),
                 ],
-                style={"marginBottom": "10px"},
+                className="task-info-item",
             ),
             html.Div(
                 [
                     html.Strong("Status: "),
                     html.Span(str(self.task.task_status.status)),
                 ],
-                style={"marginBottom": "10px"},
+                className="task-info-item",
             ),
-            html.H5("Parameters:", style={"margin": "15px 0 5px 0"}),
+            html.H5("Parameters:", className="section-header"),
             html.Pre(
                 str(dict(self.task.kwargs)),
-                style={
-                    "backgroundColor": "#f0f0f0",
-                    "padding": "8px",
-                    "borderRadius": "3px",
-                    "fontSize": "11px",
-                    "overflow": "auto",
-                    "maxHeight": "100px",
-                },
+                className="code-block",
             ),
-            html.H5("Success Callbacks:", style={"margin": "15px 0 5px 0"}),
+            html.H5("Success Callbacks:", className="section-header"),
             html.Ul(
                 [
                     html.Li(
                         callback_id,
-                        style={"fontSize": "11px", "fontFamily": "monospace"},
+                        className="callback-item",
                     )
                     for callback_id in self.task.success_callbacks
                 ],
-                style={"margin": "0", "paddingLeft": "20px"},
+                className="callback-list",
             ),
-            html.H5("Error Callbacks:", style={"margin": "15px 0 5px 0"}),
+            html.H5("Error Callbacks:", className="section-header"),
             html.Ul(
                 [
                     html.Li(
                         callback_id,
-                        style={"fontSize": "11px", "fontFamily": "monospace"},
+                        className="callback-item",
                     )
                     for callback_id in self.task.error_callbacks
                 ],
-                style={"margin": "0", "paddingLeft": "20px"},
+                className="callback-list",
             ),
-            html.H5("Task Identifiers:", style={"margin": "15px 0 5px 0"}),
+            html.H5("Task Identifiers:", className="section-header"),
             html.Pre(
                 str(dict(self.task.task_identifiers)),
-                style={
-                    "backgroundColor": "#f0f0f0",
-                    "padding": "8px",
-                    "borderRadius": "3px",
-                    "fontSize": "11px",
-                    "overflow": "auto",
-                    "maxHeight": "80px",
-                },
+                className="code-block-compact",
             ),
         ]
 
