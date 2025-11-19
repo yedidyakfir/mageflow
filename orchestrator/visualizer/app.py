@@ -14,7 +14,7 @@ cyto.load_extra_layouts()
 
 async def create_app():
     # await create()
-    app = Dash(__name__, assets_folder='assets')
+    app = Dash(__name__, assets_folder="assets")
     stylesheet = [
         # Default node style (leaf + parents)
         {
@@ -66,30 +66,30 @@ async def create_app():
     # Create tabs for each start task with inline styles
     tabs = [
         dcc.Tab(
-            label=ctx.get(task_id).task_name, 
-            value=task_id, 
+            label=ctx.get(task_id).task_name,
+            value=task_id,
             id=f"tab-{task_id}",
             style={
-                'height': '40px',
-                'width': '120px',
-                'lineHeight': '40px',
-                'padding': '0 10px',
-                'textAlign': 'center',
-                'overflow': 'hidden',
-                'textOverflow': 'ellipsis',
-                'whiteSpace': 'nowrap'
+                "height": "40px",
+                "width": "120px",
+                "lineHeight": "40px",
+                "padding": "0 10px",
+                "textAlign": "center",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "whiteSpace": "nowrap",
             },
             selected_style={
-                'height': '40px',
-                'width': 'auto',
-                'minWidth': '120px',
-                'maxWidth': '300px',
-                'lineHeight': '40px',
-                'padding': '0 10px',
-                'textAlign': 'center',
-                'overflow': 'visible',
-                'whiteSpace': 'nowrap'
-            }
+                "height": "40px",
+                "width": "auto",
+                "minWidth": "120px",
+                "maxWidth": "300px",
+                "lineHeight": "40px",
+                "padding": "0 10px",
+                "textAlign": "center",
+                "overflow": "visible",
+                "whiteSpace": "nowrap",
+            },
         )
         for task_id in start_tasks
     ]
@@ -100,11 +100,7 @@ async def create_app():
                 id="task-tabs",
                 value=start_tasks[0] if start_tasks else None,
                 children=tabs,
-                style={
-                    'height': '40px',
-                    'display': 'flex',
-                    'flexDirection': 'row'
-                }
+                style={"height": "40px", "display": "flex", "flexDirection": "row"},
             ),
             html.Div(id="tab-content"),
         ]
