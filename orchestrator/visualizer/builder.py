@@ -233,7 +233,12 @@ def find_unmentioned_tasks(ctx: dict[str, TaskBuilder]) -> list[str]:
     mentioned_tasks = set()
     for task in ctx.values():
         mentioned_tasks.update(task.mentioned_tasks())
-    return list(ctx.keys() - mentioned_tasks)
+    real_tasks_keys = {
+        task_id
+        for task_id, builder in ctx.items()
+        if not is_internal_task(builder.task_name)
+    }
+    return list(real_tasks_keys - mentioned_tasks)
 
 
 def create_builders(tasks: list[TaskSignature]) -> dict[str, TaskBuilder]:
