@@ -87,12 +87,7 @@ async def create_app():
                 [
                     html.Div(
                         id="tab-content",
-                        style={
-                            "width": "70%",
-                            "display": "inline-block",
-                            "verticalAlign": "top",
-                            "height": "600px",
-                        },
+                        className="graph-container",
                     ),
                     html.Div(
                         id="info-window",
