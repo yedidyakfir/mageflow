@@ -113,7 +113,7 @@ async def create_app():
             return cyto.Cytoscape(
                 id="cytoscape-graph",
                 elements=elements,
-                style={"width": "100%", "height": "600px"},
+                className="cytoscape-container",
                 layout={
                     "name": "klay",
                     "klay": {
