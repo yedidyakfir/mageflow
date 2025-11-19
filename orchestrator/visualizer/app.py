@@ -155,23 +155,23 @@ async def create_app():
             ]
 
         components = [
-            html.H4("Task Information", style={"margin": "0 0 15px 0"}),
+            html.H4("Task Information", className="task-info-header-detailed"),
             html.Div(
                 [
                     html.Strong("Task ID: "),
                     html.Span(
                         task_builder.id,
-                        style={"fontFamily": "monospace", "fontSize": "12px"},
+                        className="task-id-text",
                     ),
                 ],
-                style={"marginBottom": "10px"},
+                className="task-info-item",
             ),
             html.Div(
                 [
                     html.Strong("Task Name: "),
                     html.Span(task_builder.task_name),
                 ],
-                style={"marginBottom": "10px"},
+                className="task-info-item",
             ),
         ]
 
