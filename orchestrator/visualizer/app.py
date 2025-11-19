@@ -132,8 +132,8 @@ async def create_app():
         [Input("cytoscape-graph", "tapNodeData")],
         prevent_initial_call=True,
     )
-    def display_task_info(nodeData):
-        if nodeData is None:
+    def display_task_info(node_data):
+        if node_data is None:
             return [
                 html.H4("Task Information", style={"margin": "0 0 10px 0"}),
                 html.P(
@@ -142,7 +142,7 @@ async def create_app():
                 ),
             ]
 
-        task_id = nodeData["id"]
+        task_id = node_data["id"]
         task_builder = ctx.get(task_id)
 
         if not task_builder:
