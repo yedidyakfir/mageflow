@@ -91,23 +91,12 @@ async def create_app():
                     ),
                     html.Div(
                         id="info-window",
-                        style={
-                            "width": "28%",
-                            "display": "inline-block",
-                            "verticalAlign": "top",
-                            "marginLeft": "2%",
-                            "padding": "10px",
-                            "border": "1px solid #ddd",
-                            "borderRadius": "5px",
-                            "backgroundColor": "#f9f9f9",
-                            "height": "580px",
-                            "overflow": "auto",
-                        },
+                        className="info-window",
                         children=[
-                            html.H4("Task Information", style={"margin": "0 0 10px 0"}),
+                            html.H4("Task Information", className="task-info-header"),
                             html.P(
                                 "Click on a task node to see its details here.",
-                                style={"color": "#666"},
+                                className="task-info-placeholder",
                             ),
                         ],
                     ),
