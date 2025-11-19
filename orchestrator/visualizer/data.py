@@ -13,7 +13,7 @@ async def extract_signatures() -> list[TaskSignature]:
     ]
     # TODO - use large get action once we add this
     signatures_key = await asyncio.gather(
-        *[klass.all_keys() for klass in signature_models]
+        *[klass.afind_keys() for klass in signature_models]
     )
     sigantures = await asyncio.gather(
         *[rapyer.get(key) for keys in signatures_key for key in keys]

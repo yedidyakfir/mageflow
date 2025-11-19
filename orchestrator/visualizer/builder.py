@@ -4,6 +4,8 @@ from abc import ABC
 from queue import Queue
 from typing import Generic, TypeVar
 
+from dash import html
+
 from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
 from orchestrator.chain.model import ChainTaskSignature
 from orchestrator.signature.model import TaskSignature
@@ -43,7 +45,7 @@ class Builder(ABC):
         pass
 
     @abc.abstractmethod
-    def present_info(self) -> list[dict]:
+    def present_info(self) -> list:
         pass
 
 
@@ -77,11 +79,44 @@ class EmptyBuilder(Builder):
             edges=success_edges + error_edges,
         )
 
-    def present_info(self) -> list[dict]:
-        return [
-            {"type": "list", "label": "Success Tasks", "items": self.success_tasks},
-            {"type": "list", "label": "Error Tasks", "items": self.error_tasks},
-        ]
+    def present_info(self) -> list:
+        components = []
+
+        if self.success_tasks:
+            components.extend(
+                [
+                    html.H5("Success Tasks:", style={"margin": "15px 0 5px 0"}),
+                    html.Ul(
+                        [
+                            html.Li(
+                                task_id,
+                                style={"fontSize": "11px", "fontFamily": "monospace"},
+                            )
+                            for task_id in self.success_tasks
+                        ],
+                        style={"margin": "0", "paddingLeft": "20px"},
+                    ),
+                ]
+            )
+
+        if self.error_tasks:
+            components.extend(
+                [
+                    html.H5("Error Tasks:", style={"margin": "15px 0 5px 0"}),
+                    html.Ul(
+                        [
+                            html.Li(
+                                task_id,
+                                style={"fontSize": "11px", "fontFamily": "monospace"},
+                            )
+                            for task_id in self.error_tasks
+                        ],
+                        style={"margin": "0", "paddingLeft": "20px"},
+                    ),
+                ]
+            )
+
+        return components
 
 
 class TaskBuilder(Builder, Generic[T]):
@@ -144,37 +179,71 @@ class TaskBuilder(Builder, Generic[T]):
             if error and not is_internal_task(error.task_name)
         ]
 
-    def present_info(self) -> list[dict]:
-        info = [
-            {
-                "type": "field",
-                "label": "Creation Time",
-                "value": str(self.task.creation_time),
-            },
-            {
-                "type": "field",
-                "label": "Status",
-                "value": str(self.task.task_status.status),
-            },
-            {"type": "code", "label": "Parameters", "value": dict(self.task.kwargs)},
-            {
-                "type": "list",
-                "label": "Success Callbacks",
-                "items": list(self.task.success_callbacks),
-            },
-            {
-                "type": "list",
-                "label": "Error Callbacks",
-                "items": list(self.task.error_callbacks),
-            },
-            {
-                "type": "code",
-                "label": "Task Identifiers",
-                "value": dict(self.task.task_identifiers),
-            },
+    def present_info(self) -> list:
+        components = [
+            html.Div(
+                [
+                    html.Strong("Creation Time: "),
+                    html.Span(str(self.task.creation_time)),
+                ],
+                style={"marginBottom": "10px"},
+            ),
+            html.Div(
+                [
+                    html.Strong("Status: "),
+                    html.Span(str(self.task.task_status.status)),
+                ],
+                style={"marginBottom": "10px"},
+            ),
+            html.H5("Parameters:", style={"margin": "15px 0 5px 0"}),
+            html.Pre(
+                str(dict(self.task.kwargs)),
+                style={
+                    "backgroundColor": "#f0f0f0",
+                    "padding": "8px",
+                    "borderRadius": "3px",
+                    "fontSize": "11px",
+                    "overflow": "auto",
+                    "maxHeight": "100px",
+                },
+            ),
+            html.H5("Success Callbacks:", style={"margin": "15px 0 5px 0"}),
+            html.Ul(
+                [
+                    html.Li(
+                        callback_id,
+                        style={"fontSize": "11px", "fontFamily": "monospace"},
+                    )
+                    for callback_id in self.task.success_callbacks
+                ],
+                style={"margin": "0", "paddingLeft": "20px"},
+            ),
+            html.H5("Error Callbacks:", style={"margin": "15px 0 5px 0"}),
+            html.Ul(
+                [
+                    html.Li(
+                        callback_id,
+                        style={"fontSize": "11px", "fontFamily": "monospace"},
+                    )
+                    for callback_id in self.task.error_callbacks
+                ],
+                style={"margin": "0", "paddingLeft": "20px"},
+            ),
+            html.H5("Task Identifiers:", style={"margin": "15px 0 5px 0"}),
+            html.Pre(
+                str(dict(self.task.task_identifiers)),
+                style={
+                    "backgroundColor": "#f0f0f0",
+                    "padding": "8px",
+                    "borderRadius": "3px",
+                    "fontSize": "11px",
+                    "overflow": "auto",
+                    "maxHeight": "80px",
+                },
+            ),
         ]
 
-        return info
+        return components
 
 
 class ChainTaskBuilder(TaskBuilder[ChainTaskSignature]):
@@ -231,7 +300,7 @@ class BatchItemTaskBuilder(TaskBuilder[BatchItemTaskSignature]):
             return self.ctx.get(self.task.original_task_id).mentioned_tasks()
         return []
 
-    def present_info(self) -> list[dict]:
+    def present_info(self) -> list:
         if self.task.original_task_id in self.ctx:
             return self.ctx.get(self.task.original_task_id).present_info()
         return super().present_info()
