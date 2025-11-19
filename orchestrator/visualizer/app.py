@@ -147,10 +147,10 @@ async def create_app():
 
         if not task_builder:
             return [
-                html.H4("Task Information", style={"margin": "0 0 10px 0"}),
+                html.H4("Task Information", className="task-info-header"),
                 html.P(
                     f"No information available for task: {task_id}",
-                    style={"color": "#666"},
+                    className="task-info-placeholder",
                 ),
             ]
 
