@@ -1,1 +1,3 @@
 TASK_ID_PARAM_NAME = "task_id"
+
+ORCHESTRATOR_TASK_INITIALS = "orchestrator_"

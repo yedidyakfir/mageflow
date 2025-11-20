@@ -8,6 +8,7 @@ from dash import html
 
 from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
 from orchestrator.chain.model import ChainTaskSignature
+from orchestrator.signature.consts import ORCHESTRATOR_TASK_INITIALS
 from orchestrator.signature.model import TaskSignature
 from orchestrator.swarm.consts import ON_SWARM_ERROR, ON_SWARM_START, ON_SWARM_END
 from orchestrator.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
@@ -19,6 +20,9 @@ INTERNAL_TASKS = [
     ON_SWARM_START,
     ON_SWARM_ERROR,
     ON_SWARM_END,
+]
+INTERNAL_TASKS += [
+    internal_name.lstrip(ORCHESTRATOR_TASK_INITIALS) for internal_name in INTERNAL_TASKS
 ]
 
 
