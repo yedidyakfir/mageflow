@@ -22,7 +22,9 @@ class HatchetResult(BaseModel):
     hatchet_results: Any
 
 
-def handle_task_callback(expected_params: AcceptParams = AcceptParams.NO_CTX):
+def handle_task_callback(
+    expected_params: AcceptParams = AcceptParams.NO_CTX, wrap_res: bool = True
+):
     def task_decorator(func):
         @functools.wraps(func)
         async def wrapper(message: EmptyModel, ctx: Context, *args, **kwargs):
@@ -41,7 +43,7 @@ def handle_task_callback(expected_params: AcceptParams = AcceptParams.NO_CTX):
                 else:
                     result = await flexible_call(func, message, ctx, *args, **kwargs)
             except Exception:
-                has_error_handling = await invoker.run_error()
+                await invoker.run_error()
                 await invoker.remove_task(with_error=False)
                 raise
             else:

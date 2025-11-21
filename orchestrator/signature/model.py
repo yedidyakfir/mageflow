@@ -108,7 +108,7 @@ class TaskSignature(AtomicRedisModel):
 
     async def add_callbacks(
         self, success: list[Self] = None, errors: list[Self] = None
-    ) -> bool:
+    ):
         if success:
             success = [self.validate_task_id(s) for s in success]
         if errors:
