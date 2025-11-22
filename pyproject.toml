@@ -7,11 +7,18 @@ authors = [
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.11, <4.0"
+requires-python = ">=3.11, <3.13"
 dependencies = [
-    "rapyer @ git+https://github.com/yedidyakfir/rapyer.git@develop",
-    "dynaconf (>=3.2.12,<4.0.0)",
-    "hatchet-sdk (>=1.21.1,<2.0.0)"
+    "rapyer (>=1.0.3,<2.0.0)",
+    "dynaconf (>=3.2.12,<4.0.0)"
+]
+
+[project.optional-dependencies]
+display = [
+    "hatchet-sdk (>=1.21.1,<2.0.0)",
+    "dash[async] (>=3.3.0,<4.0.0)",
+    "dash-cytoscape (>=1.0.2,<2.0.0)",
+    "dash-bootstrap-components (>=2.0.4,<3.0.0)"
 ]
 
 [tool.poetry.group.dev.dependencies]
