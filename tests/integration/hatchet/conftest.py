@@ -169,7 +169,7 @@ async def extract_bad_keys_from_redis(redis_client):
         # Ignore all persistent keys
         if all(
             [
-                not key.startswith(approve_prefix.encode())
+                not key.startswith(approve_prefix)
                 for approve_prefix in STATIC_REDIS_PREFIX_KEYS
             ]
         )
