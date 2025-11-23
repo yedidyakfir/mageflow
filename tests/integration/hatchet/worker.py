@@ -111,6 +111,7 @@ workflows = [
     error_callback,
     sleep_task,
     callback_with_redis,
+    return_multiple_values,
 ]
 
 
