@@ -1,8 +1,7 @@
 import asyncio
 
-import pytest
-
 import orchestrator
+import pytest
 from orchestrator.signature.model import TaskSignature
 from tests.integration.hatchet.assertions import (
     assert_signature_not_called,
@@ -14,6 +13,7 @@ from tests.integration.hatchet.assertions import (
 from tests.integration.hatchet.conftest import HatchetInitData
 from tests.integration.hatchet.models import ContextMessage
 from tests.integration.hatchet.worker import sleep_task
+from tests.integration.hatchet.worker import task2_with_result
 
 
 @pytest.mark.asyncio(loop_scope="session")
@@ -23,7 +23,6 @@ async def test__chain_soft_paused_data_is_saved_in_redis__then_resume_check_fini
     ctx_metadata,
     trigger_options,
     sign_task1,
-    sign_task2,
     sign_task3,
     sign_callback1,
     sign_chain_callback,
@@ -35,8 +34,10 @@ async def test__chain_soft_paused_data_is_saved_in_redis__then_resume_check_fini
     )
     sleep_time = 10
     sleep_task_sign = await orchestrator.sign(sleep_task, sleep_time=sleep_time)
+
+    task_res_sign = await orchestrator.sign(task2_with_result)
     chain_signature = await orchestrator.chain(
-        tasks=[sign_task1, sleep_task_sign, sign_task2, sign_task3],
+        tasks=[sign_task1, sleep_task_sign, task_res_sign, sign_task3],
         success=sign_callback1,
         error=sign_chain_callback,
     )
@@ -55,7 +56,7 @@ async def test__chain_soft_paused_data_is_saved_in_redis__then_resume_check_fini
     runs = await get_runs(hatchet, ctx_metadata)
     assert_signature_not_called(runs, sign_chain_callback)
     assert_signature_not_called(runs, sign_callback1)
-    await assert_task_was_paused(runs, sign_task2)
+    await assert_task_was_paused(runs, task_res_sign)
 
     # Act - stage 2
     from hatchet_sdk.runnables.contextvars import ctx_additional_metadata
