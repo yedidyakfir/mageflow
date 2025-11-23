@@ -115,7 +115,7 @@ class SwarmTaskSignature(TaskSignature):
         task_name = self.task_name
         self.task_name = ON_SWARM_START
         workflow = await super().workflow(
-            **task_additional_params, use_return_field=True
+            **task_additional_params, use_return_field=use_return_field
         )
         self.task_name = task_name
         return workflow
