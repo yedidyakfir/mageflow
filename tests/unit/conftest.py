@@ -1,6 +1,7 @@
 import fakeredis
 import pytest
 import pytest_asyncio
+import rapyer
 from hatchet_sdk import Hatchet, ClientConfig
 
 import orchestrator
@@ -40,16 +41,5 @@ def orch(hatchet_mock, redis_client):
 
 
 @pytest_asyncio.fixture(autouse=True, scope="function")
-def init_models(redis_client):
-    models = [
-        # SwarmTaskSignature,
-        ChainTaskSignature,
-        TaskSignature,
-        # BatchItemTaskSignature,
-    ]
-
-    SIGNATURES_NAME_MAPPING.update(
-        {signature_class.__name__: signature_class for signature_class in models}
-    )
-    for signature_class in SIGNATURES_NAME_MAPPING.values():
-        signature_class.Meta.redis = redis_client
+async def init_models(redis_client):
+    await rapyer.init_rapyer(redis_client)
