@@ -73,9 +73,9 @@ async def init_settings(hatchet_client_init: HatchetInitData):
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session", autouse=True)
 async def hatchet_worker_deploy(
-    real_redis,
+    redis_client,
 ) -> AsyncGenerator[subprocess.Popen[bytes], None]:
-    await real_redis.flushall()
+    await redis_client.flushall()
     current_file = Path(__file__).absolute()
     test_worker_path = current_file.parent / "worker.py"
     command = ["python", str(test_worker_path)]
@@ -83,7 +83,7 @@ async def hatchet_worker_deploy(
     with hatchet_worker(command) as proc:
         await asyncio.sleep(10)
         yield proc
-    await real_redis.flushall()
+    await redis_client.flushall()
 
 
 def wait_for_worker_health(healthcheck_port: int) -> bool:

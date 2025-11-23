@@ -1,26 +1,22 @@
-import os
-from unittest.mock import MagicMock, AsyncMock
-
-import pytest
 import pytest_asyncio
 import redis.asyncio
-from redis import Redis
+from dynaconf import Dynaconf
+
+settings = Dynaconf(
+    envvar_prefix="DYNACONF",
+    settings_files=["settings.toml", ".secrets.toml"],
+)
 
 
-@pytest.fixture
-def redis_mock():
-    redis_client = MagicMock(spec=Redis)
-    redis_client.get = AsyncMock(return_value=None)
-    redis_client.set = AsyncMock()
-    redis_client.delete = AsyncMock()
+@pytest_asyncio.fixture(scope="session", loop_scope="session")
+def redis_client():
+    redis_client = redis.asyncio.from_url(settings.redis.url, max_connections=10)
 
     yield redis_client
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
-async def real_redis():
-    redis_url = os.getenv("REDIS__URL")
-    redis_client = redis.asyncio.from_url(redis_url)
+async def real_redis(redis_client):
     current_keys = await redis_client.keys("*")
     yield redis_client
     all_keys = await redis_client.keys("*")

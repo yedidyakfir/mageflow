@@ -1,6 +1,7 @@
 import asyncio
 import json
 
+import redis
 from dynaconf import Dynaconf
 from hatchet_sdk import Hatchet, ClientConfig, Context
 from hatchet_sdk.config import HealthcheckConfig
@@ -24,8 +25,9 @@ config_obj = ClientConfig(
     healthcheck=HealthcheckConfig(enabled=True),
 )
 
+redis = redis.asyncio.from_url(settings.redis.url, max_connections=10)
 hatchet = Hatchet(debug=True, config=config_obj)
-hatchet = orchestrator.Orchestrator(hatchet)
+hatchet = orchestrator.Orchestrator(hatchet, redis_client=redis)
 
 # > Default priority
 DEFAULT_PRIORITY = 1
