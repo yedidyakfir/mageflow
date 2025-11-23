@@ -97,14 +97,15 @@ async def test_signature_with_error_callbacks_execution_and_redis_cleanup_sanity
     )
     message = ContextMessage(base_data=test_ctx)
 
-    error_callback_signature1 = await orchestrator.sign(
-        error_callback, base_data={1: 2}
-    )
+    error_msg = "This is error"
+    error_callback_signature1 = await orchestrator.sign(error_callback, error=error_msg)
     error_callback_signature2 = await orchestrator.sign(error_callback)
-    callback_signature = await orchestrator.sign(task1_callback)
     error_callbacks = [error_callback_signature1, error_callback_signature2]
+    callback_signature = await orchestrator.sign(task1_callback)
     error_sign = await orchestrator.sign(
-        fail_task, error_callbacks=error_callbacks, success_callbacks=callback_signature
+        fail_task,
+        error_callbacks=error_callbacks,
+        success_callbacks=[callback_signature],
     )
 
     # Act

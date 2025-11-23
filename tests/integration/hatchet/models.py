@@ -9,6 +9,10 @@ class ContextMessage(BaseModel):
     base_data: dict = Field(default_factory=dict)
 
 
+class ErrorMessage(ContextMessage):
+    error: str
+
+
 class CommandMessageWithResult(ContextMessage):
     task_result: Annotated[Any, ReturnValue()]
 
