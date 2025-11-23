@@ -3,6 +3,7 @@ import asyncio
 import pytest
 
 import orchestrator
+from orchestrator.signature.model import TaskSignature
 from tests.integration.hatchet.assertions import (
     assert_signature_not_called,
     assert_task_was_paused,
@@ -40,6 +41,7 @@ async def test__chain_soft_paused_data_is_saved_in_redis__then_resume_check_fini
         error=sign_chain_callback,
     )
     message = ContextMessage(base_data=test_ctx)
+    all_tasks = await TaskSignature.afind()
 
     # Act - stage 1
     await chain_signature.aio_run_no_wait(message, options=trigger_options)
@@ -67,5 +69,5 @@ async def test__chain_soft_paused_data_is_saved_in_redis__then_resume_check_fini
 
     # Assert - stage 2
     runs = await get_runs(hatchet, ctx_metadata)
-    assert_chain_done(runs, chain_signature, test_ctx)
+    assert_chain_done(runs, chain_signature, all_tasks)
     await assert_redis_is_clean(redis_client)

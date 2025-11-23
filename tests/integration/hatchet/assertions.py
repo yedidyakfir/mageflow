@@ -209,11 +209,12 @@ def assert_swarm_task_done(
 def assert_chain_done(
     runs: HatchetRuns,
     chain_signature: ChainTaskSignature,
-    chain_tasks: list[TaskSignature],
+    full_tasks: list[TaskSignature],
 ):
     wf_by_signature = map_wf_by_id(runs)
+    task_map = {task.id: task for task in full_tasks}
+    chain_tasks = [task_map[task_id] for task_id in chain_signature.tasks]
     assert_tasks_in_order(wf_by_signature, chain_tasks)
-    task_map = {task.id: task for task in chain_tasks}
     output_value = None
     input_params = {}
     for chain_task_id in chain_signature.tasks:
