@@ -1,4 +1,5 @@
 import functools
+import os
 from typing import TypeVar, Any
 
 import redis
@@ -7,7 +8,6 @@ from hatchet_sdk.runnables.workflow import BaseWorkflow
 from hatchet_sdk.worker.worker import LifespanFn
 from redis.asyncio import Redis
 
-from config import settings
 from orchestrator.callbacks import AcceptParams, register_task, handle_task_callback
 from orchestrator.init import init_orchestrator_hatchet_tasks
 from orchestrator.startup import (
@@ -99,7 +99,8 @@ def Orchestrator(
     orchestrator_config.hatchet_client = hatchet_caller
 
     if redis_client is None:
-        redis_client = redis.asyncio.from_url(settings.redis.url)
+        redis_url = os.getenv("REDIS_URL")
+        redis_client = redis.asyncio.from_url(redis_url)
     if isinstance(redis_client, str):
         redis_client = redis.asyncio.from_url(redis_client, max_connections=10)
     orchestrator_config.redis_client = redis_client

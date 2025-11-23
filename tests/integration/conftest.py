@@ -1,11 +1,10 @@
+import os
 from unittest.mock import MagicMock, AsyncMock
 
 import pytest
 import pytest_asyncio
 import redis.asyncio
 from redis import Redis
-
-from config import settings
 
 
 @pytest.fixture
@@ -20,7 +19,8 @@ def redis_mock():
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def real_redis():
-    redis_client = redis.asyncio.from_url(settings.redis.url)
+    redis_url = os.getenv("REDIS__URL")
+    redis_client = redis.asyncio.from_url(redis_url)
     current_keys = await redis_client.keys("*")
     yield redis_client
     all_keys = await redis_client.keys("*")

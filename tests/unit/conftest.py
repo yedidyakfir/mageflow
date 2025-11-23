@@ -6,15 +6,14 @@ from hatchet_sdk import Hatchet, ClientConfig
 import orchestrator
 from orchestrator.chain.model import ChainTaskSignature
 from orchestrator.signature.model import SIGNATURES_NAME_MAPPING, TaskSignature
-from orchestrator.startup import update_register_signature_models
-from tests.integration.hatchet.worker import settings
+from orchestrator.startup import update_register_signature_models, orchestrator_config
 
 
 @pytest_asyncio.fixture(autouse=True, scope="function")
 async def redis_client():
     await update_register_signature_models()
     client = fakeredis.aioredis.FakeRedis()
-    settings.redis_client = client
+    orchestrator_config.redis_client = redis_client
     await client.flushall()
     try:
         yield client
@@ -30,7 +29,7 @@ def hatchet_mock():
         tls_strategy="tls",
     )
     hatchet = Hatchet(config=config_obj)
-    settings.hatchet_client = hatchet
+    orchestrator_config.hatchet_client = hatchet
 
     yield hatchet
 

@@ -7,6 +7,7 @@ from hatchet_sdk.config import HealthcheckConfig
 
 import orchestrator
 from orchestrator.signature.consts import TASK_ID_PARAM_NAME
+from orchestrator.startup import orchestrator_config
 from tests.integration.hatchet.models import (
     ContextMessage,
     CommandMessageWithResult,
@@ -78,7 +79,7 @@ async def sleep_task(msg: SleepTaskMessage):
 async def callback_with_redis(msg: CommandMessageWithResult, ctx: Context):
     task_id = ctx.additional_metadata[TASK_ID_PARAM_NAME]
 
-    await settings.redis_client.set(
+    await orchestrator_config.redis_client.set(
         f"activated-task-{task_id}", json.dumps(msg.task_result)
     )
     return msg
