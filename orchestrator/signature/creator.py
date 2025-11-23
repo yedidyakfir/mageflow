@@ -17,7 +17,7 @@ async def resolve_signature_id(task: TaskSignatureConvertible) -> TaskSignature:
     if isinstance(task, TaskSignature):
         return task
     elif isinstance(task, TaskIdentifierType):
-        return await TaskSignature.from_id_safe(task)
+        return await TaskSignature.from_id(task)
     else:
         return await TaskSignature.from_task(task)
 
@@ -63,7 +63,7 @@ async def sign(task: str | HatchetTaskType, **options: Any) -> TaskSignature:
         return await TaskSignature.from_task(task, kwargs=options, **kwargs)
 
 
-load_signature = TaskSignature.from_id_safe
+load_signature = TaskSignature.from_id
 resume_task = TaskSignature.resume_from_id
 lock_task = TaskSignature.lock_from_id
 resume = TaskSignature.resume_from_id

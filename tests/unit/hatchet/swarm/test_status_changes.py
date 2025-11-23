@@ -199,7 +199,7 @@ async def test_swarm_safe_change_status_on_deleted_signature_does_not_create_red
 
     # Assert
     assert result is False
-    reloaded_signature = await TaskSignature.from_id_safe(swarm_signature.id)
+    reloaded_signature = await TaskSignature.from_id(swarm_signature.id)
     assert reloaded_signature is None
 
 

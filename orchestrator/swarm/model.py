@@ -31,8 +31,8 @@ class BatchItemTaskSignature(TaskSignature):
 
     async def aio_run_no_wait(self, msg: BaseModel, **orig_task_kwargs):
         async with self.lock() as swarm_item:
-            swarm_task = await SwarmTaskSignature.from_id_safe(self.swarm_id)
-            original_task = await TaskSignature.from_id_safe(self.original_task_id)
+            swarm_task = await SwarmTaskSignature.from_id(self.swarm_id)
+            original_task = await TaskSignature.from_id(self.original_task_id)
             if swarm_task is None:
                 raise MissingSignatureError(
                     f"Swarm {self.swarm_id} was deleted before finish"
@@ -129,7 +129,7 @@ class SwarmTaskSignature(TaskSignature):
         self, with_error: bool = True, with_success: bool = True
     ):
         tasks = await asyncio.gather(
-            *[TaskSignature.from_id_safe(task_id) for task_id in self.tasks],
+            *[TaskSignature.from_id(task_id) for task_id in self.tasks],
             return_exceptions=True,
         )
         tasks = [task for task in tasks if isinstance(task, TaskSignature)]

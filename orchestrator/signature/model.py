@@ -78,14 +78,10 @@ class TaskSignature(AtomicRedisModel):
         return signature
 
     @classmethod
-    async def from_id(cls, task_id: TaskIdentifierType) -> Self:
-        signature_class, pk = extract_class_and_id(task_id)
-        return await signature_class.get(pk)
-
-    @classmethod
-    async def from_id_safe(cls, task_id: TaskIdentifierType) -> Optional[Self]:
+    async def from_id(cls, task_id: TaskIdentifierType) -> Optional[Self]:
         try:
-            return await cls.from_id(task_id)
+            signature_class, pk = extract_class_and_id(task_id)
+            return await signature_class.get(pk)
         except KeyNotFound:
             return None
 
@@ -156,7 +152,7 @@ class TaskSignature(AtomicRedisModel):
         if with_error:
             callback_ids.extend(self.error_callbacks)
         callbacks_signatures = await asyncio.gather(
-            *[TaskSignature.from_id_safe(callback_id) for callback_id in callback_ids]
+            *[TaskSignature.from_id(callback_id) for callback_id in callback_ids]
         )
         if any([sign is None for sign in callbacks_signatures]):
             raise MissingSignatureError(
@@ -190,7 +186,7 @@ class TaskSignature(AtomicRedisModel):
     @classmethod
     async def try_remove(cls, task_id: TaskIdentifierType, **kwargs):
         try:
-            task = await cls.from_id_safe(task_id)
+            task = await cls.from_id(task_id)
             await task.remove(**kwargs)
         except Exception as e:
             pass
@@ -211,7 +207,7 @@ class TaskSignature(AtomicRedisModel):
 
         signatures_to_delete = await asyncio.gather(
             *[
-                TaskSignature.from_id_safe(task_id)
+                TaskSignature.from_id(task_id)
                 for task_id in addition_tasks_to_delete
             ]
         )

@@ -3,7 +3,7 @@ from orchestrator.signature.model import TaskSignature
 
 async def assert_tasks_not_exists(tasks_ids: list[str]):
     for task_id in tasks_ids:
-        reloaded_signature = await TaskSignature.from_id_safe(task_id)
+        reloaded_signature = await TaskSignature.from_id(task_id)
         assert reloaded_signature is None
 
 

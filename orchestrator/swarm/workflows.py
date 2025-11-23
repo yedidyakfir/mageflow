@@ -22,7 +22,7 @@ async def swarm_start_tasks(msg: EmptyModel, ctx: Context) -> None:
         ctx.log(f"Swarm task started {msg}")
         task_data = HatchetInvoker(msg, ctx).task_ctx
         swarm_task_id = task_data[SWARM_TASK_ID_PARAM_NAME]
-        swarm_task = await SwarmTaskSignature.from_id_safe(swarm_task_id)
+        swarm_task = await SwarmTaskSignature.from_id(swarm_task_id)
         if swarm_task.has_swarm_started:
             ctx.log(f"Swarm task started but already running {msg}")
             return
@@ -32,7 +32,7 @@ async def swarm_start_tasks(msg: EmptyModel, ctx: Context) -> None:
             await swarm_task.tasks_left_to_run.aclear()
             await swarm_task.tasks_left_to_run.aextend(tasks_left_to_run)
         tasks_to_run = await asyncio.gather(
-            *[TaskSignature.from_id_safe(task_id) for task_id in tasks_ids_to_run]
+            *[TaskSignature.from_id(task_id) for task_id in tasks_ids_to_run]
         )
         await asyncio.gather(*[task.aio_run_no_wait(msg) for task in tasks_to_run])
         ctx.log(f"Swarm task started with tasks {tasks_ids_to_run} {msg}")
@@ -49,7 +49,7 @@ async def swarm_item_done(msg: SwarmResultsMessage, ctx: Context) -> None:
         swarm_item_id = task_data[SWARM_ITEM_TASK_ID_PARAM_NAME]
         ctx.log(f"Swarm item done {swarm_item_id}")
         # Update swarm tasks
-        swarm_task = await SwarmTaskSignature.from_id_safe(swarm_task_id)
+        swarm_task = await SwarmTaskSignature.from_id(swarm_task_id)
         res = msg.results
         async with swarm_task.lock(save_at_end=False) as swarm_task:
             await swarm_task.finished_tasks.aappend(swarm_item_id)
@@ -70,7 +70,7 @@ async def swarm_item_failed(msg: EmptyModel, ctx: Context) -> None:
         swarm_item_id = task_data[SWARM_ITEM_TASK_ID_PARAM_NAME]
         ctx.log(f"Swarm item failed {swarm_item_id}")
         # Check if the swarm should end
-        swarm_task = await SwarmTaskSignature.from_id_safe(swarm_task_id)
+        swarm_task = await SwarmTaskSignature.from_id(swarm_task_id)
         async with swarm_task.lock(save_at_end=False) as swarm_task:
             await swarm_task.add_to_failed_tasks(swarm_item_id)
             should_stop_after_failures = (
@@ -102,7 +102,7 @@ async def handle_finish_tasks(
     next_task = await swarm_task.pop_task_to_run()
     await swarm_task.decrease_running_tasks_count()
     if next_task:
-        next_task_signature = await TaskSignature.from_id_safe(next_task)
+        next_task_signature = await TaskSignature.from_id(next_task)
         if next_task_signature is None:
             raise MissingSwarmItemError(
                 f"swarm item {next_task} was deleted before swarm is done"

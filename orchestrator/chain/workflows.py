@@ -18,8 +18,8 @@ async def chain_end_task(msg: ChainSuccessTaskCommandMessage, ctx: Context) -> N
         current_task_id = task_data[TASK_ID_PARAM_NAME]
 
         chain_task_signature, current_task = await asyncio.gather(
-            ChainTaskSignature.from_id_safe(chain_task_id),
-            TaskSignature.from_id_safe(current_task_id),
+            ChainTaskSignature.from_id(chain_task_id),
+            TaskSignature.from_id(current_task_id),
         )
         ctx.log(f"Chain task done {chain_task_signature.task_name}")
 
@@ -43,8 +43,8 @@ async def chain_error_task(msg: EmptyModel, ctx: Context) -> None:
         chain_task_id = task_data[CHAIN_TASK_ID_NAME]
         current_task_id = task_data[TASK_ID_PARAM_NAME]
         chain_packed_task, current_task = await asyncio.gather(
-            ChainTaskSignature.from_id_safe(chain_task_id),
-            TaskSignature.from_id_safe(current_task_id),
+            ChainTaskSignature.from_id(chain_task_id),
+            TaskSignature.from_id(current_task_id),
         )
         ctx.log(
             f"Chain task failed {chain_packed_task.task_name} on task id - {current_task_id}"

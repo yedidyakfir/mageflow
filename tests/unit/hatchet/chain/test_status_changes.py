@@ -31,7 +31,7 @@ async def test_chain_safe_change_status_on_unsaved_signature_does_not_create_red
 
     # Assert
     assert result is False
-    reloaded_signature = await TaskSignature.from_id_safe(chain_signature.id)
+    reloaded_signature = await TaskSignature.from_id(chain_signature.id)
     assert reloaded_signature is None
 
 
