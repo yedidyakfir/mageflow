@@ -1,8 +1,8 @@
 import asyncio
 
-import pytest
-
 import orchestrator
+import pytest
+from orchestrator.signature.model import TaskSignature
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
     assert_chain_done,
@@ -10,9 +10,7 @@ from tests.integration.hatchet.assertions import (
     get_runs,
     assert_signature_done,
 )
-from tests.integration.hatchet.conftest import (
-    HatchetInitData,
-)
+from tests.integration.hatchet.conftest import HatchetInitData
 from tests.integration.hatchet.models import ContextMessage
 from tests.integration.hatchet.worker import (
     task2,
@@ -50,9 +48,7 @@ async def test_chain_integration(
         [sign_task1, signature2.id, task3],
         success=success_chain_signature,
     )
-    chain_tasks = await asyncio.gather(
-        *[orchestrator.load_signature(task_id) for task_id in chain_signature.tasks]
-    )
+    chain_tasks = await TaskSignature.afind()
 
     await chain_signature.aio_run_no_wait(message, options=trigger_options)
 
