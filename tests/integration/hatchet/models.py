@@ -9,6 +9,10 @@ class ContextMessage(BaseModel):
     base_data: dict = Field(default_factory=dict)
 
 
+class MesageWithResult(BaseModel):
+    results: Any
+
+
 class ErrorMessage(ContextMessage):
     error: str
 

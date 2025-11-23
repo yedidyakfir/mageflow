@@ -221,3 +221,30 @@ async def test__call_signed_task_with_normal_workflow__check_task_is_done(
     runs = await get_runs(hatchet, ctx_metadata)
 
     assert_task_done(runs, task1_callback, results=message.model_dump())
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test__call_task_that_return_multiple_values_of_basemodel__sanity(
+    hatchet_client_init: HatchetInitData, ctx_metadata, trigger_options, test_ctx
+):
+    # Arrange
+    hatchet = hatchet_client_init.hatchet
+    message = CommandMessageWithResult(task_result=test_ctx)
+
+    callback_sign = await orchestrator.sign(task1_callback)
+    return_multiple_values_sign = await orchestrator.sign(
+        return_multiple_values, success_callbacks=[callback_sign.id]
+    )
+
+    # Act
+    await return_multiple_values_sign.aio_run_no_wait(message, options=trigger_options)
+
+    # Assert
+    await asyncio.sleep(10)
+    runs = await get_runs(hatchet, ctx_metadata)
+    assert_task_done(runs, return_multiple_values_sign, results=message.model_dump())
+    assert_task_done(
+        runs,
+        callback_sign,
+        results=[message.model_dump(), message.model_dump(), message.model_dump()],
+    )
