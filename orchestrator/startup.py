@@ -23,6 +23,7 @@ orchestrator_config = OrchestratorConfigModel()
 
 
 async def init_orchestrator():
+    await rapyer.init_rapyer(orchestrator_config.redis_client)
     await register_workflows()
     await update_register_signature_models()
 
