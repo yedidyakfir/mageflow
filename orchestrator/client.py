@@ -1,26 +1,33 @@
 import functools
 import os
-from typing import TypeVar, Any
+from typing import TypeVar, Any, Protocol, overload
 
 import redis
 from hatchet_sdk import Hatchet, Worker
 from hatchet_sdk.runnables.workflow import BaseWorkflow
 from hatchet_sdk.worker.worker import LifespanFn
-from redis.asyncio import Redis
-
 from orchestrator.callbacks import AcceptParams, register_task, handle_task_callback
+from orchestrator.chain.creator import chain
 from orchestrator.init import init_orchestrator_hatchet_tasks
+from orchestrator.signature.creator import sign
 from orchestrator.startup import (
     lifespan_initialize,
     orchestrator_config,
     init_orchestrator,
 )
+from orchestrator.swarm.creator import swarm
+from redis.asyncio import Redis
 
 
 async def merge_lifespan(original_lifespan: LifespanFn):
     await init_orchestrator()
     async for res in original_lifespan():
         yield res
+
+
+class OrchestratorProtocol(Protocol):
+    async def chain(self): ...
+    async def swarm(self): ...
 
 
 class HatchetOrchestrator(Hatchet):
@@ -80,8 +87,34 @@ class HatchetOrchestrator(Hatchet):
 
         return super().worker(*args, workflows=workflows, lifespan=lifespan, **kwargs)
 
+    async def sign(self, task: str | HatchetTaskType, **options: Any) -> TaskSignature:
+        return await sign(task, **options)
+
+    async def chain(
+        self,
+        tasks: list[TaskSignatureConvertible],
+        name: str = None,
+        error: TaskInputType = None,
+        success: TaskInputType = None,
+    ):
+        return await chain(tasks, name, error, success)
+
+    async def swarm(
+        self,
+        tasks: list[TaskSignatureConvertible] = None,
+        task_name: str = None,
+        **kwargs: Unpack[SignatureOptions],
+    ):
+        return await swarm(tasks, task_name, **kwargs)
+
 
 T = TypeVar("T")
+
+
+@overload
+def Orchestrator(
+    hatchet_client: Hatchet, redis_client: Redis | str = None
+) -> HatchetOrchestrator: ...
 
 
 def Orchestrator(
