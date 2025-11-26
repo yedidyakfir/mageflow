@@ -5,6 +5,8 @@ from queue import Queue
 from typing import Generic, TypeVar, TypeAlias, Any, get_args
 
 from dash import html
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import core_schema
 
 from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
 from orchestrator.chain.model import ChainTaskSignature
@@ -125,6 +127,46 @@ class EmptyBuilder(Builder):
 
         return components
 
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        data_schema = core_schema.typed_dict_schema(
+            {
+                "task_id": core_schema.typed_dict_field(core_schema.str_schema()),
+                "success_tasks": core_schema.typed_dict_field(
+                    core_schema.list_schema(core_schema.str_schema()),
+                    required=False,
+                ),
+                "error_tasks": core_schema.typed_dict_field(
+                    core_schema.list_schema(core_schema.str_schema()),
+                    required=False,
+                ),
+            }
+        )
+
+        def _build(data: dict) -> "EmptyBuilder":
+            return cls(
+                task_id=data["task_id"],
+                success_tasks=data.get("success_tasks") or [],
+                error_tasks=data.get("error_tasks") or [],
+            )
+
+        def _serialize(b: "EmptyBuilder") -> dict:
+            return {
+                "task_id": b.task_id,
+                "success_tasks": list(b.success_tasks),
+                "error_tasks": list(b.error_tasks),
+            }
+
+        return core_schema.no_info_after_validator_function(
+            _build,
+            data_schema,
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                _serialize, info_arg=False, return_schema=data_schema
+            ),
+        )
+
 
 class TaskBuilder(Builder, Generic[T]):
     def __init__(self, task: T):
@@ -243,6 +285,30 @@ class TaskBuilder(Builder, Generic[T]):
         ]
 
         return components
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        # Try to infer the generic task type (TaskBuilder[SomeTask]) if available.
+        args = get_args(source_type) or get_args(cls)
+        task_type = args[0] if args else TaskSignature
+
+        task_schema = handler(task_type)
+
+        def _build_from_task(task: Any) -> "TaskBuilder":
+            return cls(task)
+
+        def _serialize(builder: "TaskBuilder") -> Any:
+            return builder.task
+
+        return core_schema.no_info_after_validator_function(
+            _build_from_task,
+            task_schema,
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                _serialize, info_arg=False, return_schema=task_schema
+            ),
+        )
 
 
 class ChainTaskBuilder(TaskBuilder[ChainTaskSignature]):
