@@ -38,6 +38,10 @@ class TaskSignature(AtomicRedisModel):
     def id(self) -> str:
         return f"{self.__class__.__name__}:{self.key}"
 
+    @id.setter
+    def id(self, value: str):
+        self.key = value.split(":", maxsplit=1)[1]
+
     @field_validator("success_callbacks", "error_callbacks", mode="before")
     @classmethod
     def validate_tasks_id(cls, v: list) -> list[TaskIdentifierType]:

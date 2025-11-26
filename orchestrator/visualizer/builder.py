@@ -2,10 +2,10 @@ import abc
 import dataclasses
 from abc import ABC
 from queue import Queue
-from typing import Generic, TypeVar, TypeAlias, Any
+from typing import Generic, TypeVar, TypeAlias, Any, Union, Annotated, Literal
 
 from dash import html
-from pydantic import GetCoreSchemaHandler, BaseModel, PrivateAttr
+from pydantic import GetCoreSchemaHandler, BaseModel, PrivateAttr, Field
 from pydantic_core import core_schema
 
 from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
@@ -171,6 +171,7 @@ class EmptyBuilder(Builder):
 
 class TaskBuilder(BaseModel, Builder, Generic[T]):
     task: T
+    builder_type: Literal["TaskBuilder"] = Field(default="TaskBuilder")
     _ctx: dict[str, Self] = PrivateAttr(default_factory=dict)
 
     @property
@@ -296,6 +297,8 @@ class TaskBuilder(BaseModel, Builder, Generic[T]):
 
 
 class ChainTaskBuilder(TaskBuilder[ChainTaskSignature]):
+    builder_type: Literal["ChainTaskBuilder"] = Field(default="ChainTaskBuilder")
+
     def draw(self) -> GraphData:
         base_node = super().draw()
 
@@ -344,6 +347,10 @@ class ChainTaskBuilder(TaskBuilder[ChainTaskSignature]):
 
 
 class BatchItemTaskBuilder(TaskBuilder[BatchItemTaskSignature]):
+    builder_type: Literal["BatchItemTaskBuilder"] = Field(
+        default="BatchItemTaskBuilder"
+    )
+
     def draw(self) -> GraphData:
         original_task = self.ctx.get(self.task.original_task_id)
         if original_task:
@@ -370,6 +377,8 @@ class BatchItemTaskBuilder(TaskBuilder[BatchItemTaskSignature]):
 
 
 class SwarmTaskBuilder(TaskBuilder[SwarmTaskSignature]):
+    builder_type: Literal["SwarmTaskBuilder"] = Field(default="SwarmTaskBuilder")
+
     def draw(self) -> GraphData:
         base_node = super().draw()
 
@@ -417,7 +426,13 @@ task_mapping = {
     BatchItemTaskSignature: BatchItemTaskBuilder,
 }
 
-CTXType: TypeAlias = dict[str, TaskBuilder]
+# Discriminated union for proper serialization/deserialization
+AnyTaskBuilder = Annotated[
+    Union[TaskBuilder, ChainTaskBuilder, BatchItemTaskBuilder, SwarmTaskBuilder],
+    Field(discriminator="builder_type"),
+]
+
+CTXType: TypeAlias = dict[str, AnyTaskBuilder]
 
 
 def find_unmentioned_tasks(ctx: CTXType) -> list[str]:
@@ -447,6 +462,10 @@ def create_builders(tasks: list[TaskSignature]) -> CTXType:
 
 
 def build_graph(initial_id: str, ctx: CTXType) -> list[dict]:
+    for task_id in ctx:
+        ctx[task_id].set_ctx(ctx)
+        ctx[task_id].task.id = task_id
+
     tasks_to_draw = Queue()
     tasks_to_draw.put(initial_id)
     drawn_tasks = []
