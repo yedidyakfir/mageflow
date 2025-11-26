@@ -271,19 +271,42 @@ def assert_overlaps_leq_k_workflows(
     workflows: list[V1TaskSummary], max_concurrency: int = 4
 ):
     """
-    Check that at no time more than k intervals overlap.
+    Check workflow concurrency constraints using the sweep line algorithm.
     """
+    # Create events for each workflow: (time, delta, workflow_id)
+    # delta: +1 for start, -1 for the end
     events = []
-    for wf in workflows:
-        s = wf.started_at
-        e = wf.finished_at
-        events.append((s, +1))
-        events.append((e, -1))
+    for i, wf in enumerate(workflows):
+        events.append((wf.started_at, +1, i))
 
-    # Tie-breaking:
+        # Only add end event if the workflow has finished
+        if wf.finished_at is not None:
+            events.append((wf.finished_at, -1, i))
+
+    # Sort events by time, with end events before start events for tiebreaking
+    # This ensures workflows that end exactly when others start don't count as overlapping
     events.sort(key=lambda x: (x[0], -x[1]))
 
-    active = 0
-    for t, delta in events:
-        active += delta
-        assert max_concurrency > active, f"Too many active tasks: {active}"
+    active_count = 0
+    max_active_seen = 0
+    active_workflows = set()  # Track which workflows are currently active
+
+    for time, delta, wf_id in events:
+        if delta == +1:
+            active_workflows.add(wf_id)
+        else:
+            active_workflows.discard(wf_id)
+
+        active_count += delta
+        max_active_seen = max(max_active_seen, active_count)
+
+        # Check maximum concurrency constraint
+        if active_count > max_concurrency:
+            active_workflow_names = [
+                workflows[wf_id].workflow_name for wf_id in active_workflows
+            ]
+            assert False, (
+                f"Too many workflows running concurrently: {active_count} > {max_concurrency} "
+                f"at time {time}. "
+                f"Active workflows: {', '.join(active_workflow_names)}"
+            )
