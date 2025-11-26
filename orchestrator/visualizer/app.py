@@ -39,11 +39,28 @@ async def create_app(redis_url: str):
 
     app.layout = html.Div(
         [
-            dcc.Tabs(
-                id="task-tabs",
-                value=start_tasks[0] if start_tasks else None,
-                children=tabs,
-                className="tabs-container",
+            html.Div(
+                [
+                    dcc.Tabs(
+                        id="task-tabs",
+                        value=start_tasks[0] if start_tasks else None,
+                        children=tabs,
+                        className="tabs-container",
+                    ),
+                    html.Div(
+                        [
+                            html.H4("Control Panel", className="control-panel-header"),
+                            html.Button(
+                                "Refresh",
+                                id="refresh-button",
+                                className="control-button",
+                                n_clicks=0,
+                            ),
+                        ],
+                        className="control-panel",
+                    ),
+                ],
+                className="top-bar",
             ),
             html.Div(
                 [

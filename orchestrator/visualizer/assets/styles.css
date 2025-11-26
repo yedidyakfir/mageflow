@@ -1,6 +1,5 @@
 /* Task Information Section - USED in app.py */
 .task-info-header {
-    /*margin: 0 0 10px 0 !important;*/
 }
 
 .task-info-placeholder {
@@ -34,6 +33,18 @@
     display: flex !important;
     flex-direction: row !important;
     margin-bottom: 0 !important;
+    flex: 1 !important;
+}
+
+/* Top bar layout */
+.top-bar {
+    display: flex !important;
+    width: 100% !important;
+    height: 4vh !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    justify-content: flex-end !important;
 }
 
 /* Layout */
@@ -44,35 +55,73 @@
     margin: 0 !important;
     padding: 0 !important;
     min-height: 0 !important;
+    /*Because of the tabs*/
+    height: 96vh !important;
 }
 
 .graph-container {
     flex: 1 !important;
-    height: 100% !important;
+    height: 96vh !important;
     margin: 0 !important;
     padding: 0 !important;
     min-height: 0 !important;
     position: relative !important;
 }
 
+/* Control panel */
+.control-panel {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    background-color: #2D1B69 !important;
+    border-color: #7209B7 !important;
+    color: #E0AAFF !important;
+    height: 4vh !important;
+    width: 30vw !important;
+    box-sizing: border-box !important;
+}
+
+.control-panel-header {
+    margin: 0 !important;
+    color: #C77DFF !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+}
+
+.control-button {
+    background-color: #7209B7 !important;
+    color: #E0AAFF !important;
+    border: 1px solid #9D4EDD !important;
+    border-radius: 3px !important;
+    padding: 6px 12px !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s !important;
+    font-size: 12px !important;
+}
+
+.control-button:hover {
+    background-color: #9D4EDD !important;
+}
+
 .info-window {
     width: 30vw !important;
-    display: inline-block !important;
-    vertical-align: top !important;
+    display: block !important;
     padding: 10px !important;
-    border: 1px solid #ddd !important;
     border-radius: 5px !important;
     background-color: #10002B !important;
     border-color: #7209B7 !important;
     color: #E0AAFF !important;
-    height: 90vh !important;
+    height: 96vh !important;
     overflow: auto !important;
+    box-sizing: border-box !important;
 }
 
 /* Cytoscape graph */
 .cytoscape-container {
     width: 100% !important;
-    height: 90vh !important;
+    height: 96vh !important;
 }
 
 /* Root container */
