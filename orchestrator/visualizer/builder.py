@@ -2,7 +2,7 @@ import abc
 import dataclasses
 from abc import ABC
 from queue import Queue
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, TypeAlias, Any, get_args
 
 from dash import html
 
@@ -367,8 +367,10 @@ task_mapping = {
     BatchItemTaskSignature: BatchItemTaskBuilder,
 }
 
+CTXType: TypeAlias = dict[str, TaskBuilder]
 
-def find_unmentioned_tasks(ctx: dict[str, TaskBuilder]) -> list[str]:
+
+def find_unmentioned_tasks(ctx: CTXType) -> list[str]:
     mentioned_tasks = set()
     for task in ctx.values():
         mentioned_tasks.update(task.mentioned_tasks())
@@ -380,7 +382,7 @@ def find_unmentioned_tasks(ctx: dict[str, TaskBuilder]) -> list[str]:
     return list(real_tasks_keys - mentioned_tasks)
 
 
-def create_builders(tasks: list[TaskSignature]) -> dict[str, TaskBuilder]:
+def create_builders(tasks: list[TaskSignature]) -> CTXType:
     ctx = {task.id: task_mapping.get(type(task))(task) for task in tasks}
 
     # Initialize tasks
@@ -394,7 +396,7 @@ def create_builders(tasks: list[TaskSignature]) -> dict[str, TaskBuilder]:
     return ctx
 
 
-def build_graph(initial_id: str, ctx: dict[str, TaskBuilder]) -> list[dict]:
+def build_graph(initial_id: str, ctx: CTXType) -> list[dict]:
     tasks_to_draw = Queue()
     tasks_to_draw.put(initial_id)
     drawn_tasks = []
