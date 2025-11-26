@@ -14,6 +14,9 @@
     background-color: #2D1B69 !important;
     color: #C77DFF !important;
     border: 1px solid #5A189A !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 .tab-selected {
@@ -26,10 +29,14 @@
     background-color: #7209B7 !important;
     color: #E0AAFF !important;
     border: 2px solid #9D4EDD !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 .tabs-container {
     height: 4vh !important;
+    width: 70vw !important;
     display: flex !important;
     flex-direction: row !important;
     margin-bottom: 0 !important;
