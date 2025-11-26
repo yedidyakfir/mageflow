@@ -3,50 +3,29 @@ import dash_cytoscape as cyto
 import rapyer
 from dash import Dash, html, dcc, Input, Output, callback
 
+from orchestrator.visualizer.assets.cytoscape_styles import EDGE_STYLES, GRAPH_STYLES
 from orchestrator.visualizer.builder import (
     build_graph,
     create_builders,
     find_unmentioned_tasks,
+    CTXType,
 )
 from orchestrator.visualizer.data import extract_signatures, create
-from orchestrator.visualizer.assets.cytoscape_styles import EDGE_STYLES, GRAPH_STYLES
+from orchestrator.visualizer.utils import pydantic_validator
 
 # Load extra layouts
 cyto.load_extra_layouts()
 
 
 async def create_app(redis_url: str):
-    await rapyer.init_rapyer(redis_url)
     app = Dash(__name__)
     stylesheet = GRAPH_STYLES + EDGE_STYLES
-
-    # Get the complex scenario data
-    tasks = await extract_signatures()
-    ctx = create_builders(tasks)
-    start_tasks = find_unmentioned_tasks(ctx)
-
-    # Create tabs for each start task with CSS classes
-    tabs = [
-        dcc.Tab(
-            label=ctx.get(task_id).task_name,
-            value=task_id,
-            id=f"tab-{task_id}",
-            className="tab-style",
-            selected_className="tab-selected",
-        )
-        for task_id in start_tasks
-    ]
 
     app.layout = html.Div(
         [
             html.Div(
                 [
-                    dcc.Tabs(
-                        id="task-tabs",
-                        value=start_tasks[0] if start_tasks else None,
-                        children=tabs,
-                        className="tabs-container",
-                    ),
+                    dcc.Tabs(id="task-tabs", className="tabs-container"),
                     html.Div(
                         [
                             html.H4("Control Panel", className="control-panel-header"),
@@ -66,6 +45,7 @@ async def create_app(redis_url: str):
                 [
                     html.Div(
                         id="tab-content",
+                        children=[],
                         className="graph-container",
                     ),
                     html.Div(
@@ -82,12 +62,48 @@ async def create_app(redis_url: str):
                 ],
                 className="main-layout",
             ),
+            dcc.Store(id="start-tasks", data=[]),
+            dcc.Store(id="tasks-data", data={}),
         ]
     )
 
-    @callback(Output("tab-content", "children"), [Input("task-tabs", "value")])
-    def render_content(active_tab):
-        if active_tab:
+    @callback(
+        [Output("tasks-data", "data"), Output("start-tasks", "data")],
+        [Input("refresh-button", "n_clicks")],
+    )
+    @pydantic_validator
+    async def refresh_data(n_clicks: int) -> tuple[CTXType, list[str]]:
+        await rapyer.init_rapyer(redis_url)
+        tasks = await extract_signatures()
+        ctx = create_builders(tasks)
+        start_tasks = find_unmentioned_tasks(ctx)
+        return ctx, start_tasks
+
+    @callback(
+        Output("task-tabs", "children"),
+        [Input("start-tasks", "data"), Input("tasks-data", "data")],
+    )
+    @pydantic_validator
+    def update_tabs(start_tasks: list[str], ctx: CTXType):
+        tabs = [
+            dcc.Tab(
+                label=ctx.get(task_id).task_name,
+                value=task_id,
+                id=f"tab-{task_id}",
+                className="tab-style",
+                selected_className="tab-selected",
+            )
+            for task_id in start_tasks
+        ]
+        return tabs
+
+    @callback(
+        Output("tab-content", "children"),
+        [Input("task-tabs", "value"), Input("tasks-data", "data")],
+    )
+    @pydantic_validator
+    def render_content(active_tab: str, ctx: CTXType):
+        if active_tab and active_tab in ctx:
             elements = build_graph(active_tab, ctx)
             return cyto.Cytoscape(
                 id="cytoscape-graph",
@@ -108,10 +124,11 @@ async def create_app(redis_url: str):
 
     @callback(
         Output("info-window", "children"),
-        [Input("cytoscape-graph", "tapNodeData")],
+        [Input("cytoscape-graph", "tapNodeData"), Input("tasks-data", "data")],
         prevent_initial_call=True,
     )
-    def display_task_info(node_data):
+    @pydantic_validator
+    def display_task_info(node_data: dict, ctx: CTXType):
         if node_data is None:
             return [
                 html.H4("Task Information", className="task-info-header"),
