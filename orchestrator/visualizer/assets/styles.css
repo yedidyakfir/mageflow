@@ -4,7 +4,7 @@
 }
 
 .task-info-placeholder {
-    color: #666 !important;
+    color: #C77DFF !important;
 }
 
 /* Tabs */
@@ -16,6 +16,9 @@
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
     display: flex !important;
+    background-color: #2D1B69 !important;
+    color: #C77DFF !important;
+    border: 1px solid #5A189A !important;
 }
 
 .tab-selected {
@@ -31,6 +34,9 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    background-color: #7209B7 !important;
+    color: #E0AAFF !important;
+    border: 2px solid #9D4EDD !important;
 }
 
 .tabs-container {
@@ -67,7 +73,9 @@
     padding: 10px !important;
     border: 1px solid #ddd !important;
     border-radius: 5px !important;
-    background-color: #f9f9f9 !important;
+    background-color: #10002B !important;
+    border-color: #7209B7 !important;
+    color: #E0AAFF !important;
     height: 580px !important;
     overflow: auto !important;
 }
@@ -84,6 +92,8 @@ html, body {
     padding: 0 !important;
     height: 100% !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+    background: linear-gradient(135deg, #0F0C29 0%, #24243e 35%, #302B63 100%) !important;
+    color: #E0AAFF !important;
 }
 
 /* Main app container */
@@ -98,6 +108,7 @@ html, body {
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
+    background: linear-gradient(135deg, #0F0C29 0%, #24243e 35%, #302B63 100%) !important;
 }
 
 /* Ensure the app wrapper takes full height */
