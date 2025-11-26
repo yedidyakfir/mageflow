@@ -17,7 +17,7 @@ Task Orchestrator abstracts away the complexity of task management systems, prov
 Create sequential workflows where each task depends on the previous one's completion. Perfect for multi-step processes where order matters.
 
 ```python
-from orchestrator import chain
+import orchestrator
 
 # Create a chain of tasks that run sequentially
 task_order = [
@@ -25,14 +25,14 @@ task_order = [
     analyze_data_task,
     generate_report_task
 ]
-workflow = await chain(task_order, name="data-pipeline")
+workflow = await orchestrator.chain(task_order, name="data-pipeline")
 ```
 
 ### 🐝 Task Swarms
 Execute multiple tasks in parallel with intelligent coordination. Ideal for processing large datasets or performing independent operations simultaneously.
 
 ```python
-from orchestrator import swarm
+import orchestrator
 
 # Run multiple tasks in parallel
 swarm_tasks = [
@@ -40,7 +40,7 @@ swarm_tasks = [
     send_notifications_task,
     update_cache_task
 ]
-parallel_workflow = await swarm(swarm_tasks, task_name="user-processing")
+parallel_workflow = await orchestrator.swarm(swarm_tasks, task_name="user-processing")
 ```
 
 ### 📞 Callback System
@@ -60,10 +60,10 @@ async def my_task(message):
 Flexible task definition system with validation, state management, and lifecycle control.
 
 ```python
-from orchestrator import sign, TaskStatus
+import orchestrator
 
 # Create a task signature with validation
-task_signature = await sign(
+task_signature = await orchestrator.sign(
     task_name="process-order",
     task_identifiers={"order_id": "12345"},
     success_callbacks=[send_confirmation_task],
