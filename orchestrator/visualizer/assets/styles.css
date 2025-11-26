@@ -66,54 +66,32 @@
 }
 
 .info-window {
-    width: 28% !important;
+    width: 30vw !important;
     display: inline-block !important;
     vertical-align: top !important;
-    margin-left: 2% !important;
     padding: 10px !important;
     border: 1px solid #ddd !important;
     border-radius: 5px !important;
     background-color: #10002B !important;
     border-color: #7209B7 !important;
     color: #E0AAFF !important;
-    height: 580px !important;
+    height: 90vh !important;
     overflow: auto !important;
 }
 
 /* Cytoscape graph */
 .cytoscape-container {
     width: 100% !important;
-    height: 600px !important;
+    height: 100vh !important;
 }
 
 /* Root container */
-html, body {
+html, body, #react-entry-point  {
     margin: 0 !important;
     padding: 0 !important;
-    height: 100% !important;
+    height: 100vh !important;
+    width: 100vw !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
     background: linear-gradient(135deg, #0F0C29 0%, #24243e 35%, #302B63 100%) !important;
     color: #E0AAFF !important;
-}
-
-/* Main app container */
-#react-entry-point {
-    height: 100vh !important;
-}
-
-._dash-container {
-    height: 100vh !important;
-    margin: 0 !important;
-    padding: 10px !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: linear-gradient(135deg, #0F0C29 0%, #24243e 35%, #302B63 100%) !important;
-}
-
-/* Ensure the app wrapper takes full height */
-._dash-container > div {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
 }
