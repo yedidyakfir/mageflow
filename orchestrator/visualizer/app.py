@@ -1,4 +1,6 @@
+import click
 import dash_cytoscape as cyto
+import rapyer
 from dash import Dash, html, dcc, Input, Output, callback
 
 from orchestrator.visualizer.builder import (
@@ -12,8 +14,8 @@ from orchestrator.visualizer.data import extract_signatures, create
 cyto.load_extra_layouts()
 
 
-async def create_app():
-    # await create()
+async def create_app(redis_url: str):
+    await rapyer.init_rapyer(redis_url)
     app = Dash(__name__)
     stylesheet = [
         # Default node style (leaf + parents)
@@ -54,6 +56,20 @@ async def create_app():
                 "line-color": "#888",
                 "target-arrow-color": "#888",
                 "width": 2,
+            },
+        },
+        {
+            "selector": ".success-edge",
+            "style": {
+                "line-color": "#28a745",
+                "target-arrow-color": "#28a745",
+            },
+        },
+        {
+            "selector": ".error-edge",
+            "style": {
+                "line-color": "#dc3545",
+                "target-arrow-color": "#dc3545",
             },
         },
     ]
@@ -181,7 +197,29 @@ async def create_app():
     app.run(debug=True)
 
 
-if __name__ == "__main__":
+DEFAULT_REDIS_URL = "redis://localhost:6379/12"
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command("create")
+@click.option("--redis-url", default=DEFAULT_REDIS_URL, help="Redis URL")
+def create_db(redis_url: str):
     import asyncio
 
-    asyncio.run(create_app())
+    asyncio.run(create(redis_url))
+
+
+@cli.command("app")
+@click.option("--redis-url", default=DEFAULT_REDIS_URL, help="Redis URL")
+def main(redis_url: str):
+    import asyncio
+
+    asyncio.run(create_app(redis_url))
+
+
+if __name__ == "__main__":
+    cli()

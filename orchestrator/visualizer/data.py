@@ -47,7 +47,8 @@ async def create_chain(name: str):
     return chain_sign
 
 
-async def create():
+async def create(redis_url: str):
+    await rapyer.init_rapyer(redis_url)
     chain_task1 = await create_chain("chain1")
     chain_task2 = await create_chain("chain2")
     chain_task3 = await create_chain("chain3")
