@@ -276,3 +276,38 @@ async def test_swarm_run_concurrently(
     # Check concurrency of the swarm
     swarm_wf = [wf_by_task_id[task.id] for task in swarm_tasks]
     assert_overlaps_leq_k_workflows(swarm_wf, max_concurrency)
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_swarm_run_finish_at_fail__still_finish_successfully(
+    hatchet_client_init: HatchetInitData,
+    test_ctx,
+    ctx_metadata,
+    trigger_options,
+    sign_fail_task,
+):
+    # Arrange
+    redis_client, hatchet = (
+        hatchet_client_init.redis_client,
+        hatchet_client_init.hatchet,
+    )
+    swarm_tasks = [fail_task]
+    task1_callback_sign = await orchestrator.sign(task1_callback, base_data=test_ctx)
+    swarm = await orchestrator.swarm(
+        tasks=swarm_tasks,
+        success_callbacks=[task1_callback_sign],
+        config=SwarmConfig(stop_after_n_failures=10),
+        is_swarm_closed=True,
+    )
+
+    # Act
+    regular_message = ContextMessage()
+    await swarm.aio_run_no_wait(regular_message, options=trigger_options)
+    await asyncio.sleep(60)
+
+    # Assert
+    runs = await get_runs(hatchet, ctx_metadata)
+    wf_by_task_id = map_wf_by_id(runs, also_not_done=True)
+
+    # Check swarm callback was called
+    assert_signature_done(runs, task1_callback_sign, base_data=test_ctx)
