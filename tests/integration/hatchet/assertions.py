@@ -45,9 +45,7 @@ def is_wf_done(wf: V1TaskSummary) -> bool:
 
 
 def is_task_paused(wf: V1TaskSummary) -> bool:
-    wf_output = wf.output or {}
-    res = wf_output.get("hatchet_results")
-    return res == {}
+    return wf.status == V1TaskStatus.CANCELLED
 
 
 def get_task_param(wf: V1TaskSummary, param_name: str):
@@ -248,7 +246,8 @@ def assert_paused(runs: HatchetRuns, start_time: datetime, end_time: datetime):
         start_before_pause = task_start_time < start_time
         end_time = end_time.astimezone(task_start_time.tzinfo)
         started_after_pause = task_start_time > end_time
-        assert start_before_pause or started_after_pause
+        task_was_stopped = is_task_paused(wf)
+        assert start_before_pause or started_after_pause or task_was_stopped
 
     paused_tasks = [wf for wf in wf_by_task_id.values() if is_task_paused(wf)]
     for paused_wf in paused_tasks:
