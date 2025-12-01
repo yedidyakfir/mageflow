@@ -17,7 +17,6 @@ async def test__task_is_cancelled__swarm_still_finish(
     test_ctx,
     ctx_metadata,
     trigger_options,
-    sign_fail_task,
 ):
     # Arrange
     redis_client, hatchet = (
@@ -35,6 +34,8 @@ async def test__task_is_cancelled__swarm_still_finish(
     await asyncio.sleep(10)
     for i in range(2):
         swarm_item = await swarm.add_task(task1)
+        swarm_items.append(swarm_item)
+        tasks.append(await TaskSignature.from_id(swarm_item.original_task_id))
         await swarm_item.aio_run_no_wait(regular_message, options=trigger_options)
     await swarm.close_swarm()
     await asyncio.sleep(30)
