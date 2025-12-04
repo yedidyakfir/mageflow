@@ -22,6 +22,19 @@ signature = await orchestrator.sign("process-data")
 signature = await orchestrator.sign(my_task_function)
 ```
 
+!!! info "Alternative Client Usage"
+    You can also create signatures using the orchestrator client instead of the global `orchestrator` module:
+
+    ```python
+    from orchestrator import Orchestrator
+
+    # Create orchestrator client
+    hatchet = Orchestrator(hatchet, redis)
+
+    # Use client to create signatures
+    signature = await hatchet.sign("process-data")
+    signature = await hatchet.sign(my_task_function)
+    ```
 
 ## Attaching Data with kwargs
 

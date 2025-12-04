@@ -29,6 +29,19 @@ swarm_signature = await orchestrator.swarm(
 )
 ```
 
+!!! info "Alternative Client Usage"
+    You can also create swarms using the orchestrator client instead of the global `orchestrator` module:
+
+    ```python
+    from orchestrator import Orchestrator
+
+    # Create orchestrator client
+    hatchet = Orchestrator(hatchet, redis)
+
+    # Use client to create swarms
+    swarm_signature = await hatchet.swarm(tasks=[task1, task2, task3])
+    ```
+
 ### Parameters
 
 - `tasks`: List of task signatures, task functions, or task names to run in parallel

@@ -29,6 +29,19 @@ chain_signature = await orchestrator.chain(
 )
 ```
 
+!!! info "Alternative Client Usage"
+    You can also create chains using the orchestrator client instead of the global `orchestrator` module:
+
+    ```python
+    from orchestrator import Orchestrator
+
+    # Create orchestrator client
+    hatchet = Orchestrator(hatchet, redis)
+
+    # Use client to create chains
+    chain_signature = await hatchet.chain([task1, task2, task3])
+    ```
+
 ### Parameters
 
 - `tasks`: List of task signatures, task functions, or task names to chain together
