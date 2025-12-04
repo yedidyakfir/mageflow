@@ -9,32 +9,50 @@ theme:
   logo: icon.png
   favicon: icon.png
   palette:
-    - scheme: default
-      primary: red
-      accent: red
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: purple
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    - scheme: slate
-      primary: red
-      accent: red
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: cyan
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: Switch to system preference
   features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
     - navigation.instant
     - navigation.instant.prefetch
-    - navigation.path
-    - navigation.indexes
+    - navigation.instant.progress
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.top
     - navigation.tracking
-    - navigation.footer
     - search.highlight
-    - search.suggest
     - search.share
-    - content.code.copy
-    - content.code.annotate
-    - content.tooltips
+    - search.suggest
+    - toc.follow
   font:
     text: Inter
     code: JetBrains Mono
@@ -46,6 +64,7 @@ nav:
     - Call With Callback: documentation/callbacks.md
     - Chain: documentation/chain.md
     - Swarm: documentation/swarm.md
+    - Task Lifecycle: documentation/task-lifecycle.md
   - API Reference:
       - Chain: api/chain.md
       - Swarm: api/swarm.md
@@ -53,26 +72,68 @@ nav:
   - Changelog: changelog.md
 
 markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: yedidyakfir
+      repo: task-orchestrator
+  - pymdownx.mark
+  - pymdownx.smartsymbols
   - pymdownx.snippets:
       base_path: .
-  - pymdownx.superfences
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences
-  - attr_list
-  - md_in_html
-  - toc:
-      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
 
 plugins:
-  - search
+  - search:
+      separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
 
 extra:
+  status:
+    new: Recently added
+    deprecated: Deprecated
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/yedidyakfir/orchestrator
+      link: https://github.com/yedidyakfir/task-orchestrator
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/orchestrator/
+  version:
+    provider: mike
+    default: latest
