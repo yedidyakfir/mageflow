@@ -61,23 +61,36 @@ async def extract_data(msg: InputMessage) -> DataOutput:
     # Process initial input
     return DataOutput(processed_data="...")
 
+
+class SecondMessage(BaseModel):
+    results: DataOutput
+
 @hatchet.task()  
-async def transform_data(msg: DataOutput) -> TransformedData:
+async def transform_data(msg: SecondMessage) -> TransformedData:
     # Receives DataOutput from extract_data
     return TransformedData(transformed=msg.processed_data)
 
+class ThirdMessage(BaseModel):
+    transformed_data: Annotated[TransformedData, ReturnValue()]
+    field_int: int
+
 @hatchet.task()
-async def save_data(msg: TransformedData) -> SaveResult:
+async def save_data(msg: ThirdMessage) -> SaveResult:
     # Receives TransformedData from transform_data
     return SaveResult(saved_id=123)
+
+# Sing second task
+extract_data = await orchestrator.sign(extract_data, field_int=123)
 
 # Create the chain
 chain = await orchestrator.chain([
     extract_data,
-    transform_data, 
+    extract_data, 
     save_data
 ])
 ```
+
+Note here that every message receives the output of the previous task via the [ReturnValue](callbacks.md#setting-success-callbacks) field
 
 ### Failure Behavior
 
