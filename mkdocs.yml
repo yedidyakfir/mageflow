@@ -61,7 +61,7 @@ nav:
   - Overview: index.md
   - Setup: setup.md
   - Documentation:
-    - Call With Callback: documentation/callbacks.md
+    - Callbacks: documentation/callbacks.md
     - Chain: documentation/chain.md
     - Swarm: documentation/swarm.md
     - Task Lifecycle: documentation/task-lifecycle.md
