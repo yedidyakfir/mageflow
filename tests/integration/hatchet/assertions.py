@@ -241,16 +241,26 @@ def assert_chain_done(
         _assert_task_done(chain_success, wf_by_signature, input_params)
 
 
-def assert_paused(runs: HatchetRuns, start_time: datetime, end_time: datetime):
+def assert_paused(
+    runs: HatchetRuns,
+    tasks: list[TaskSignature],
+    start_time: datetime,
+    end_time: datetime,
+):
     wf_by_task_id = map_wf_by_id(runs, also_not_done=True)
-    for wf in wf_by_task_id.values():
+    tasks_map = {task.id: task for task in tasks}
+    for task_id, wf in wf_by_task_id.items():
+        if task_id not in tasks_map:
+            continue
         task_start_time = wf.started_at
         start_time = start_time.astimezone(task_start_time.tzinfo)
         start_before_pause = task_start_time < start_time
         end_time = end_time.astimezone(task_start_time.tzinfo)
         started_after_pause = task_start_time > end_time
         task_was_stopped = is_task_paused(wf)
-        assert start_before_pause or started_after_pause or task_was_stopped
+        assert (
+            start_before_pause or started_after_pause or task_was_stopped
+        ), f"{wf.workflow_name} was not paused in {task_start_time}"
 
     paused_tasks = [wf for wf in wf_by_task_id.values() if is_task_paused(wf)]
     for paused_wf in paused_tasks:
