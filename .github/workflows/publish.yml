@@ -1,0 +1,201 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  check-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Wait for test matrix to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'test-results'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
+      - name: Wait for lint to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'lint'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
+  coverage:
+    needs: check-tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install tox
+        run: pip install tox
+
+      - name: Install dependencies
+        run: poetry install --with dev --extras hatchet
+
+      - name: Deploy Hatch Lite
+        run: |
+          docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml up -d
+
+      - name: Generate Env File
+        env:
+          SERVER_AUTH_COOKIE_INSECURE: "t"
+        working-directory: .
+        run: |
+          sleep 10
+          HATCHET_API_KEY=$(docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml exec hatchet-lite /hatchet-admin token create --config /config --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)
+          echo "HATCHET_API_KEY=$HATCHET_API_KEY" >> $GITHUB_ENV
+          echo "DYNACONF_hatchet__api_key=$HATCHET_API_KEY" >> $GITHUB_ENV
+          echo "DYNACONF_hatchet__tls_config__strategy=none" >> $GITHUB_ENV
+          echo "DYNACONF_REDIS__URL=redis://localhost:6379/" >> $GITHUB_ENV
+          echo "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED=True" >> $GITHUB_ENV
+
+      - name: Run coverage with tox
+        env:
+          PYTHONHASHSEED: 0
+        run: tox -e coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Clean up credentials
+        if: always()
+        run: |
+          rm -f ~/.git-credentials
+          docker stop hatchet-lite || true
+          docker rm hatchet-lite || true
+
+
+  create-github-release:
+    needs: coverage
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write  # Required for creating releases
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Extract version from pyproject.toml
+      id: version
+      run: |
+        VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        TAG=${GITHUB_REF#refs/tags/}
+        RELEASE_DATE=$(date +%Y-%m-%d)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "release_date=$RELEASE_DATE" >> $GITHUB_OUTPUT
+        echo "Extracted version: $VERSION from pyproject.toml"
+        echo "Git tag: $TAG"
+        echo "Release date: $RELEASE_DATE"
+
+    - name: Extract release notes
+      id: release_notes
+      run: |
+        VERSION=${{ steps.version.outputs.version }}
+        
+        # Check if changelog exists
+        if [ ! -f "CHANGELOG.md" ]; then
+          echo "Error: CHANGELOG.md not found"
+          exit 1
+        fi
+        
+        # Extract release notes for this version
+        RELEASE_NOTES=$(awk "/^## \[$VERSION\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md)
+        
+        # Check if release notes were found
+        if [ -z "$RELEASE_NOTES" ]; then
+          echo "Error: No release notes found for version $VERSION in CHANGELOG.md"
+          echo "Please add release notes for version $VERSION before creating a release"
+          exit 1
+        fi
+        
+        # Save release notes to file and output
+        echo "$RELEASE_NOTES" > release_notes.md
+        echo "Release notes extracted for version $VERSION"
+        
+        # Create multiline output
+        {
+          echo 'notes<<EOF'
+          echo "$RELEASE_NOTES"
+          echo EOF
+        } >> $GITHUB_OUTPUT
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        release_name: ${{ steps.version.outputs.version }} - ${{ steps.version.outputs.release_date }}
+        body: ${{ steps.release_notes.outputs.notes }}
+        draft: false
+        prerelease: false
+
+  publish:
+    needs: create-github-release
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write  # Required for trusted publishing
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+    
+    - name: Install project
+      run: poetry install --no-interaction
+    
+    - name: Build package
+      run: |
+        poetry build
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        packages-dir: dist/
