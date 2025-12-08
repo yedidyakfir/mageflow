@@ -1,8 +1,8 @@
-class OrchestratorError(Exception):
+class MageflowError(Exception):
     pass
 
 
-class MissingSignatureError(OrchestratorError):
+class MissingSignatureError(MageflowError):
     pass
 
 
@@ -10,7 +10,7 @@ class MissingSwarmItemError(MissingSignatureError):
     pass
 
 
-class SwarmError(OrchestratorError):
+class SwarmError(MageflowError):
     pass
 
 

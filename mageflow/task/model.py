@@ -7,7 +7,7 @@ from rapyer.fields import Key
 
 
 class HatchetTaskModel(AtomicRedisModel):
-    orchestrator_task_name: Annotated[str, Key()]
+    mageflow_task_name: Annotated[str, Key()]
     task_name: str
     input_validator: Optional[type[BaseModel]] = None
 
