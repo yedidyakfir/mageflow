@@ -2,7 +2,7 @@ from typing import Annotated
 
 # Call With Callback
 
-The callback system in Task Orchestrator allows you to create robust, event-driven workflows with automatic success and error handling. This documentation covers the `orchestrator.sign()` function, which is the foundation for creating task signatures with callbacks.
+The callback system in MageFlow allows you to create robust, event-driven workflows with automatic success and error handling. This documentation covers the `mageflow.sign()` function, which is the foundation for creating task signatures with callbacks.
 
 ## Task Signatures
 
@@ -23,12 +23,12 @@ signature = await mageflow.sign(my_task_function)
 ```
 
 !!! info "Alternative Client Usage"
-    You can also create signatures using the orchestrator client instead of the global `orchestrator` module:
+    You can also create signatures using the mageflow client instead of the global `mageflow` module:
 
     ```python
     from mageflow import Mageflow
 
-    # Create orchestrator client
+    # Create mageflow client
     hatchet = Mageflow(hatchet, redis)
 
     # Use client to create signatures
@@ -44,7 +44,7 @@ You can attach additional data to task signatures using the `kwargs` parameter. 
 
 ```python
 # Attach configuration data
-task_signature = await orchestrator.sign(
+task_signature = await mageflow.sign(
     "send-notification", 
     template="welcome_email",
     priority="high",
@@ -60,7 +60,7 @@ You can also update kwargs after creating the signature:
 
 ```python
 # Create signature
-user_task = await orchestrator.sign("process-user-data")
+user_task = await mageflow.sign("process-user-data")
 
 # Update kwargs dynamically
 await user_task.kwargs.aupdate(
@@ -81,11 +81,11 @@ Success callbacks are executed when a task completes successfully:
 
 ```python
 # Create callback tasks
-success_callback = await orchestrator.sign("send-success-email")
-audit_callback = await orchestrator.sign("log-completion")
+success_callback = await mageflow.sign("send-success-email")
+audit_callback = await mageflow.sign("log-completion")
 
 # Create main task with success callbacks
-main_task = await orchestrator.sign(
+main_task = await mageflow.sign(
     "process-order",
     success_callbacks=[success_callback, audit_callback]
 )
@@ -111,10 +111,10 @@ async def success_callback(msg: SuccessMessage):
 ```
 
 !!! info "ReturnValue Annotation"
-    ReturnValue is an annotation that tells the task orchestrator that the return value of the function should be injected into the parameter marked with ReturnValue.
+    ReturnValue is an annotation that tells the mageflow that the return value of the function should be injected into the parameter marked with ReturnValue.
     ```python {title="Creating model with ReturnValue annotation"}
     from pydantic import BaseModel
-    from orchestrator.models.message import ReturnValue
+    from mageflow.models.message import ReturnValue
     
     class SuccessMessage(BaseModel):
         task_result: Annotated[Any, ReturnValue()]
@@ -135,12 +135,12 @@ Error callbacks are triggered when a task fails:
 
 ```python
 # Create error handling tasks
-error_logger = await orchestrator.sign("log-error")
-notify_admin = await orchestrator.sign("alert-administrator")
-retry_handler = await orchestrator.sign("schedule-retry")
+error_logger = await mageflow.sign("log-error")
+notify_admin = await mageflow.sign("alert-administrator")
+retry_handler = await mageflow.sign("schedule-retry")
 
 # Create task with error callbacks
-risky_task = await orchestrator.sign(
+risky_task = await mageflow.sign(
     "external-api-call",
     error_callbacks=[error_logger, notify_admin, retry_handler]
 )
@@ -166,8 +166,8 @@ async def error_callback(msg: ErrorMessage):
 
 
 # Create error handling tasks
-error_logger = await orchestrator.sign(error_callback, additional_field1=12345, additional_field2="test")
-signature = await orchestrator.sign("task", error_callbacks=[error_logger])
+error_logger = await mageflow.sign(error_callback, additional_field1=12345, additional_field2="test")
+signature = await mageflow.sign("task", error_callbacks=[error_logger])
 ```
 
 ## Advanced Signature Configuration
@@ -180,7 +180,7 @@ Specify input validation for your task signatures:
 from mageflow.models.message import ContextMessage
 
 # Create signature with specific input validation
-validated_task = await orchestrator.sign(
+validated_task = await mageflow.sign(
     "validate-data",
     model_validators=ContextMessage
 )

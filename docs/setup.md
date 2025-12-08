@@ -1,23 +1,23 @@
 # Setup
 
-This guide walks you through setting up Task Orchestrator with your preferred task manager backend and configuring the necessary dependencies.
+This guide walks you through setting up MageFlow with your preferred task manager backend and configuring the necessary dependencies.
 
 ## Installation
 
-Install Task Orchestrator with your preferred task manager backend using the appropriate extra:
+Install MageFlow with your preferred task manager backend using the appropriate extra:
 
 ### Hatchet Backend
 ```bash
-pip install task-mageflow[hatchet]
+pip install mageflow[hatchet]
 ```
 
 ## Configuration
 
-Task Orchestrator requires configuration for both the task manager backend and Redis storage.
+MageFlow requires configuration for both the task manager backend and Redis storage.
 
 ### Basic Setup with Hatchet
 
-Here's how to set up Task Orchestrator with Hatchet:
+Here's how to set up MageFlow with Hatchet:
 
 ```python
 import asyncio
@@ -41,7 +41,7 @@ redis_client = redis.asyncio.from_url(
 # Initialize Hatchet
 hatchet = Hatchet(debug=True, config=config_obj)
 
-# Create the Orchestrator instance
+# Create the MageFlow instance
 hatchet = mageflow.Mageflow(hatchet, redis_client=redis_client)
 ```
 
@@ -51,7 +51,7 @@ For a smooth transition experience, we recommend calling the wrapped object with
 
 ### Task Definition
 
-Define your tasks using the orchestrator's task decorators:
+Define your tasks using the mageflow task decorators:
 
 ```python
 @hatchet.task(name="process-data", input_validator=YourModelA)
@@ -82,8 +82,8 @@ async def critical_process(msg):
 If you want the task to stay with the hatchet definition (with ctx parameter), you can use the param_config parameter
 
 ```python
-# Create the Orchestrator instance
-hatchet = orchestrator.Mageflow(hatchet, redis_client=redis_client, param_config=AcceptParams.ALL)
+# Create the MageFlow instance
+hatchet = mageflow.Mageflow(hatchet, redis_client=redis_client, param_config=AcceptParams.ALL)
 
 
 # Now define the task in the original hatchet definition

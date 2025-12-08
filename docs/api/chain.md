@@ -1,8 +1,8 @@
 # Chain API Reference
 
-This page provides detailed API documentation for chain functionality in the Task Orchestrator.
+This page provides detailed API documentation for chain functionality in MageFlow.
 
-## orchestrator.chain()
+## mageflow.chain()
 
 Create a new task chain for sequential execution.
 

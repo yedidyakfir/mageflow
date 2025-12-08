@@ -1,6 +1,6 @@
 # Task Swarms
 
-Task swarms in the Task Orchestrator provide a powerful way to run multiple tasks in parallel with controlled concurrency. Unlike chains where tasks run sequentially, swarms allow you to manage a group of tasks that execute simultaneously while controlling how many can run at once and when to trigger callbacks for the entire group.
+Task swarms in MageFlow provide a powerful way to run multiple tasks in parallel with controlled concurrency. Unlike chains where tasks run sequentially, swarms allow you to manage a group of tasks that execute simultaneously while controlling how many can run at once and when to trigger callbacks for the entire group.
 
 ## What is a Swarm?
 
@@ -12,7 +12,7 @@ A swarm is a collection of tasks that execute in parallel, where:
 
 ## Creating a Swarm
 
-Use `orchestrator.swarm()` to create a task swarm:
+Use `mageflow.swarm()` to create a task swarm:
 
 ```python
 import mageflow
@@ -30,13 +30,13 @@ swarm_signature = await mageflow.swarm(
 ```
 
 !!! info "Alternative Client Usage"
-    You can also create swarms using the orchestrator client instead of the global `orchestrator` module:
+    You can also create swarms using the mageflow client instead of the global `mageflow` module:
 
     ```python
-    from orchestrator import Orchestrator
+    from mageflow import Mageflow
 
-    # Create orchestrator client
-    hatchet = Orchestrator(hatchet, redis)
+    # Create mageflow client
+    hatchet = Mageflow(hatchet, redis)
 
     # Use client to create swarms
     swarm_signature = await hatchet.swarm(tasks=[task1, task2, task3])
@@ -57,7 +57,7 @@ swarm_signature = await mageflow.swarm(
 You can start a swarm like any other task with the `aio_run_no_wait` method:
 ```python
 # Create swarm (not closed yet)
-swarm = await orchestrator.swarm(tasks=[initial_task])
+swarm = await mageflow.swarm(tasks=[initial_task])
 await swarm.aio_run_no_wait(message)
 
 # The swarm will:
@@ -76,7 +76,7 @@ You can also add tasks after you created the swarm, to run it, in that case you 
 
 ```python
 # Create swarm (not closed yet)
-swarm = await orchestrator.swarm(tasks=[initial_task])
+swarm = await mageflow.swarm(tasks=[initial_task])
 
 # Add more tasks while swarm is running
 new_task = await swarm.add_task(additional_task)
@@ -102,7 +102,7 @@ class SwarmMessage(BaseModel):
 async def new_task(message: NewTaskMessage):
     print(message.data)
 
-swarm = await orchestrator.swarm(tasks=[initial_task])
+swarm = await mageflow.swarm(tasks=[initial_task])
 await swarm.aio_run_no_wait(SwarmMessage(swarm_data="swarm_data"))
 
 # Add more tasks while swarm is running
@@ -119,7 +119,7 @@ When you want finish adding tasks to the swarm, you can close it.
 await swarm.close_swarm()
 
 # Or create a pre-closed swarm
-swarm = await orchestrator.swarm(
+swarm = await mageflow.swarm(
     tasks=task_list,
     is_swarm_closed=True  # No new tasks can be added
 )
@@ -130,7 +130,7 @@ You can also create swarm that is already closed
 
 ```python
 # Create swarm (not closed yet)
-swarm = await orchestrator.swarm(tasks=[initial_task], is_swarm_closed=True)
+swarm = await mageflow.swarm(tasks=[initial_task], is_swarm_closed=True)
 ```
 
 ## Concurrency Control
@@ -140,11 +140,11 @@ Swarms automatically manage task concurrency:
 ```python
 # Example: Process 20 files with max 5 concurrent
 file_tasks = [
-    await orchestrator.sign("process-file", file_path=f"file_{i}.txt") 
+    await mageflow.sign("process-file", file_path=f"file_{i}.txt") 
     for i in range(20)
 ]
 
-swarm = await orchestrator.swarm(
+swarm = await mageflow.swarm(
     tasks=file_tasks,
     config=SwarmConfig(max_concurrency=5),
     is_swarm_closed=True
@@ -163,14 +163,14 @@ Control how swarms handle task failures:
 
 ```python
 # Stop after 3 failures
-swarm = await orchestrator.swarm(
+swarm = await mageflow.swarm(
     tasks=risky_tasks,
     error_callbacks=[handle_swarm_failure],
     config=SwarmConfig(stop_after_n_failures=3)
 )
 
 # Continue despite individual failures (no stop limit)
-swarm = await orchestrator.swarm(
+swarm = await mageflow.swarm(
     tasks=optional_tasks,
     success_callbacks=[process_results],  # Called even if some tasks fail
     config=SwarmConfig(stop_after_n_failures=None)
@@ -188,14 +188,14 @@ The swarm will trigger callbacks when all tasks completed. The callback will rec
 # Process multiple files concurrently
 file_paths = ["file1.csv", "file2.csv", "file3.csv"]
 process_tasks = [
-    await orchestrator.sign("process-csv-file", file_path=path)
+    await mageflow.sign("process-csv-file", file_path=path)
     for path in file_paths
 ]
 
-consolidate_results = await orchestrator.sign("consolidate-results")
-handle_processing_errors = await orchestrator.sign("handle-file-errors")
+consolidate_results = await mageflow.sign("consolidate-results")
+handle_processing_errors = await mageflow.sign("handle-file-errors")
 
-file_swarm = await orchestrator.swarm(
+file_swarm = await mageflow.swarm(
     tasks=process_tasks,
     success_callbacks=[consolidate_results],
     error_callbacks=[handle_processing_errors],
@@ -210,10 +210,10 @@ await file_swarm.aio_run_no_wait(ProcessingMessage())
 
 ```python
 # Start with initial tasks, add more dynamically
-initial_tasks = [await orchestrator.sign("initial-task")]
-notification_task = await orchestrator.sign("notify-completion")
+initial_tasks = [await mageflow.sign("initial-task")]
+notification_task = await mageflow.sign("notify-completion")
 
-swarm = await orchestrator.swarm(
+swarm = await mageflow.swarm(
     tasks=initial_tasks,
     success_callbacks=[notification_task],
     config=SwarmConfig(max_concurrency=10)
@@ -224,7 +224,7 @@ await swarm.aio_run_no_wait(InitialMessage())
 
 # Add tasks as needed
 for data_item in dynamic_data_stream:
-    new_task = await orchestrator.sign("process-item", data=data_item)
+    new_task = await mageflow.sign("process-item", data=data_item)
     await swarm.add_task(new_task)
     await new_task.aio_run_no_wait(ProcessMessage())
 
@@ -237,14 +237,14 @@ await swarm.close_swarm()
 ```python
 # Process batch with some failure tolerance
 batch_tasks = [
-    await orchestrator.sign("process-record", record_id=i)
+    await mageflow.sign("process-record", record_id=i)
     for i in range(1000)
 ]
 
-completion_report = await orchestrator.sign("generate-completion-report")
-failure_alert = await orchestrator.sign("send-failure-alert")
+completion_report = await mageflow.sign("generate-completion-report")
+failure_alert = await mageflow.sign("send-failure-alert")
 
-batch_swarm = await orchestrator.swarm(
+batch_swarm = await mageflow.swarm(
     tasks=batch_tasks,
     success_callbacks=[completion_report],
     error_callbacks=[failure_alert],

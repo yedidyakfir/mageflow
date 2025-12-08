@@ -1,6 +1,6 @@
 # Task Lifecycle Management
 
-The Task Orchestrator provides comprehensive lifecycle management capabilities that allow you to control task execution at runtime. You can suspend, interrupt, and resume tasks based on your application's requirements.
+MageFlow provides comprehensive lifecycle management capabilities that allow you to control task execution at runtime. You can suspend, interrupt, and resume tasks based on your application's requirements.
 
 ## Overview
 

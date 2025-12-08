@@ -1,8 +1,8 @@
 # Signature API Reference
 
-This page provides detailed API documentation for task signature functionality in the Task Orchestrator.
+This page provides detailed API documentation for task signature functionality in MageFlow.
 
-## orchestrator.sign()
+## mageflow.sign()
 
 Create a new task signature.
 
@@ -129,7 +129,7 @@ async def pause_task(self, pause_type: PauseActionTypes = PauseActionTypes.SUSPE
 
 ## Helper Functions
 
-### orchestrator.load_signature()
+### mageflow.load_signature()
 
 Load stored signature by ID from redis.
 
@@ -137,14 +137,14 @@ Load stored signature by ID from redis.
 async def load_signature(task_id: TaskIdentifierType) -> Optional[TaskSignature]
 ```
 
-### orchestrator.resume_task() / orchestrator.resume()
+### mageflow.resume_task() / mageflow.resume()
 
 ```python
 async def resume_task(task_id: TaskIdentifierType)
 async def resume(task_id: TaskIdentifierType)  # Same as resume_task
 ```
 
-### orchestrator.lock_task()
+### mageflow.lock_task()
 
 ```python
 def lock_task(task_id: TaskIdentifierType, **kwargs)

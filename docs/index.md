@@ -76,7 +76,7 @@ task_signature = await mageflow.sign(
 ## Core Components
 
 ### Task Management
-- **Task Registration**: Register tasks with the orchestrator for centralized management
+- **Task Registration**: Register tasks with mageflow for centralized management
 - **Task Lifecycle**: Control task execution with pause, resume, and cancellation capabilities
 - **Task Validation**: Built-in validation for task inputs and outputs using Pydantic models
 
@@ -97,7 +97,7 @@ task_signature = await mageflow.sign(
 
 ## Use Cases
 
-Task Orchestrator is perfect for:
+MageFlow is perfect for:
 
 - **Data Processing Pipelines**: Sequential data transformation and analysis workflows
 - **Microservice Coordination**: Orchestrating calls across multiple services
@@ -118,12 +118,12 @@ The package is built on top of proven task management systems and provides:
 
 ## Getting Started
 
-To start using Task Orchestrator, you'll need to:
+To start using MageFlow, you'll need to:
 
 1. **Install** the package and its dependencies
 2. **Set up** your task manager backend (e.g., Hatchet)
 3. **Configure** Redis for state storage
 4. **Define** your tasks and workflows
-5. **Run** your orchestrated tasks
+5. **Run** your tasks
 
 Ready to get started? Check out our [Installation Guide](installation.md) and [Setup Documentation](setup.md).

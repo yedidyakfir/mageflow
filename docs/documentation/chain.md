@@ -1,6 +1,6 @@
 # Task Chains
 
-Task chains in the Task Orchestrator provide a powerful way to create sequential workflows where tasks execute one after another, with each task receiving the output of the previous task as input. This enables complex data processing pipelines and multi-step workflows with automatic error handling and completion callbacks.
+Task chains in MageFlow provide a powerful way to create sequential workflows where tasks execute one after another, with each task receiving the output of the previous task as input. This enables complex data processing pipelines and multi-step workflows with automatic error handling and completion callbacks.
 
 ## What is a Chain?
 
@@ -12,7 +12,7 @@ A chain is a sequence of tasks that execute in order, where:
 
 ## Creating a Chain
 
-Use `orchestrator.chain()` to create a task chain:
+Use `mageflow.chain()` to create a task chain:
 
 ```python
 import mageflow
@@ -30,13 +30,13 @@ chain_signature = await mageflow.chain(
 ```
 
 !!! info "Alternative Client Usage"
-    You can also create chains using the orchestrator client instead of the global `orchestrator` module:
+    You can also create chains using the mageflow client instead of the global `mageflow` module:
 
     ```python
-    from orchestrator import Orchestrator
+    from mageflow import Mageflow
 
-    # Create orchestrator client
-    hatchet = Orchestrator(hatchet, redis)
+    # Create mageflow client
+    hatchet = Mageflow(hatchet, redis)
 
     # Use client to create chains
     chain_signature = await hatchet.chain([task1, task2, task3])
@@ -79,13 +79,13 @@ async def save_data(msg: ThirdMessage) -> SaveResult:
     # Receives TransformedData from transform_data
     return SaveResult(saved_id=123)
 
-# Sing second task
-extract_data = await orchestrator.sign(extract_data, field_int=123)
+# Sign second task
+transform_task = await mageflow.sign(transform_data, field_int=123)
 
 # Create the chain
-chain = await orchestrator.chain([
+chain = await mageflow.chain([
     extract_data,
-    extract_data, 
+    transform_task, 
     save_data
 ])
 ```
@@ -105,14 +105,14 @@ When a task fails in a chain:
 
 ```python
 # ETL Pipeline
-extract_task = await orchestrator.sign("extract-from-database")
-transform_task = await orchestrator.sign("apply-business-rules") 
-load_task = await orchestrator.sign("save-to-warehouse")
+extract_task = await mageflow.sign("extract-from-database")
+transform_task = await mageflow.sign("apply-business-rules") 
+load_task = await mageflow.sign("save-to-warehouse")
 
-audit_task = await orchestrator.sign("log-pipeline-completion")
-alert_task = await orchestrator.sign("send-failure-alert")
+audit_task = await mageflow.sign("log-pipeline-completion")
+alert_task = await mageflow.sign("send-failure-alert")
 
-etl_chain = await orchestrator.chain(
+etl_chain = await mageflow.chain(
     tasks=[extract_task, transform_task, load_task],
     name="daily-etl",
     success=audit_task,
@@ -124,15 +124,15 @@ etl_chain = await orchestrator.chain(
 
 ```python
 # Document processing chain
-parse_doc = await orchestrator.sign("parse-document")
-extract_entities = await orchestrator.sign("extract-entities")
-classify_content = await orchestrator.sign("classify-content")
-index_document = await orchestrator.sign("index-in-search")
+parse_doc = await mageflow.sign("parse-document")
+extract_entities = await mageflow.sign("extract-entities")
+classify_content = await mageflow.sign("classify-content")
+index_document = await mageflow.sign("index-in-search")
 
-notify_completion = await orchestrator.sign("notify-user")
-handle_processing_error = await orchestrator.sign("handle-doc-error")
+notify_completion = await mageflow.sign("notify-user")
+handle_processing_error = await mageflow.sign("handle-doc-error")
 
-doc_chain = await orchestrator.chain(
+doc_chain = await mageflow.chain(
     tasks=[parse_doc, extract_entities, classify_content, index_document],
     name="document-processing",
     success=notify_completion,
@@ -142,5 +142,5 @@ doc_chain = await orchestrator.chain(
 
 ## Why Use Chains?
 
-Chaining tasks is usefull orchestrating tool when multiple tasks are really one task, and a failure of one should stop the entire pipeline.
-Using chain methods you can do exactly that. Binding the entire process as a single tasks, in this way you can also treat it as such when using other orchestration tools like swarm.
+Chaining tasks is a useful orchestrating tool when multiple tasks are really one task, and a failure of one should stop the entire pipeline.
+Using chain methods, you can do exactly that. Binding the entire process as a single task, in this way you can also treat it as such when using other orchestration tools like swarm.

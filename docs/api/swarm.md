@@ -1,8 +1,8 @@
 # Swarm API Reference
 
-This page provides detailed API documentation for swarm functionality in the Task Orchestrator.
+This page provides detailed API documentation for swarm functionality in MageFlow.
 
-## orchestrator.swarm()
+## mageflow.swarm()
 
 Create a new task swarm for parallel execution.
 

@@ -1,4 +1,4 @@
-# 🚀 Orchestrator Roadmap
+# 🚀 MageFlow Roadmap
 
 > Building the future of intelligent task orchestration, one feature at a time.
 
@@ -216,7 +216,7 @@ Enable intelligent task prioritization for optimal resource utilization.
 
 ---
 
-## 🧠 Advanced Orchestration Patterns
+## 🧠 Advanced Mageflow Patterns
 
 Sophisticated workflow creation capabilities that go beyond basic chains and swarms.
 
@@ -290,8 +290,8 @@ Comprehensive visual interface and real-time monitoring capabilities for task or
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  A comprehensive web-based interface for visualizing       │
-│  and controlling task orchestration workflows              │
+│  A comprehensive web-based interface for visualizing        │
+│  and controlling mageflow workflows                         │ 
 └─────────────────────────────────────────────────────────────┘
 ```
 
