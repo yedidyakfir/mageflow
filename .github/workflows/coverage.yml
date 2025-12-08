@@ -6,7 +6,6 @@ on:
 
 jobs:
   coverage:
-    needs: check-tests
     runs-on: ubuntu-22.04
 
     steps:
