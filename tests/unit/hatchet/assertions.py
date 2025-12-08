@@ -1,4 +1,4 @@
-from orchestrator.signature.model import TaskSignature
+from mageflow.signature.model import TaskSignature
 
 
 async def assert_tasks_not_exists(tasks_ids: list[str]):

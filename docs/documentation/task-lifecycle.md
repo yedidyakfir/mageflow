@@ -116,23 +116,25 @@ active → suspend() → suspended  → resume() → active (may be inconsistent
 ## Examples
 
 ### Graceful Workflow Pause and Resume
+
 ```python
-import orchestrator
+import mageflow
 import asyncio
+
 
 async def pausable_workflow():
     # Create a long-running workflow
     tasks = [long_task_1, long_task_2, long_task_3]
-    workflow = await orchestrator.chain(tasks, name="pausable-pipeline")
-    
+    workflow = await mageflow.chain(tasks, name="pausable-pipeline")
+
     # Start the workflow
     await workflow.start()
-    
+
     # Pause after some time
     await asyncio.sleep(10)
     await workflow.suspend()
     print("Workflow paused")
-    
+
     # Resume later
     await asyncio.sleep(30)
     await workflow.resume()

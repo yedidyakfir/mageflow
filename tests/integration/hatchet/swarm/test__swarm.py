@@ -2,9 +2,9 @@ import asyncio
 
 import pytest
 
-import orchestrator
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.model import SwarmConfig
+import mageflow
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import SwarmConfig
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
     assert_swarm_task_done,
@@ -40,18 +40,18 @@ async def test_swarm_with_three_tasks_integration_sanity(
         hatchet_client_init.hatchet,
     )
 
-    sign_task_with_data = await orchestrator.sign(
+    sign_task_with_data = await mageflow.sign(
         task_with_data, data="Hello", field_list=[5, 3]
     )
     await sign_callback1.kwargs.aupdate(base_data={"1": 2})
     swarm_tasks = [sign_task1, sign_task_with_data, sign_task3]
-    swarm = await orchestrator.swarm(
+    swarm = await mageflow.swarm(
         tasks=swarm_tasks,
         success_callbacks=[sign_callback1],
         kwargs=dict(base_data={"param1": "nice", "param2": ["test", 2]}),
     )
     batch_tasks = await asyncio.gather(
-        *[orchestrator.load_signature(batch_id) for batch_id in swarm.tasks]
+        *[mageflow.load_signature(batch_id) for batch_id in swarm.tasks]
     )
     await swarm.close_swarm()
     tasks = await TaskSignature.afind()
@@ -94,10 +94,10 @@ async def test_swarm_with_mixed_success_failed_tasks_integration_edge_case(
     fail_tasks = await sign_fail_task.duplicate_many(3)
     await sign_fail_task.remove()
 
-    swarm_callback_sig = await orchestrator.sign(callback_with_redis)
-    swarm_error_callback_sig = await orchestrator.sign(error_callback)
+    swarm_callback_sig = await mageflow.sign(callback_with_redis)
+    swarm_error_callback_sig = await mageflow.sign(error_callback)
     reg_tasks = [sign_task1, sign_task2, sign_task3]
-    swarm = await orchestrator.swarm(
+    swarm = await mageflow.swarm(
         tasks=reg_tasks + fail_tasks,
         success_callbacks=[swarm_callback_sig],
         error_callbacks=[swarm_error_callback_sig],
@@ -158,10 +158,10 @@ async def test_swarm_mixed_task_all_done_before_closing_task(
         hatchet_client_init.hatchet,
     )
 
-    swarm_callback_sig = await orchestrator.sign(task1_callback)
-    swarm_error_callback_sig = await orchestrator.sign(error_callback)
+    swarm_callback_sig = await mageflow.sign(task1_callback)
+    swarm_error_callback_sig = await mageflow.sign(error_callback)
     reg_tasks = [sign_task1, fail_task]
-    swarm = await orchestrator.swarm(
+    swarm = await mageflow.swarm(
         tasks=reg_tasks,
         success_callbacks=[swarm_callback_sig],
         error_callbacks=[swarm_error_callback_sig],
@@ -215,10 +215,10 @@ async def test_swarm_mixed_task__not_enough_fails__swarm_finish_successfully(
         hatchet_client_init.hatchet,
     )
 
-    swarm_callback_sig = await orchestrator.sign(task1_callback)
-    swarm_error_callback_sig = await orchestrator.sign(error_callback)
+    swarm_callback_sig = await mageflow.sign(task1_callback)
+    swarm_error_callback_sig = await mageflow.sign(error_callback)
     reg_tasks = [sign_fail_task, sign_task2, sign_task3]
-    swarm = await orchestrator.swarm(
+    swarm = await mageflow.swarm(
         tasks=reg_tasks,
         success_callbacks=[swarm_callback_sig],
         error_callbacks=[swarm_error_callback_sig],
@@ -258,7 +258,7 @@ async def test_swarm_run_concurrently(
     )
     swarm_tasks = await sign_task2.duplicate_many(8)
     max_concurrency = 4
-    swarm = await orchestrator.swarm(
+    swarm = await mageflow.swarm(
         tasks=swarm_tasks,
         config=SwarmConfig(max_concurrency=max_concurrency),
         is_swarm_closed=True,
@@ -292,8 +292,8 @@ async def test_swarm_run_finish_at_fail__still_finish_successfully(
         hatchet_client_init.hatchet,
     )
     swarm_tasks = [fail_task]
-    task1_callback_sign = await orchestrator.sign(task1_callback, base_data=test_ctx)
-    swarm = await orchestrator.swarm(
+    task1_callback_sign = await mageflow.sign(task1_callback, base_data=test_ctx)
+    swarm = await mageflow.swarm(
         tasks=swarm_tasks,
         success_callbacks=[task1_callback_sign],
         config=SwarmConfig(stop_after_n_failures=10),

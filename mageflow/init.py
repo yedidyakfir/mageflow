@@ -1,19 +1,19 @@
 from hatchet_sdk import Hatchet
 
-from orchestrator.callbacks import register_task
-from orchestrator.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
-from orchestrator.chain.messages import ChainSuccessTaskCommandMessage
-from orchestrator.chain.workflows import chain_end_task, chain_error_task
-from orchestrator.swarm.consts import ON_SWARM_ERROR, ON_SWARM_END, ON_SWARM_START
-from orchestrator.swarm.messages import SwarmResultsMessage
-from orchestrator.swarm.workflows import (
+from mageflow.callbacks import register_task
+from mageflow.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
+from mageflow.chain.messages import ChainSuccessTaskCommandMessage
+from mageflow.chain.workflows import chain_end_task, chain_error_task
+from mageflow.swarm.consts import ON_SWARM_ERROR, ON_SWARM_END, ON_SWARM_START
+from mageflow.swarm.messages import SwarmResultsMessage
+from mageflow.swarm.workflows import (
     swarm_item_failed,
     swarm_item_done,
     swarm_start_tasks,
 )
 
 
-def init_orchestrator_hatchet_tasks(hatchet: Hatchet):
+def init_mageflow_hatchet_tasks(hatchet: Hatchet):
     # Chain tasks
     hatchet_chain_done = hatchet.task(
         name=ON_CHAIN_END,

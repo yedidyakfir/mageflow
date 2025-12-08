@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import TypeAlias, TypedDict, Any, overload
 
-from orchestrator.signature.model import (
+from mageflow.signature.model import (
     TaskSignature,
     TaskIdentifierType,
     HatchetTaskType,
 )
-from orchestrator.signature.status import TaskStatus
+from mageflow.signature.status import TaskStatus
 
 TaskSignatureConvertible: TypeAlias = (
     TaskIdentifierType | TaskSignature | HatchetTaskType

@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-import orchestrator
+import mageflow
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
     assert_task_was_paused,
@@ -30,10 +30,10 @@ async def test__paused_signature_dont_trigger_callbacks(
         hatchet_client_init.hatchet,
     )
 
-    callback_signature = await orchestrator.sign(callback_with_redis)
-    second_callback_signature = await orchestrator.sign(callback_with_redis)
-    error_callback = await orchestrator.sign(task1_callback)
-    main_signature = await orchestrator.sign(
+    callback_signature = await mageflow.sign(callback_with_redis)
+    second_callback_signature = await mageflow.sign(callback_with_redis)
+    error_callback = await mageflow.sign(task1_callback)
+    main_signature = await mageflow.sign(
         sleep_task,
         success_callbacks=[callback_signature, second_callback_signature],
         error_callbacks=[error_callback],
@@ -63,10 +63,8 @@ async def test_signature_pause_with_callback_redis_cleanup_sanity(
     )
     message = ContextMessage(base_data=test_ctx)
 
-    callback_signature = await orchestrator.sign(callback_with_redis)
-    main_signature = await orchestrator.sign(
-        task1, success_callbacks=[callback_signature]
-    )
+    callback_signature = await mageflow.sign(callback_with_redis)
+    main_signature = await mageflow.sign(task1, success_callbacks=[callback_signature])
 
     # Act
     await callback_signature.pause_task()

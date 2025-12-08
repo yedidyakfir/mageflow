@@ -15,13 +15,13 @@ A swarm is a collection of tasks that execute in parallel, where:
 Use `orchestrator.swarm()` to create a task swarm:
 
 ```python
-import orchestrator
+import mageflow
 
 # Create a simple swarm
-swarm_signature = await orchestrator.swarm(tasks=[task1, task2, task3])
+swarm_signature = await mageflow.swarm(tasks=[task1, task2, task3])
 
 # Create a swarm with concurrency control and callbacks
-swarm_signature = await orchestrator.swarm(
+swarm_signature = await mageflow.swarm(
     tasks=[process_file1, process_file2, process_file3],
     success_callbacks=[completion_callback],
     error_callbacks=[error_handler],

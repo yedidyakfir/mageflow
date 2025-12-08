@@ -1,13 +1,13 @@
 import asyncio
 
-from orchestrator.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
-from orchestrator.chain.messages import ChainSuccessTaskCommandMessage
-from orchestrator.chain.model import ChainTaskSignature
-from orchestrator.signature.creator import (
+from mageflow.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
+from mageflow.chain.messages import ChainSuccessTaskCommandMessage
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.creator import (
     TaskSignatureConvertible,
     resolve_signature_id,
 )
-from orchestrator.signature.model import (
+from mageflow.signature.model import (
     TaskIdentifierType,
     TaskSignature,
     TaskInputType,

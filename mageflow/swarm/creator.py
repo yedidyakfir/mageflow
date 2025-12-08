@@ -1,11 +1,11 @@
 import asyncio
 import uuid
 
-from orchestrator.signature.creator import (
+from mageflow.signature.creator import (
     TaskSignatureConvertible,
     TaskSignatureOptions,
 )
-from orchestrator.swarm.model import SwarmTaskSignature, SwarmConfig
+from mageflow.swarm.model import SwarmTaskSignature, SwarmConfig
 
 try:
     # Python 3.12+

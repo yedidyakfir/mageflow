@@ -20,9 +20,9 @@ from hatchet_sdk import Hatchet
 from hatchet_sdk.clients.admin import TriggerWorkflowOptions
 from redis.asyncio.client import Redis
 
-import orchestrator
-from orchestrator.startup import orchestrator_config, init_orchestrator
-from orchestrator.task.model import HatchetTaskModel
+import mageflow
+from mageflow.startup import mageflow_config, init_mageflow
+from mageflow.task.model import HatchetTaskModel
 from tests.integration.hatchet.worker import (
     config_obj,
     settings,
@@ -67,10 +67,10 @@ async def init_settings(hatchet_client_init: HatchetInitData):
         hatchet_client_init.redis_client,
         hatchet_client_init.hatchet,
     )
-    orchestrator_config.redis_client = redis_client
-    orchestrator_config.hatchet_client = hatchet
+    mageflow_config.redis_client = redis_client
+    mageflow_config.hatchet_client = hatchet
     # Load the subclasses of the task signature
-    await init_orchestrator()
+    await init_mageflow()
 
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session", autouse=True)
@@ -125,14 +125,14 @@ def hatchet_worker(
 
     os.environ["HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT"] = str(healthcheck_port)
     env = os.environ.copy()
-    orchestrator_path = Path(__file__).absolute().parent.parent.parent.parent
+    magelfow_path = Path(__file__).absolute().parent.parent.parent.parent
 
     proc = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=env,
-        cwd=orchestrator_path,
+        cwd=magelfow_path,
     )
 
     # Check if the process is still running
@@ -197,41 +197,41 @@ def test_ctx():
 @pytest_asyncio.fixture(loop_scope="session")
 async def sign_task(req):
     task = req.params
-    signature = await orchestrator.sign(task)
+    signature = await mageflow.sign(task)
     return signature
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def sign_task1():
-    signature = await orchestrator.sign(task1)
+    signature = await mageflow.sign(task1)
     return signature
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def sign_task2():
-    signature = await orchestrator.sign(task2)
+    signature = await mageflow.sign(task2)
     return signature
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def sign_task3():
-    signature = await orchestrator.sign(task3)
+    signature = await mageflow.sign(task3)
     return signature
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def sign_callback1():
-    signature = await orchestrator.sign(task1_callback)
+    signature = await mageflow.sign(task1_callback)
     return signature
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def sign_fail_task():
-    signature = await orchestrator.sign(fail_task)
+    signature = await mageflow.sign(fail_task)
     return signature
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def sign_chain_callback():
-    signature = await orchestrator.sign(chain_callback)
+    signature = await mageflow.sign(chain_callback)
     return signature

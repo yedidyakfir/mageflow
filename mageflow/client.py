@@ -8,29 +8,29 @@ from hatchet_sdk.runnables.workflow import BaseWorkflow
 from hatchet_sdk.worker.worker import LifespanFn
 from redis.asyncio import Redis
 
-from orchestrator.callbacks import AcceptParams, register_task, handle_task_callback
-from orchestrator.chain.creator import chain
-from orchestrator.init import init_orchestrator_hatchet_tasks
-from orchestrator.signature.creator import sign, TaskSignatureConvertible
-from orchestrator.signature.model import TaskSignature, TaskInputType
-from orchestrator.signature.types import HatchetTaskType
-from orchestrator.startup import (
+from mageflow.callbacks import AcceptParams, register_task, handle_task_callback
+from mageflow.chain.creator import chain
+from mageflow.init import init_mageflow_hatchet_tasks
+from mageflow.signature.creator import sign, TaskSignatureConvertible
+from mageflow.signature.model import TaskSignature, TaskInputType
+from mageflow.signature.types import HatchetTaskType
+from mageflow.startup import (
     lifespan_initialize,
-    orchestrator_config,
-    init_orchestrator,
-    teardown_orchestrator,
+    mageflow_config,
+    init_mageflow,
+    teardown_mageflow,
 )
-from orchestrator.swarm.creator import swarm, SignatureOptions
+from mageflow.swarm.creator import swarm, SignatureOptions
 
 
 async def merge_lifespan(original_lifespan: LifespanFn):
-    await init_orchestrator()
+    await init_mageflow()
     async for res in original_lifespan():
         yield res
-    await teardown_orchestrator()
+    await teardown_mageflow()
 
 
-class HatchetOrchestrator(Hatchet):
+class HatchetMageflow(Hatchet):
     def __init__(
         self,
         hatchet: Hatchet,
@@ -78,8 +78,8 @@ class HatchetOrchestrator(Hatchet):
         lifespan: LifespanFn | None = None,
         **kwargs,
     ) -> Worker:
-        orchestrator_flows = init_orchestrator_hatchet_tasks(self.hatchet)
-        workflows += orchestrator_flows
+        mageflow_flows = init_mageflow_hatchet_tasks(self.hatchet)
+        workflows += mageflow_flows
         if lifespan is None:
             lifespan = lifespan_initialize
         else:
@@ -112,12 +112,12 @@ T = TypeVar("T")
 
 
 @overload
-def Orchestrator(
+def Mageflow(
     hatchet_client: Hatchet, redis_client: Redis | str = None
-) -> HatchetOrchestrator: ...
+) -> HatchetMageflow: ...
 
 
-def Orchestrator(
+def Mageflow(
     hatchet_client: T = None,
     redis_client: Redis | str = None,
     param_config: AcceptParams = AcceptParams.NO_CTX,
@@ -129,12 +129,12 @@ def Orchestrator(
     config = hatchet_client._client.config.model_copy(deep=True)
     config.namespace = ""
     hatchet_caller = Hatchet(config=config, debug=hatchet_client._client.debug)
-    orchestrator_config.hatchet_client = hatchet_caller
+    mageflow_config.hatchet_client = hatchet_caller
 
     if redis_client is None:
         redis_url = os.getenv("REDIS_URL")
         redis_client = redis.asyncio.from_url(redis_url, decode_responses=True)
     if isinstance(redis_client, str):
         redis_client = redis.asyncio.from_url(redis_client, decode_responses=True)
-    orchestrator_config.redis_client = redis_client
-    return HatchetOrchestrator(hatchet_client, redis_client, param_config)
+    mageflow_config.redis_client = redis_client
+    return HatchetMageflow(hatchet_client, redis_client, param_config)

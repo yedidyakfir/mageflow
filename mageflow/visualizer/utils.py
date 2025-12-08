@@ -6,7 +6,7 @@ from pydantic import TypeAdapter
 from pydantic_core import ValidationError
 from rapyer.types.base import REDIS_DUMP_FLAG_NAME
 
-from orchestrator.utils.pythonic import flexible_call
+from mageflow.utils.pythonic import flexible_call
 
 
 def try_validate_json(validator: TypeAdapter, data: Any):

@@ -1,7 +1,7 @@
 import pytest
 
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.model import SwarmTaskSignature, SwarmConfig
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import SwarmTaskSignature, SwarmConfig
 from tests.integration.hatchet.models import ContextMessage
 
 

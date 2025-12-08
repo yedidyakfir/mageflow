@@ -4,10 +4,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 
-import orchestrator
-from orchestrator.chain.model import ChainTaskSignature
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.model import SwarmTaskSignature
+import mageflow
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import SwarmTaskSignature
 from tests.integration.hatchet.worker import ContextMessage
 
 pytest.register_assert_rewrite("tests.assertions")
@@ -92,7 +92,7 @@ async def chain_with_tasks():
         chain_task_signature_3,
     ]
 
-    chain_signature = await orchestrator.chain([task.id for task in task_signatures])
+    chain_signature = await mageflow.chain([task.id for task in task_signatures])
 
     return ChainTestData(
         task_signatures=task_signatures, chain_signature=chain_signature

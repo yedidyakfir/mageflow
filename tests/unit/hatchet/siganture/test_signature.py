@@ -1,6 +1,6 @@
 import pytest
 
-from orchestrator.signature.model import TaskSignature
+from mageflow.signature.model import TaskSignature
 
 
 @pytest.mark.asyncio

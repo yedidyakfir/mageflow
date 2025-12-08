@@ -2,8 +2,8 @@ import asyncio
 
 import rapyer
 
-import orchestrator
-from orchestrator.signature.model import TaskSignature
+import mageflow
+from mageflow.signature.model import TaskSignature
 
 
 async def extract_signatures() -> list[TaskSignature]:
@@ -22,26 +22,26 @@ async def extract_signatures() -> list[TaskSignature]:
 
 
 async def create_chain(name: str):
-    sign1_callback = await orchestrator.sign(f"sign1_callback-{name}")
-    sign2_callback = await orchestrator.sign(f"sign2_callback-{name}")
-    sign3_callback = await orchestrator.sign(f"sign3_callback-{name}")
-    sign4_callback = await orchestrator.sign(f"sign4_callback-{name}")
-    sign1 = await orchestrator.sign(
+    sign1_callback = await mageflow.sign(f"sign1_callback-{name}")
+    sign2_callback = await mageflow.sign(f"sign2_callback-{name}")
+    sign3_callback = await mageflow.sign(f"sign3_callback-{name}")
+    sign4_callback = await mageflow.sign(f"sign4_callback-{name}")
+    sign1 = await mageflow.sign(
         "task1", success_callbacks=[sign1_callback, sign2_callback]
     )
-    sign2 = await orchestrator.sign("task2")
-    sign3 = await orchestrator.sign(
+    sign2 = await mageflow.sign("task2")
+    sign3 = await mageflow.sign(
         "task3", error_callbacks=[sign3_callback], success_callbacks=[sign4_callback]
     )
-    sign4 = await orchestrator.sign("task4")
-    sign5 = await orchestrator.sign("task5")
+    sign4 = await mageflow.sign("task4")
+    sign5 = await mageflow.sign("task5")
 
-    another_sign = await orchestrator.sign("another_task")
-    callback_sign = await orchestrator.sign(
+    another_sign = await mageflow.sign("another_task")
+    callback_sign = await mageflow.sign(
         f"callback-{name}",
         error_callbacks=[another_sign],
     )
-    chain_sign = await orchestrator.chain(
+    chain_sign = await mageflow.chain(
         [sign1, sign2, sign3, sign4, sign5], error=callback_sign
     )
     return chain_sign
@@ -53,13 +53,13 @@ async def create(redis_url: str):
     chain_task2 = await create_chain("chain2")
     chain_task3 = await create_chain("chain3")
     chain_task4 = await create_chain("chain4")
-    swarm_task = await orchestrator.swarm(
+    swarm_task = await mageflow.swarm(
         tasks=[chain_task1, chain_task2, chain_task3], success_callbacks=[chain_task4]
     )
     chain_task1 = await create_chain("chain5")
     chain_task2 = await create_chain("chain6")
     chain_task3 = await create_chain("chain7")
     chain_task4 = await create_chain("chain8")
-    swarm_task = await orchestrator.swarm(
+    swarm_task = await mageflow.swarm(
         tasks=[chain_task1, chain_task2, chain_task3], error_callbacks=[chain_task4]
     )

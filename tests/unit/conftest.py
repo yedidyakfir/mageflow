@@ -4,17 +4,17 @@ import pytest_asyncio
 import rapyer
 from hatchet_sdk import Hatchet, ClientConfig
 
-import orchestrator
-from orchestrator.chain.model import ChainTaskSignature
-from orchestrator.signature.model import SIGNATURES_NAME_MAPPING, TaskSignature
-from orchestrator.startup import update_register_signature_models, orchestrator_config
+import mageflow
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.model import SIGNATURES_NAME_MAPPING, TaskSignature
+from mageflow.startup import update_register_signature_models, mageflow_config
 
 
 @pytest_asyncio.fixture(autouse=True, scope="function")
 async def redis_client():
     await update_register_signature_models()
     client = fakeredis.aioredis.FakeRedis()
-    orchestrator_config.redis_client = redis_client
+    mageflow_config.redis_client = redis_client
     await client.flushall()
     try:
         yield client
@@ -30,14 +30,14 @@ def hatchet_mock():
         tls_strategy="tls",
     )
     hatchet = Hatchet(config=config_obj)
-    orchestrator_config.hatchet_client = hatchet
+    mageflow_config.hatchet_client = hatchet
 
     yield hatchet
 
 
 @pytest.fixture()
 def orch(hatchet_mock, redis_client):
-    yield orchestrator.Orchestrator(hatchet_mock, redis_client)
+    yield mageflow.Mageflow(hatchet_mock, redis_client)
 
 
 @pytest_asyncio.fixture(autouse=True, scope="function")

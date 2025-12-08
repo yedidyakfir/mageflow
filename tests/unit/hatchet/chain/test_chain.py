@@ -1,9 +1,9 @@
 import pytest
 
-import orchestrator
-from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
-from orchestrator.signature.model import TaskSignature
-from orchestrator.chain.model import ChainTaskSignature
+import mageflow
+from mageflow.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
+from mageflow.signature.model import TaskSignature
+from mageflow.chain.model import ChainTaskSignature
 from tests.integration.hatchet.models import ContextMessage
 
 
@@ -104,7 +104,7 @@ async def test_chain_creation_with_various_task_types_loads_correctly_from_redis
         tasks.append(task_signature)
 
     # Act
-    chain_signature = await orchestrator.chain([task.id for task in tasks])
+    chain_signature = await mageflow.chain([task.id for task in tasks])
 
     # Assert
     loaded_chain = await TaskSignature.from_id(chain_signature.id)
@@ -164,7 +164,7 @@ async def test_chain_success_callbacks_contain_next_task_ids_sanity(
     await task3.save()
 
     # Act
-    chain_signature = await orchestrator.chain([task1.id, task2.id, task3.id])
+    chain_signature = await mageflow.chain([task1.id, task2.id, task3.id])
 
     # Assert
     # Reload tasks from Redis to check updated callbacks
@@ -206,7 +206,7 @@ async def test_chain_error_callbacks_contain_unique_chain_error_task_ids_sanity(
     await task2.save()
 
     # Act
-    chain_signature = await orchestrator.chain([task1.id, task2.id])
+    chain_signature = await mageflow.chain([task1.id, task2.id])
 
     # Assert
     # Reload tasks from Redis to check error callbacks
@@ -264,7 +264,7 @@ async def test_chain_with_existing_callbacks_preserves_and_adds_new_ones_edge_ca
     await simple_task.save()
 
     # Act
-    chain_signature = await orchestrator.chain([task_with_callbacks.id, simple_task.id])
+    chain_signature = await mageflow.chain([task_with_callbacks.id, simple_task.id])
 
     # Assert
     reloaded_task = await TaskSignature.from_id(task_with_callbacks.id)

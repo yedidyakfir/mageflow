@@ -2,20 +2,20 @@ import asyncio
 from typing import Self, Any, Optional
 
 from hatchet_sdk.runnables.types import EmptyModel
-from orchestrator.errors import (
+from mageflow.errors import (
     MissingSignatureError,
     MissingSwarmItemError,
     TooManyTasksError,
     SwarmIsCanceledError,
 )
-from orchestrator.signature.creator import (
+from mageflow.signature.creator import (
     TaskSignatureConvertible,
     resolve_signature_id,
 )
-from orchestrator.signature.model import TaskSignature
-from orchestrator.signature.status import SignatureStatus
-from orchestrator.signature.types import TaskIdentifierType
-from orchestrator.swarm.consts import (
+from mageflow.signature.model import TaskSignature
+from mageflow.signature.status import SignatureStatus
+from mageflow.signature.types import TaskIdentifierType
+from mageflow.swarm.consts import (
     BATCH_TASK_NAME_INITIALS,
     SWARM_TASK_ID_PARAM_NAME,
     SWARM_ITEM_TASK_ID_PARAM_NAME,
@@ -23,8 +23,8 @@ from orchestrator.swarm.consts import (
     ON_SWARM_ERROR,
     ON_SWARM_START,
 )
-from orchestrator.swarm.messages import SwarmResultsMessage
-from orchestrator.utils.pythonic import deep_merge
+from mageflow.swarm.messages import SwarmResultsMessage
+from mageflow.utils.pythonic import deep_merge
 from pydantic import Field, field_validator, BaseModel
 from rapyer.types import RedisList, RedisInt
 

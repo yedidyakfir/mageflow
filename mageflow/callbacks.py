@@ -8,8 +8,8 @@ from hatchet_sdk import Context
 from hatchet_sdk.runnables.types import EmptyModel
 from pydantic import BaseModel
 
-from orchestrator.invokers.hatchet import HatchetInvoker
-from orchestrator.utils.pythonic import flexible_call
+from mageflow.invokers.hatchet import HatchetInvoker
+from mageflow.utils.pythonic import flexible_call
 
 
 class AcceptParams(Enum):
@@ -63,7 +63,7 @@ def handle_task_callback(
 
 
 def register_task(register_name: str):
-    from orchestrator.startup import REGISTERED_TASKS
+    from mageflow.startup import REGISTERED_TASKS
 
     def decorator(func):
         REGISTERED_TASKS.append((func, register_name))

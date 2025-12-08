@@ -1,7 +1,7 @@
 import pytest
 
-from orchestrator.signature.model import TaskSignature
-from orchestrator.signature.status import SignatureStatus
+from mageflow.signature.model import TaskSignature
+from mageflow.signature.status import SignatureStatus
 from tests.unit.hatchet.assertions import assert_tasks_changed_status
 
 

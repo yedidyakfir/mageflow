@@ -15,13 +15,13 @@ A chain is a sequence of tasks that execute in order, where:
 Use `orchestrator.chain()` to create a task chain:
 
 ```python
-import orchestrator
+import mageflow
 
 # Create a simple chain
-chain_signature = await orchestrator.chain([task1, task2, task3])
+chain_signature = await mageflow.chain([task1, task2, task3])
 
 # Create a chain with name and callbacks
-chain_signature = await orchestrator.chain(
+chain_signature = await mageflow.chain(
     tasks=[process_data, validate_results, send_notification],
     name="data-processing-pipeline",
     success=success_callback_task,

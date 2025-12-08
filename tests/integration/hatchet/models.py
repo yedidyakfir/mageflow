@@ -2,7 +2,7 @@ from typing import Any, Annotated
 
 from pydantic import BaseModel, Field
 
-from orchestrator.models.message import ReturnValue
+from mageflow.models.message import ReturnValue
 
 
 class ContextMessage(BaseModel):

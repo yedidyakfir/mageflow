@@ -2,10 +2,10 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 
-import orchestrator
-from orchestrator.signature.model import TaskSignature
-from orchestrator.chain.model import ChainTaskSignature
-from orchestrator.signature.status import SignatureStatus, TaskStatus
+import mageflow
+from mageflow.signature.model import TaskSignature
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.status import SignatureStatus, TaskStatus
 from tests.integration.hatchet.models import ContextMessage
 from tests.unit.hatchet.assertions import assert_redis_keys_do_not_contain_sub_task_ids
 from tests.unit.hatchet.assertions import (
@@ -81,7 +81,7 @@ async def test_chain_change_status_with_optional_deleted_sub_tasks_edge_case(
         task_signatures.append(task_signature)
 
     # Create a chain
-    chain_signature = await orchestrator.chain([task.id for task in task_signatures])
+    chain_signature = await mageflow.chain([task.id for task in task_signatures])
 
     # Delete specified subtasks from Redis (simulate they were removed)
     deleted_task_ids = []
@@ -207,7 +207,7 @@ async def test_chain_resume_with_optional_deleted_sub_tasks_sanity(
         last_status = task_signature.task_status.last_status
         expected_statuses.append(last_status)
 
-    chain_signature = await orchestrator.chain([task.id for task in task_signatures])
+    chain_signature = await mageflow.chain([task.id for task in task_signatures])
     chain_signature.task_status.status = SignatureStatus.SUSPENDED
 
     deleted_task_ids = []

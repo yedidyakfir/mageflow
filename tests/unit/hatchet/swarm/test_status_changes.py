@@ -1,9 +1,9 @@
 import pytest
 
-import orchestrator
-from orchestrator.signature.model import TaskSignature
-from orchestrator.signature.status import SignatureStatus
-from orchestrator.swarm.model import SwarmTaskSignature
+import mageflow
+from mageflow.signature.model import TaskSignature
+from mageflow.signature.status import SignatureStatus
+from mageflow.swarm.model import SwarmTaskSignature
 from tests.integration.hatchet.models import ContextMessage
 from tests.unit.hatchet.assertions import assert_redis_keys_do_not_contain_sub_task_ids
 from tests.unit.hatchet.assertions import (
@@ -108,7 +108,7 @@ async def test_swarm_change_status_with_optional_deleted_sub_tasks_edge_case(
         task_signatures.append(task_signature)
 
     # Create a swarm with task signatures
-    swarm_signature = await orchestrator.swarm(
+    swarm_signature = await mageflow.swarm(
         task_name="test_swarm",
         tasks=[task.id for task in task_signatures],
     )

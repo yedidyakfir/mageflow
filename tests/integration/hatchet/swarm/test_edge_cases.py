@@ -2,9 +2,9 @@ import asyncio
 
 import pytest
 
-import orchestrator
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.model import BatchItemTaskSignature, SwarmConfig
+import mageflow
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import BatchItemTaskSignature, SwarmConfig
 from tests.integration.hatchet.assertions import get_runs, assert_swarm_task_done
 from tests.integration.hatchet.conftest import HatchetInitData
 from tests.integration.hatchet.models import ContextMessage
@@ -24,7 +24,7 @@ async def test__task_is_cancelled__swarm_still_finish(
         hatchet_client_init.hatchet,
     )
     swarm_tasks = [timeout_task]
-    swarm = await orchestrator.swarm(
+    swarm = await mageflow.swarm(
         tasks=swarm_tasks, config=SwarmConfig(max_concurrency=1)
     )
     swarm_items = await BatchItemTaskSignature.afind()

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from rapyer.base import REDIS_MODELS
 from redis.asyncio.client import Redis
 
-from orchestrator.task.model import HatchetTaskModel
+from mageflow.task.model import HatchetTaskModel
 
 REGISTERED_TASKS: list[tuple] = []
 
@@ -14,26 +14,26 @@ class ConfigModel(BaseModel):
         arbitrary_types_allowed = True
 
 
-class OrchestratorConfigModel(ConfigModel):
+class MageFlowConfigModel(ConfigModel):
     hatchet_client: Hatchet | None = None
     redis_client: Redis | None = None
 
 
-orchestrator_config = OrchestratorConfigModel()
+mageflow_config = MageFlowConfigModel()
 
 
-async def init_orchestrator():
-    await rapyer.init_rapyer(orchestrator_config.redis_client)
+async def init_mageflow():
+    await rapyer.init_rapyer(mageflow_config.redis_client)
     await register_workflows()
     await update_register_signature_models()
 
 
-async def teardown_orchestrator():
+async def teardown_mageflow():
     await rapyer.teardown_rapyer()
 
 
 async def update_register_signature_models():
-    from orchestrator.signature.model import SIGNATURES_NAME_MAPPING, TaskSignature
+    from mageflow.signature.model import SIGNATURES_NAME_MAPPING, TaskSignature
 
     signature_classes = [cls for cls in REDIS_MODELS if issubclass(cls, TaskSignature)]
     SIGNATURES_NAME_MAPPING.update(
@@ -46,9 +46,9 @@ async def update_register_signature_models():
 
 async def register_workflows():
     for reg_task in REGISTERED_TASKS:
-        workflow, orchestrator_task_name = reg_task
+        workflow, mageflow_task_name = reg_task
         hatchet_task = HatchetTaskModel(
-            orchestrator_task_name=orchestrator_task_name,
+            mageflow_task_name=mageflow_task_name,
             task_name=workflow.name,
             input_validator=workflow.input_validator,
         )
@@ -56,9 +56,9 @@ async def register_workflows():
 
 
 async def lifespan_initialize():
-    await init_orchestrator()
+    await init_mageflow()
     # yield makes the function usable as a Hatchet lifespan context manager (can also be used for FastAPI):
     # - code before yield runs at startup (init config, register workers, etc.)
     # - code after yield would run at shutdown
     yield
-    await teardown_orchestrator()
+    await teardown_mageflow()

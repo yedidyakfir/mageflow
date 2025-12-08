@@ -1,9 +1,9 @@
 import pytest
 
-import orchestrator
-from orchestrator.errors import TooManyTasksError
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.model import SwarmConfig
+import mageflow
+from mageflow.errors import TooManyTasksError
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import SwarmConfig
 from tests.integration.hatchet.models import ContextMessage
 
 
@@ -11,7 +11,7 @@ from tests.integration.hatchet.models import ContextMessage
 @pytest.mark.parametrize(["max_task_allowed"], [[2], [1], [5]])
 async def test_add_task_exceeds_max_task_allowed_error(max_task_allowed):
     # Arrange
-    swarm_signature = await orchestrator.swarm(
+    swarm_signature = await mageflow.swarm(
         task_name="test_swarm",
         tasks=[
             TaskSignature(task_name=f"test_task_{i}") for i in range(max_task_allowed)

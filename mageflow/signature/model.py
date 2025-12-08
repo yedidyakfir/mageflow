@@ -13,15 +13,15 @@ from rapyer import AtomicRedisModel
 from rapyer.errors.base import KeyNotFound
 from rapyer.types import RedisDict, RedisList, RedisDatetime
 
-from orchestrator.errors import MissingSignatureError
-from orchestrator.models.message import ReturnValue
-from orchestrator.signature.consts import TASK_ID_PARAM_NAME
-from orchestrator.signature.status import TaskStatus, SignatureStatus, PauseActionTypes
-from orchestrator.signature.types import TaskIdentifierType, HatchetTaskType
-from orchestrator.startup import orchestrator_config
-from orchestrator.task.model import HatchetTaskModel
-from orchestrator.utils.models import get_marked_fields
-from orchestrator.workflows import OrchestratorWorkflow
+from mageflow.errors import MissingSignatureError
+from mageflow.models.message import ReturnValue
+from mageflow.signature.consts import TASK_ID_PARAM_NAME
+from mageflow.signature.status import TaskStatus, SignatureStatus, PauseActionTypes
+from mageflow.signature.types import TaskIdentifierType, HatchetTaskType
+from mageflow.startup import mageflow_config
+from mageflow.task.model import HatchetTaskModel
+from mageflow.utils.models import get_marked_fields
+from mageflow.workflows import MageflowWorkflow
 
 
 class TaskSignature(AtomicRedisModel):
@@ -102,7 +102,7 @@ class TaskSignature(AtomicRedisModel):
 
     @classmethod
     async def delete_signature(cls, task_id: TaskIdentifierType):
-        result = await orchestrator_config.redis_client.remove(task_id)
+        result = await mageflow_config.redis_client.remove(task_id)
         return result
 
     async def add_callbacks(
@@ -130,16 +130,16 @@ class TaskSignature(AtomicRedisModel):
         task = task_def.task_name if task_def else self.task_name
         return_field = self.return_value_field() if use_return_field else None
 
-        workflow = orchestrator_config.hatchet_client.workflow(
+        workflow = mageflow_config.hatchet_client.workflow(
             name=task, input_validator=self.model_validators
         )
-        orchestrator_workflow = OrchestratorWorkflow(
+        mageflow_wf = MageflowWorkflow(
             workflow,
             workflow_params=total_kwargs,
             return_value_field=return_field,
             task_ctx=self.task_ctx(),
         )
-        return orchestrator_workflow
+        return mageflow_wf
 
     def task_ctx(self) -> dict:
         return self.task_identifiers | {TASK_ID_PARAM_NAME: self.id}
@@ -235,7 +235,7 @@ class TaskSignature(AtomicRedisModel):
         return self.task_status.status == SignatureStatus.PENDING
 
     async def change_status(self, status: SignatureStatus) -> bool:
-        return await self.task_status.aupdate(
+        await self.task_status.aupdate(
             last_status=self.task_status.status, status=status
         )
 

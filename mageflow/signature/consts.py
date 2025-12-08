@@ -1,0 +1,3 @@
+TASK_ID_PARAM_NAME = "task_id"
+
+MAGEFLOW_TASK_INITIALS = "mageflow_"

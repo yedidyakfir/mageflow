@@ -1,8 +1,8 @@
 import asyncio
 
-import orchestrator
+import mageflow
 import pytest
-from orchestrator.signature.model import TaskSignature
+from mageflow.signature.model import TaskSignature
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
     assert_chain_done,
@@ -37,14 +37,14 @@ async def test_chain_integration(
     )
     message = ContextMessage(base_data=test_ctx)
 
-    signature2 = await orchestrator.sign(task2, success_callbacks=[sign_callback1])
-    chain_success_error_callback = await orchestrator.sign(error_callback)
-    success_chain_signature = await orchestrator.sign(
+    signature2 = await mageflow.sign(task2, success_callbacks=[sign_callback1])
+    chain_success_error_callback = await mageflow.sign(error_callback)
+    success_chain_signature = await mageflow.sign(
         chain_callback, error_callbacks=[chain_success_error_callback]
     )
 
     # Act
-    chain_signature = await orchestrator.chain(
+    chain_signature = await mageflow.chain(
         [sign_task1, signature2.id, task3],
         success=success_chain_signature,
     )
@@ -77,11 +77,11 @@ async def test_chain_fail(
     )
     message = ContextMessage(base_data=test_ctx)
 
-    chain_success_error_callback = await orchestrator.sign(error_callback)
-    success_chain_signature = await orchestrator.sign(chain_callback)
+    chain_success_error_callback = await mageflow.sign(error_callback)
+    success_chain_signature = await mageflow.sign(chain_callback)
 
     # Act
-    chain_signature = await orchestrator.chain(
+    chain_signature = await mageflow.chain(
         [sign_task1, fail_task, task3],
         success=success_chain_signature,
         error=chain_success_error_callback,

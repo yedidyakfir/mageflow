@@ -1,9 +1,9 @@
 import pytest
 
-import orchestrator
-from orchestrator.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.model import BatchItemTaskSignature, SwarmTaskSignature
+import mageflow
+from mageflow.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import BatchItemTaskSignature, SwarmTaskSignature
 from tests.integration.hatchet.models import ContextMessage
 
 
@@ -30,7 +30,7 @@ async def test_chain_with_swarm_task_creates_callbacks_correctly_edge_case(
     await simple_task.save()
 
     # Act
-    chain_signature = await orchestrator.chain([swarm_task.id, simple_task.id])
+    chain_signature = await mageflow.chain([swarm_task.id, simple_task.id])
 
     # Assert
     # Verify swarm task was loaded and updated correctly
@@ -87,7 +87,7 @@ async def test_chain_with_batch_item_task_creates_callbacks_correctly_edge_case(
     await simple_task.save()
 
     # Act
-    chain_signature = await orchestrator.chain([batch_item_task.id, simple_task.id])
+    chain_signature = await mageflow.chain([batch_item_task.id, simple_task.id])
 
     # Assert
     reloaded_batch_item = await TaskSignature.from_id(batch_item_task.id)
@@ -134,7 +134,7 @@ async def test_chain_with_mixed_task_types_loads_and_chains_correctly_sanity(
     await final_task.save()
 
     # Act
-    chain_signature = await orchestrator.chain(
+    chain_signature = await mageflow.chain(
         [simple_task.id, swarm_task.id, final_task.id]
     )
 
@@ -204,7 +204,7 @@ async def test_chain_creation_with_custom_name_and_callbacks_sanity(hatchet_mock
     await task2.save()
 
     # Act
-    chain_signature = await orchestrator.chain(
+    chain_signature = await mageflow.chain(
         [task1.id, task2.id],
         name="custom_chain_name",
         success=custom_success.id,

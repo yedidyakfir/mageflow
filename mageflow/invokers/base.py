@@ -2,7 +2,7 @@ import abc
 from abc import ABC
 from typing import Any
 
-from orchestrator.signature.model import TaskSignature
+from mageflow.signature.model import TaskSignature
 
 
 class BaseInvoker(ABC):

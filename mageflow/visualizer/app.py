@@ -3,15 +3,15 @@ import dash_cytoscape as cyto
 import rapyer
 from dash import Dash, html, dcc, Input, Output, callback
 
-from orchestrator.visualizer.assets.cytoscape_styles import EDGE_STYLES, GRAPH_STYLES
-from orchestrator.visualizer.builder import (
+from mageflow.visualizer.assets.cytoscape_styles import EDGE_STYLES, GRAPH_STYLES
+from mageflow.visualizer.builder import (
     build_graph,
     create_builders,
     find_unmentioned_tasks,
     CTXType,
 )
-from orchestrator.visualizer.data import extract_signatures, create
-from orchestrator.visualizer.utils import pydantic_validator
+from mageflow.visualizer.data import extract_signatures, create
+from mageflow.visualizer.utils import pydantic_validator
 
 # Load extra layouts
 cyto.load_extra_layouts()
@@ -45,7 +45,16 @@ async def create_app(redis_url: str):
                 [
                     html.Div(
                         id="tab-content",
-                        children=[],
+                        children=[
+                            cyto.Cytoscape(
+                                id="cytoscape-graph",
+                                elements=[],
+                                className="cytoscape-container",
+                                layout={"name": "preset"},
+                                stylesheet=stylesheet,
+                                style={"display": "none"},
+                            )
+                        ],
                         className="graph-container",
                     ),
                     html.Div(
@@ -120,7 +129,14 @@ async def create_app(redis_url: str):
                 },
                 stylesheet=stylesheet,
             )
-        return html.Div("No task selected")
+        return cyto.Cytoscape(
+            id="cytoscape-graph",
+            elements=[],
+            className="cytoscape-container",
+            layout={"name": "preset"},
+            stylesheet=stylesheet,
+            style={"display": "none"},
+        )
 
     @callback(
         Output("info-window", "children"),

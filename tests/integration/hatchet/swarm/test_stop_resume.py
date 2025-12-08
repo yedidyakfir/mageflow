@@ -3,9 +3,9 @@ from datetime import datetime
 
 import pytest
 
-import orchestrator
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.model import SwarmConfig, BatchItemTaskSignature
+import mageflow
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import SwarmConfig, BatchItemTaskSignature
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
     assert_paused,
@@ -28,9 +28,9 @@ async def test__swarm_soft_paused_data_is_saved_in_redis__then_resume_check_fini
         hatchet_client_init.hatchet,
     )
     sleep_time = 4
-    swarm_sleep_task_sign = await orchestrator.sign(sleep_task, sleep_time=sleep_time)
+    swarm_sleep_task_sign = await mageflow.sign(sleep_task, sleep_time=sleep_time)
     sleep_tasks = await swarm_sleep_task_sign.duplicate_many(3)
-    swarm_signature = await orchestrator.swarm(
+    swarm_signature = await mageflow.swarm(
         tasks=[task1, swarm_sleep_task_sign, *sleep_tasks, task1, task2, task3],
         config=SwarmConfig(max_concurrency=3),
     )

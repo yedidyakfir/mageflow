@@ -1,10 +1,11 @@
-# Task Orchestrator
+# MageFlow
 
-Task Orchestrator is a Python package that provides a powerful wrapper for task managers like Hatchet and Taskiq. It enables you to orchestrate complex workflows by running tasks with callbacks, chaining tasks together, and managing pools of tasks that can run in parallel.
+**Ma**ngae **G**raph **E**xecution Flow - This package's purpose is to help users of task managers (like hatchet/taskiq etc) to orchestrate their tasks in an easy way from a single point. This way, it is much easier to flow and change, rather than spreading the flow logic all over your projects.
+MageFlow provides a unify interface across different task managers that is fully compatible with the task manager api to execute tasks in chain/parallel/conditional tasks that can be calculated in runtime.
 
-## What is Task Orchestrator?
+## What is Mageflow?
 
-Task Orchestrator abstracts away the complexity of task management systems, providing a unified interface to:
+Mageflow abstracts away the complexity of task management systems, providing a unified interface to:
 
 - **Execute tasks with callbacks**: Run tasks with success and error callbacks for robust error handling
 - **Chain tasks together**: Create sequential workflows where tasks depend on the completion of previous tasks
@@ -17,7 +18,7 @@ Task Orchestrator abstracts away the complexity of task management systems, prov
 Create sequential workflows where each task depends on the previous one's completion. Perfect for multi-step processes where order matters.
 
 ```python
-import orchestrator
+import mageflow
 
 # Create a chain of tasks that run sequentially
 task_order = [
@@ -25,14 +26,14 @@ task_order = [
     analyze_data_task,
     generate_report_task
 ]
-workflow = await orchestrator.chain(task_order, name="data-pipeline")
+workflow = await mageflow.chain(task_order, name="data-pipeline")
 ```
 
 ### 🐝 Task Swarms
 Execute multiple tasks in parallel with intelligent coordination. Ideal for processing large datasets or performing independent operations simultaneously.
 
 ```python
-import orchestrator
+import mageflow
 
 # Run multiple tasks in parallel
 swarm_tasks = [
@@ -40,14 +41,15 @@ swarm_tasks = [
     send_notifications_task,
     update_cache_task
 ]
-parallel_workflow = await orchestrator.swarm(swarm_tasks, task_name="user-processing")
+parallel_workflow = await mageflow.swarm(swarm_tasks, task_name="user-processing")
 ```
 
 ### 📞 Callback System
 Robust error handling and success callbacks ensure your workflows are resilient and responsive.
 
 ```python
-from orchestrator import register_task, handle_task_callback
+from mageflow import register_task, handle_task_callback
+
 
 @register_task("my-task")
 @handle_task_callback()
@@ -60,10 +62,10 @@ async def my_task(message):
 Flexible task definition system with validation, state management, and lifecycle control.
 
 ```python
-import orchestrator
+import mageflow
 
 # Create a task signature with validation
-task_signature = await orchestrator.sign(
+task_signature = await mageflow.sign(
     task_name="process-order",
     task_identifiers={"order_id": "12345"},
     success_callbacks=[send_confirmation_task],

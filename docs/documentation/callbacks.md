@@ -10,26 +10,26 @@ Task signatures define how a task should be executed, including its configuratio
 
 ### Basic Task Signature
 
-Create a basic task signature using `orchestrator.sign()`:
+Create a basic task signature using `mageflow.sign()`:
 
 ```python
-import orchestrator
+import mageflow
 
 # Create a signature for a registered task
-signature = await orchestrator.sign("process-data")
+signature = await mageflow.sign("process-data")
 
 # Create a signature from a task function
-signature = await orchestrator.sign(my_task_function)
+signature = await mageflow.sign(my_task_function)
 ```
 
 !!! info "Alternative Client Usage"
     You can also create signatures using the orchestrator client instead of the global `orchestrator` module:
 
     ```python
-    from orchestrator import Orchestrator
+    from mageflow import Mageflow
 
     # Create orchestrator client
-    hatchet = Orchestrator(hatchet, redis)
+    hatchet = Mageflow(hatchet, redis)
 
     # Use client to create signatures
     signature = await hatchet.sign("process-data")
@@ -93,15 +93,16 @@ main_task = await orchestrator.sign(
 
 When a success callback is called, we take the return value of the function and inject it into the parameter that is marked with ReturnValue.
 
-
 ```python
 from pydantic import BaseModel
-from orchestrator.models.message import ReturnValue
+from mageflow.models.message import ReturnValue
+
 
 class SuccessMessage(BaseModel):
     task_result: Annotated[Any, ReturnValue()]
     field_int: int
     ...
+
 
 @hatchet.task(input_validator=SuccessMessage)
 async def success_callback(msg: SuccessMessage):
@@ -149,17 +150,20 @@ For error callbacks, the message will be the same message that was sent to the t
 
 ```python
 from pydantic import BaseModel
-from orchestrator.models.message import ReturnValue
+from mageflow.models.message import ReturnValue
+
 
 class ErrorMessage(OriginalMessage):
     additional_field1: int
     additional_field2: str
     ...
 
+
 @hatchet.task(input_validator=ErrorMessage)
 async def error_callback(msg: ErrorMessage):
     # msg.task_result contains the original task's return value
     result = msg.task_result
+
 
 # Create error handling tasks
 error_logger = await orchestrator.sign(error_callback, additional_field1=12345, additional_field2="test")
@@ -173,7 +177,7 @@ signature = await orchestrator.sign("task", error_callbacks=[error_logger])
 Specify input validation for your task signatures:
 
 ```python
-from orchestrator.models.message import ContextMessage
+from mageflow.models.message import ContextMessage
 
 # Create signature with specific input validation
 validated_task = await orchestrator.sign(

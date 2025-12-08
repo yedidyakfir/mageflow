@@ -8,13 +8,13 @@ from dash import html
 from pydantic import GetCoreSchemaHandler, BaseModel, PrivateAttr, Field
 from pydantic_core import core_schema
 
-from orchestrator.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
-from orchestrator.chain.model import ChainTaskSignature
-from orchestrator.signature.consts import ORCHESTRATOR_TASK_INITIALS
-from orchestrator.signature.model import TaskSignature
-from orchestrator.swarm.consts import ON_SWARM_ERROR, ON_SWARM_START, ON_SWARM_END
-from orchestrator.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
-from orchestrator.typing_support import Self
+from mageflow.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.consts import MAGEFLOW_TASK_INITIALS
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.consts import ON_SWARM_ERROR, ON_SWARM_START, ON_SWARM_END
+from mageflow.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
+from mageflow.typing_support import Self
 
 T = TypeVar("T", bound=TaskSignature)
 INTERNAL_TASKS = [
@@ -25,7 +25,7 @@ INTERNAL_TASKS = [
     ON_SWARM_END,
 ]
 INTERNAL_TASKS += [
-    internal_name.lstrip(ORCHESTRATOR_TASK_INITIALS) for internal_name in INTERNAL_TASKS
+    internal_name.lstrip(MAGEFLOW_TASK_INITIALS) for internal_name in INTERNAL_TASKS
 ]
 
 

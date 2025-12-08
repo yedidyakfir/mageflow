@@ -6,9 +6,9 @@ from dynaconf import Dynaconf
 from hatchet_sdk import Hatchet, ClientConfig, Context
 from hatchet_sdk.config import HealthcheckConfig
 
-import orchestrator
-from orchestrator.signature.consts import TASK_ID_PARAM_NAME
-from orchestrator.startup import orchestrator_config
+import mageflow
+from mageflow.signature.consts import TASK_ID_PARAM_NAME
+from mageflow.startup import mageflow_config
 from tests.integration.hatchet.models import (
     ContextMessage,
     MessageWithData,
@@ -29,7 +29,7 @@ config_obj = ClientConfig(
 
 redis = redis.asyncio.from_url(settings.redis.url, decode_responses=True)
 hatchet = Hatchet(debug=True, config=config_obj)
-hatchet = orchestrator.Orchestrator(hatchet, redis_client=redis)
+hatchet = mageflow.Mageflow(hatchet, redis_client=redis)
 
 # > Default priority
 DEFAULT_PRIORITY = 1
@@ -93,7 +93,7 @@ async def sleep_task(msg: SleepTaskMessage):
 async def callback_with_redis(msg: CommandMessageWithResult, ctx: Context):
     task_id = ctx.additional_metadata[TASK_ID_PARAM_NAME]
 
-    await orchestrator_config.redis_client.set(
+    await mageflow_config.redis_client.set(
         f"activated-task-{task_id}", json.dumps(msg.task_result)
     )
     return msg

@@ -1,8 +1,8 @@
-site_name: Orchestrator
+site_name: MageFlow
 site_description: A Python package that provides Pydantic models with Redis as the backend storage
-site_url: https://yedidyakfir.github.io/orchestrator/
-repo_url: https://github.com/yedidyakfir/orchestrator
-repo_name: yedidyakfir/task-orchestrator
+site_url: https://yedidyakfir.github.io/mageflow/
+repo_url: https://github.com/yedidyakfir/mageflow
+repo_name: yedidyakfir/mageflow
 
 theme:
   name: material
@@ -102,7 +102,7 @@ markdown_extensions:
       normalize_issue_symbols: true
       repo_url_shorthand: true
       user: yedidyakfir
-      repo: task-orchestrator
+      repo: task-mageflow
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.snippets:
@@ -132,9 +132,9 @@ extra:
     deprecated: Deprecated
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/yedidyakfir/task-orchestrator
+      link: https://github.com/yedidyakfir/mageflow
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/orchestrator/
+      link: https://pypi.org/project/mageflow/
   version:
     provider: mike
     default: latest

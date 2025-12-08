@@ -4,12 +4,12 @@ from datetime import datetime
 from hatchet_sdk import Hatchet
 from hatchet_sdk.clients.rest import V1TaskStatus, V1TaskSummary
 
-from orchestrator.chain.model import ChainTaskSignature
-from orchestrator.signature.consts import TASK_ID_PARAM_NAME
-from orchestrator.signature.model import TaskSignature
-from orchestrator.signature.types import TaskIdentifierType
-from orchestrator.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
-from orchestrator.workflows import TASK_DATA_PARAM_NAME
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.consts import TASK_ID_PARAM_NAME
+from mageflow.signature.model import TaskSignature
+from mageflow.signature.types import TaskIdentifierType
+from mageflow.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
+from mageflow.workflows import TASK_DATA_PARAM_NAME
 from tests.integration.hatchet.conftest import extract_bad_keys_from_redis
 
 WF_MAPPING_TYPE = dict[str, V1TaskSummary]

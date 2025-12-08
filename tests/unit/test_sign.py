@@ -4,9 +4,9 @@ from typing import Optional, Any
 import pytest
 from pydantic import BaseModel
 
-import orchestrator
-from orchestrator.signature.model import TaskSignature
-from orchestrator.signature.types import TaskIdentifierType
+import mageflow
+from mageflow.signature.model import TaskSignature
+from mageflow.signature.types import TaskIdentifierType
 
 
 class SignParamOptions(BaseModel):
@@ -134,7 +134,7 @@ async def test__sign_task__sanity(
         expected_signature.model_validators = task.input_validator
 
     # Act
-    signature = await orchestrator.sign(task, **sign_params)
+    signature = await mageflow.sign(task, **sign_params)
 
     # Assert
     signature.creation_time = expected_signature.creation_time

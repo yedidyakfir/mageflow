@@ -2,9 +2,9 @@ import asyncio
 
 from pydantic import field_validator, Field
 
-from orchestrator.errors import MissingSignatureError
-from orchestrator.signature.model import TaskSignature, TaskIdentifierType
-from orchestrator.signature.status import SignatureStatus
+from mageflow.errors import MissingSignatureError
+from mageflow.signature.model import TaskSignature, TaskIdentifierType
+from mageflow.signature.status import SignatureStatus
 
 
 class ChainTaskSignature(TaskSignature):

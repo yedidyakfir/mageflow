@@ -8,7 +8,7 @@ Install Task Orchestrator with your preferred task manager backend using the app
 
 ### Hatchet Backend
 ```bash
-pip install task-orchestrator[hatchet]
+pip install task-mageflow[hatchet]
 ```
 
 ## Configuration
@@ -26,15 +26,14 @@ from dynaconf import Dynaconf
 from hatchet_sdk import Hatchet, ClientConfig
 from hatchet_sdk.config import HealthcheckConfig
 
-import orchestrator
-
+import mageflow
 
 # Configure Hatchet client
 config_obj = ClientConfig(token="your-hatchet-token")
 
 # Set up Redis client
 redis_client = redis.asyncio.from_url(
-    "redis-url", 
+    "redis-url",
     max_connections=1028,  # Use connection pool 
     decode_responses=True,  # Mandatory - for redis backend, see https://github.com/yedidyakfir/rapyer docs
 )
@@ -43,7 +42,7 @@ redis_client = redis.asyncio.from_url(
 hatchet = Hatchet(debug=True, config=config_obj)
 
 # Create the Orchestrator instance
-hatchet = orchestrator.Orchestrator(hatchet, redis_client=redis_client)
+hatchet = mageflow.Mageflow(hatchet, redis_client=redis_client)
 ```
 
 For a smooth transition experience, we recommend calling the wrapped object with the original name, it has all the same functions and configurations.
@@ -81,9 +80,11 @@ async def critical_process(msg):
 
 ### Backpropagation
 If you want the task to stay with the hatchet definition (with ctx parameter), you can use the param_config parameter
+
 ```python
 # Create the Orchestrator instance
-hatchet = orchestrator.Orchestrator(hatchet, redis_client=redis_client, param_config=AcceptParams.ALL)
+hatchet = orchestrator.Mageflow(hatchet, redis_client=redis_client, param_config=AcceptParams.ALL)
+
 
 # Now define the task in the original hatchet definition
 

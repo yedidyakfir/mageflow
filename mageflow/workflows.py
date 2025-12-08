@@ -7,7 +7,7 @@ from hatchet_sdk.runnables.workflow import Workflow
 from hatchet_sdk.utils.typing import JSONSerializableMapping
 from pydantic import BaseModel
 
-from orchestrator.utils.pythonic import deep_merge
+from mageflow.utils.pythonic import deep_merge
 
 TASK_DATA_PARAM_NAME = "task_data"
 
@@ -16,7 +16,7 @@ class ModelToDump(BaseModel):
     value: Any
 
 
-class OrchestratorWorkflow(Workflow):
+class MageflowWorkflow(Workflow):
     def __init__(
         self,
         workflow: Workflow,
@@ -25,18 +25,18 @@ class OrchestratorWorkflow(Workflow):
         task_ctx: dict = None,
     ):
         super().__init__(config=workflow.config, client=workflow.client)
-        self._orchestrator_workflow_params = workflow_params
+        self._mageflow_workflow_params = workflow_params
         self._return_value_field = return_value_field
         self._task_ctx = task_ctx or {}
 
     def _serialize_input(self, input: Any) -> JSONSerializableMapping:
         if isinstance(input, BaseModel):
-            input = super(OrchestratorWorkflow, self)._serialize_input(input)
+            input = super(MageflowWorkflow, self)._serialize_input(input)
 
         # Force model dump
-        kwargs = self._orchestrator_workflow_params
+        kwargs = self._mageflow_workflow_params
         results_model = ModelToDump(value=kwargs)
-        extra_params = super(OrchestratorWorkflow, self)._serialize_input(results_model)
+        extra_params = super(MageflowWorkflow, self)._serialize_input(results_model)
         dumped_kwargs = extra_params["value"]
 
         if self._return_value_field:
