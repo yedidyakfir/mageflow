@@ -241,7 +241,7 @@ def assert_chain_done(
         _assert_task_done(chain_success, wf_by_signature, input_params)
 
 
-def assert_paused(
+async def assert_paused(
     runs: HatchetRuns,
     tasks: list[TaskSignature],
     start_time: datetime,
@@ -265,7 +265,7 @@ def assert_paused(
     paused_tasks = [wf for wf in wf_by_task_id.values() if is_task_paused(wf)]
     for paused_wf in paused_tasks:
         task_id = get_task_param(paused_wf, TASK_ID_PARAM_NAME)
-        assert_task_was_paused(runs, task_id)
+        await assert_task_was_paused(runs, task_id)
 
 
 def assert_task_did_not_repeat(runs: HatchetRuns):
