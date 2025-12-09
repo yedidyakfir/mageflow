@@ -39,3 +39,15 @@ build-backend = "poetry.core.masonry.api"
 
 [project.scripts]
 disply-tasks = "visualizer.app:main"
+
+[tool.coverage.run]
+source = ["mageflow"]
+concurrency = ["multiprocessing"]
+parallel = true
+
+[tool.coverage.report]
+skip_covered = false
+show_missing = true
+
+[tool.coverage.html]
+directory = "htmlcov"

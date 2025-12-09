@@ -1,5 +1,11 @@
 import asyncio
 import json
+import os
+
+# Start coverage if COVERAGE_PROCESS_START is set
+if os.environ.get('COVERAGE_PROCESS_START'):
+    import coverage
+    coverage.process_startup()
 
 import redis
 from dynaconf import Dynaconf

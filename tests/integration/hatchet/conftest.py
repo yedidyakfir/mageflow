@@ -146,6 +146,9 @@ def hatchet_worker(
         else:
             env["PYTHONPATH"] = str(project_root)
 
+    # Enable coverage for subprocess
+    env["COVERAGE_PROCESS_START"] = str(project_root / "pyproject.toml")
+    
     proc = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
