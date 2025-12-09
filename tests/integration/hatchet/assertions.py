@@ -127,7 +127,7 @@ async def assert_redis_is_clean(redis_client):
 
 
 async def assert_task_was_paused(
-    runs: HatchetRuns, task: TaskSignature | TaskIdentifierType, with_resume=False
+    runs: HatchetRuns, task: TaskSignature, with_resume=False
 ):
     __tracebackhide__ = False  # force pytest to show this frame
     task_id = task.id if isinstance(task, TaskSignature) else task
@@ -265,7 +265,8 @@ async def assert_paused(
     paused_tasks = [wf for wf in wf_by_task_id.values() if is_task_paused(wf)]
     for paused_wf in paused_tasks:
         task_id = get_task_param(paused_wf, TASK_ID_PARAM_NAME)
-        await assert_task_was_paused(runs, task_id)
+        task = tasks_map[task_id]
+        await assert_task_was_paused(runs, task)
 
 
 def assert_task_did_not_repeat(runs: HatchetRuns):
