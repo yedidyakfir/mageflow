@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="logo.png" alt="MageFlow Logo" width="200"/>
+</div>
+
 # MageFlow
 
 **Ma**nage **G**raph **E**xecution Flow - A unified interface for task orchestration across different task managers.

@@ -6,8 +6,8 @@ repo_name: yedidyakfir/mageflow
 
 theme:
   name: material
-  logo: icon.png
-  favicon: icon.png
+  logo: ../logo.png
+  favicon: ../logo.png
   palette:
     - media: "(prefers-color-scheme)"
       toggle:
