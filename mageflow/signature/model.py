@@ -270,7 +270,7 @@ class TaskSignature(AtomicRedisModel):
         last_status = self.task_status.last_status
         if last_status == SignatureStatus.ACTIVE:
             await self.change_status(SignatureStatus.PENDING)
-            await self.aio_run_no_wait(EmptyModel())
+            await self.aio_run_no_wait(EmptyModel(**self.kwargs))
         else:
             await self.change_status(last_status)
 
