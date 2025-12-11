@@ -17,15 +17,8 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
 
-      - name: Wait for lint to complete
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.ref }}
-          check-name: 'lint'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-
   create-github-release:
+    needs: check-tests
     runs-on: ubuntu-22.04
     permissions:
       contents: write  # Required for creating releases
