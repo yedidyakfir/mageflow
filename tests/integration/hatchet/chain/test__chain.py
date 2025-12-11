@@ -92,10 +92,10 @@ async def test_chain_fail(
     # Assert
     await asyncio.sleep(15)
     runs = await get_runs(hatchet, ctx_metadata)
-    wf_by_signature = map_wf_by_id(runs)
+    runs_task_ids = [wf.task_id for wf in runs]
 
     # Check task was not called
-    assert task3.id not in wf_by_signature
+    assert task3.id not in runs_task_ids
 
     # Check that callback was called
     assert_signature_done(runs, chain_success_error_callback)
