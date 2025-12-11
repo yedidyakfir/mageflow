@@ -2480,4 +2480,4 @@ hatchet = ["hatchet-sdk"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "398253e2e795deaab80d6b745d53768e4101aa90799970c9343bd75fee431857"
+content-hash = "dbd3d4c1a24d4fd0ab0c3253afa8e88f1f3a9a9d18deb8b8516e31bfbe3555cd"
