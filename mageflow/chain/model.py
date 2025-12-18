@@ -1,5 +1,6 @@
 import asyncio
 
+import rapyer
 from pydantic import field_validator, Field
 
 from mageflow.errors import MissingSignatureError
@@ -31,6 +32,12 @@ class ChainTaskSignature(TaskSignature):
             signature.remove(with_errors, with_success) for signature in signatures
         ]
         await asyncio.gather(*delete_tasks)
+
+    async def aupdate_real_task_kwargs(self, **kwargs):
+        first_task = await rapyer.get(self.tasks[0])
+        if not isinstance(first_task, TaskSignature):
+            raise RuntimeError(f"First task from chain {self.key} must be a signature")
+        return await first_task.aupdate_real_task_kwargs(**kwargs)
 
     async def change_status(self, status: SignatureStatus):
         pause_chain_tasks = [

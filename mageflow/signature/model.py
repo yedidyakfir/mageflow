@@ -234,6 +234,9 @@ class TaskSignature(AtomicRedisModel):
             last_status=self.task_status.status, status=status
         )
 
+    async def aupdate_real_task_kwargs(self, **kwargs):
+        return await self.kwargs.aupdate(**kwargs)
+
     # When pausing signature from outside the task
     @classmethod
     async def safe_change_status(

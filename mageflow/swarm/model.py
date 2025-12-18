@@ -50,7 +50,7 @@ class BatchItemTaskSignature(TaskSignature):
             kwargs = deep_merge(kwargs, swarm_task.kwargs.clone())
             if not can_run_task:
                 kwargs = deep_merge(kwargs, msg.model_dump(mode="json"))
-            await original_task.kwargs.aupdate(**kwargs)
+            await original_task.aupdate_real_task_kwargs(**kwargs)
             if can_run_task:
                 return await original_task.aio_run_no_wait(msg, **orig_task_kwargs)
 
