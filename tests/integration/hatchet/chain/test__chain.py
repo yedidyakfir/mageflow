@@ -3,6 +3,7 @@ import asyncio
 import pytest
 
 import mageflow
+from hatchet_sdk.runnables.types import EmptyModel
 from mageflow.signature.model import TaskSignature
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
@@ -35,7 +36,7 @@ async def test_chain_integration(
         hatchet_client_init.redis_client,
         hatchet_client_init.hatchet,
     )
-    message = ContextMessage(base_data=test_ctx)
+    message = EmptyModel()
 
     signature2 = await mageflow.sign(task2, success_callbacks=[sign_callback1])
     chain_success_error_callback = await mageflow.sign(error_callback)
@@ -48,6 +49,7 @@ async def test_chain_integration(
         [sign_task1, signature2.key, task3],
         success=success_chain_signature,
     )
+    await chain_signature.kwargs.aupdate(base_data=test_ctx)
     chain_tasks = await TaskSignature.afind()
 
     await chain_signature.aio_run_no_wait(message, options=trigger_options)
