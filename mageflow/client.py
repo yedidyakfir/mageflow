@@ -43,6 +43,10 @@ class HatchetMageflow(Hatchet):
         self.param_config = param_config
 
     def task(self, *, name: str | None = None, **kwargs):
+        """
+        This is a wrapper for task, if you want to see hatchet task go to parent class
+        """
+
         hatchet_task = super().task(name=name, **kwargs)
 
         def decorator(func):
@@ -58,6 +62,9 @@ class HatchetMageflow(Hatchet):
         return decorator
 
     def durable_task(self, *, name: str | None = None, **kwargs):
+        """
+        This is a wrapper for durable task, if you want to see hatchet durable task go to parent class
+        """
         hatchet_task = super().durable_task(name=name, **kwargs)
 
         def decorator(func):
