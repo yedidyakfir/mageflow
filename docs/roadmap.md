@@ -34,6 +34,36 @@ Implement delayed deletion system for task signatures to enable rerun capabiliti
 
 ---
 
+### 🧹 Signature Cleanup Callbacks
+> **Difficulty:** `MEDIUM` | **Priority:** `HIGH` | **Status:** `Planned`
+
+Implement cleanup callbacks for each signature that execute on both success and failure to ensure proper resource management.
+
+**What's Coming:**
+- ✅ **Success Cleanup** - Execute cleanup operations after successful task completion
+- ❌ **Failure Cleanup** - Trigger cleanup on task failures or errors
+- 🔄 **Guaranteed Execution** - Ensure cleanup runs regardless of task outcome
+- 🎯 **Per-Signature Config** - Configure cleanup callbacks at signature level
+- 🧹 **Resource Management** - Properly release resources, close connections, clean temporary files
+- 📊 **Cleanup Tracking** - Monitor and log cleanup operations for debugging
+
+**Use Cases:**
+- Database connection cleanup after query execution
+- Temporary file removal after processing
+- Lock release in distributed systems
+- Resource deallocation and memory cleanup
+- External API session termination
+- Notification sending after task completion
+
+**Technical Implementation:**
+- Cleanup callbacks execute in finally-like semantics
+- Support both synchronous and asynchronous cleanup functions
+- Chain cleanup callbacks for nested operations
+- Handle cleanup callback failures gracefully
+
+**Impact:** Ensure robust resource management and prevent resource leaks by guaranteeing cleanup operations execute regardless of task success or failure.
+
+---
 
 ### ⛔ Support Interrupt Tasks
 > **Difficulty:** `MEDIUM` | **Priority:** `HIGH` | **Status:** `Planned`
