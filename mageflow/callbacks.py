@@ -25,7 +25,9 @@ class HatchetResult(BaseModel):
 
 
 def handle_task_callback(
-    expected_params: AcceptParams = AcceptParams.NO_CTX, wrap_res: bool = True
+    expected_params: AcceptParams = AcceptParams.NO_CTX,
+    wrap_res: bool = True,
+    send_signature: bool = False,
 ):
     def task_decorator(func):
         @functools.wraps(func)
@@ -38,7 +40,9 @@ def handle_task_callback(
                 # NOTE: This should not run, the task should cancel, but just in case
                 return {"Error": "Task should have been canceled"}
             try:
-                await invoker.start_task()
+                signature = await invoker.start_task()
+                if send_signature:
+                    kwargs["signature"] = signature
                 if expected_params == AcceptParams.JUST_MESSAGE:
                     result = await flexible_call(func, message)
                 elif expected_params == AcceptParams.NO_CTX:

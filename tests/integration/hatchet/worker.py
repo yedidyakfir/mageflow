@@ -1,6 +1,9 @@
 import asyncio
 import json
 import os
+from datetime import datetime
+
+from mageflow.signature.model import TaskSignature
 
 # Start coverage if COVERAGE_PROCESS_START is set
 if os.environ.get("COVERAGE_PROCESS_START"):
@@ -14,7 +17,7 @@ if os.environ.get("COVERAGE_PROCESS_START"):
 
 import redis
 from dynaconf import Dynaconf
-from hatchet_sdk import Hatchet, ClientConfig, Context
+from hatchet_sdk import Hatchet, ClientConfig, Context, NonRetryableException
 from hatchet_sdk.config import HealthcheckConfig
 
 import mageflow
@@ -121,7 +124,7 @@ async def timeout_task(msg):
     await asyncio.sleep(10)
 
 
-@hatchet.task(retries=3)
+@hatchet.task(retries=3, execution_timeout=60)
 @hatchet.with_ctx
 async def retry_once(msg, ctx: Context):
     if ctx.attempt_number == 1:
@@ -129,9 +132,18 @@ async def retry_once(msg, ctx: Context):
     return "Nice"
 
 
-@hatchet.task(retries=3)
-async def retry_to_failure(msg):
+@hatchet.task(retries=3, execution_timeout=60)
+@hatchet.with_signature
+async def retry_to_failure(msg, signature: TaskSignature):
+    await mageflow_config.redis_client.set(
+        f"finish-{signature.key}", datetime.now().isoformat()
+    )
     raise ValueError("Test exception")
+
+
+@hatchet.task(retries=3, execution_timeout=60)
+async def cancel_retry(msg):
+    raise NonRetryableException("Test exception")
 
 
 workflows = [
@@ -150,6 +162,7 @@ workflows = [
     timeout_task,
     retry_once,
     retry_to_failure,
+    cancel_retry,
 ]
 
 
