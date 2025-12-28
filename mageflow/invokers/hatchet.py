@@ -25,12 +25,13 @@ class HatchetInvoker(BaseInvoker):
     def task_ctx(self) -> dict:
         return self.task_data
 
-    async def start_task(self):
+    async def start_task(self) -> TaskSignature | None:
         task_id = self.task_data.get(TASK_ID_PARAM_NAME, None)
         if task_id:
             async with TaskSignature.lock_from_key(task_id) as signature:
                 await signature.change_status(SignatureStatus.ACTIVE)
                 await signature.task_status.aupdate(worker_task_id=self.workflow_id)
+                return signature
 
     async def run_success(self, result: Any) -> bool:
         success_publish_tasks = []
