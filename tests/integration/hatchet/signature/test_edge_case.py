@@ -138,6 +138,3 @@ async def test__retry_but_override_with_exception__check_error_callback_is_calle
     failed_summary = assert_signature_failed(runs, cancel_retry_sign)
     assert failed_summary.retry_count == 0
     assert_signature_done(runs, error_callback_sign, base_data=test_ctx)
-
-
-# TODO - add also failure case to swarm and chain in the large test
