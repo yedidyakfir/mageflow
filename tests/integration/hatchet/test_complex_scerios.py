@@ -23,7 +23,7 @@ from tests.integration.hatchet.worker import (
     task3,
     error_callback,
     retry_once,
-    retry_to_failure,
+    cancel_retry,
 )
 
 
@@ -53,7 +53,7 @@ async def test__swarm_with_swarms_and_chains__sanity(
     triggered_error = await hatchet.sign(error_callback)
     not_triggered_success = await hatchet.sign(task1_callback)
     failed_chain = await hatchet.chain(
-        [task3, retry_to_failure], error=triggered_error, success=not_triggered_success
+        [task3, cancel_retry], error=triggered_error, success=not_triggered_success
     )
 
     base_swarm = await hatchet.swarm(tasks=[task2, task3], is_swarm_closed=True)
