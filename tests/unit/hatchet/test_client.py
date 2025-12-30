@@ -55,9 +55,7 @@ async def test_stagger_execution_applies_delay_within_range(
     await test_func(mock_message, mock_ctx)
 
     wait_time = sleep_mock.await_args[0][0]
-    assert mock_ctx.refresh_timeout.assert_called_once_with(
-        timedelta(seconds=wait_time)
-    )
+    mock_ctx.refresh_timeout.assert_called_once_with(timedelta(seconds=wait_time))
     assert sleep_mock.await_count >= 1
 
     (sleep_seconds,), _ = sleep_mock.await_args
