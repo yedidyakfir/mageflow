@@ -130,6 +130,7 @@ class HatchetMageflow(Hatchet):
             async def stagger_wrapper(message, ctx: Context, *args, **kwargs):
                 stagger = random.uniform(0, wait_delta.total_seconds())
                 ctx.log(f"Staggering for {stagger:.2f} seconds")
+                ctx.refresh_timeout(timedelta(seconds=stagger))
                 await asyncio.sleep(stagger)
 
                 if does_task_wants_ctx(func):
@@ -150,9 +151,7 @@ def task_decorator(
     hatchet_task_name: str | None = None,
 ):
     param_config = (
-        AcceptParams.ALL
-        if does_task_wants_ctx(func)
-        else mage_client.param_config
+        AcceptParams.ALL if does_task_wants_ctx(func) else mage_client.param_config
     )
     send_signature = getattr(func, "__send_signature__", False)
     handler_dec = handle_task_callback(param_config, send_signature=send_signature)
