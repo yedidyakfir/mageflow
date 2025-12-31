@@ -1,8 +1,12 @@
 name: coverage.yml
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   coverage:
