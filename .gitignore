@@ -216,3 +216,4 @@ future-features
 .secrets.*
 .claude
 /junit.xml
+.jbeval
