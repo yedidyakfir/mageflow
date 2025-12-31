@@ -1,9 +1,13 @@
+import asyncio
 import functools
+import inspect
 import os
+import random
+from datetime import timedelta
 from typing import TypeVar, Any, overload, Unpack, Callable
 
 import redis
-from hatchet_sdk import Hatchet, Worker
+from hatchet_sdk import Hatchet, Worker, Context
 from hatchet_sdk.runnables.workflow import BaseWorkflow
 from hatchet_sdk.worker.worker import LifespanFn
 from redis.asyncio import Redis
@@ -22,6 +26,7 @@ from mageflow.startup import (
     teardown_mageflow,
 )
 from mageflow.swarm.creator import swarm, SignatureOptions
+from mageflow.utils.mageflow import does_task_wants_ctx
 
 
 async def merge_lifespan(original_lifespan: LifespanFn):
@@ -118,6 +123,26 @@ class HatchetMageflow(Hatchet):
         func.__send_signature__ = True
         return func
 
+    def stagger_execution(self, wait_delta: timedelta):
+        def decorator(func):
+            @self.with_ctx
+            @functools.wraps(func)
+            async def stagger_wrapper(message, ctx: Context, *args, **kwargs):
+                stagger = random.uniform(0, wait_delta.total_seconds())
+                ctx.log(f"Staggering for {stagger:.2f} seconds")
+                ctx.refresh_timeout(timedelta(seconds=stagger))
+                await asyncio.sleep(stagger)
+
+                if does_task_wants_ctx(func):
+                    return await func(message, ctx, *args, **kwargs)
+                else:
+                    return await func(message, *args, **kwargs)
+
+            stagger_wrapper.__signature__ = inspect.signature(func)
+            return stagger_wrapper
+
+        return decorator
+
 
 def task_decorator(
     func: Callable,
@@ -126,9 +151,7 @@ def task_decorator(
     hatchet_task_name: str | None = None,
 ):
     param_config = (
-        AcceptParams.ALL
-        if getattr(func, "__user_ctx__", False)
-        else mage_client.param_config
+        AcceptParams.ALL if does_task_wants_ctx(func) else mage_client.param_config
     )
     send_signature = getattr(func, "__send_signature__", False)
     handler_dec = handle_task_callback(param_config, send_signature=send_signature)
