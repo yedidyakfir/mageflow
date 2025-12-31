@@ -7,9 +7,7 @@ on:
 
 jobs:
   create-github-release:
-    environment:
-      name: create-release
-    if: github.event.base_ref == 'refs/heads/main'
+    needs: check-tests
     runs-on: ubuntu-22.04
     permissions:
       contents: write  # Required for creating releases
@@ -63,12 +61,9 @@ jobs:
         } >> $GITHUB_OUTPUT
     
     - name: Create GitHub Release
-      uses: actions/create-release@v1
+      run: |
+        gh release create ${{ steps.version.outputs.tag }} \
+          --title "${{ steps.version.outputs.version }} - ${{ steps.version.outputs.release_date }}" \
+          --notes "${{ steps.release_notes.outputs.notes }}"
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.version.outputs.tag }}
-        release_name: ${{ steps.version.outputs.version }} - ${{ steps.version.outputs.release_date }}
-        body: ${{ steps.release_notes.outputs.notes }}
-        draft: false
-        prerelease: false
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
