@@ -63,3 +63,30 @@ async def my_task(msg: MyModel, signature: TaskSignature):
 
 **Description:**
 The `with_signature` decorator allows a task to receive its own `TaskSignature` object as a parameter. This provides access to the task's configuration, including its name, identifiers, callbacks, and other metadata. This is particularly useful for tasks that need to be self-aware or need to inspect their own execution configuration at runtime.
+
+#### stagger_execution()
+
+Randomly delay task execution to prevent resource deadlocks when multiple tasks compete for the same resources.
+
+**Usage:**
+```python
+from datetime import timedelta
+
+@client.task(name="resource-intensive-task")
+@client.stagger_execution(wait_delta=timedelta(seconds=10))
+async def my_task(msg: MyModel):
+    # Task will be delayed by 0-10 seconds randomly
+    # Access shared resource safely
+    return {"status": "completed"}
+```
+
+**Parameters:**
+- `wait_delta` (timedelta): Maximum delay time for staggering. The actual delay will be a random value between 0 and `wait_delta`.
+
+**Description:**
+The `stagger_execution` decorator helps prevent deadlocks when multiple tasks require the same resource and need to execute sequentially. When applied, the decorator:
+1. Adds a random delay between 0 and `wait_delta` seconds before task execution
+2. Automatically extends the task timeout by the stagger duration to prevent premature timeouts
+3. Logs the stagger duration for debugging purposes
+
+This is particularly useful when you have multiple tasks that access exclusive resources (like database locks, file locks, or external APIs with rate limits). By staggering their execution, you reduce the chance of deadlock situations where tasks wait indefinitely for each other to release resources.

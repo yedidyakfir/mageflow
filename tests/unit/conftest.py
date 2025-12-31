@@ -1,11 +1,18 @@
+from dataclasses import dataclass
+from unittest.mock import AsyncMock, patch
+
 import fakeredis
+import mageflow
 import pytest
 import pytest_asyncio
 import rapyer
 from hatchet_sdk import Hatchet, ClientConfig
-
-import mageflow
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.model import TaskSignature
 from mageflow.startup import update_register_signature_models, mageflow_config
+from tests.integration.hatchet.worker import ContextMessage
+
+pytest.register_assert_rewrite("tests.assertions")
 
 
 @pytest_asyncio.fixture(autouse=True, scope="function")
@@ -41,3 +48,48 @@ def orch(hatchet_mock, redis_client):
 @pytest_asyncio.fixture(autouse=True, scope="function")
 async def init_models(redis_client):
     await rapyer.init_rapyer(redis_client)
+
+
+@pytest.fixture
+def mock_aio_run_no_wait():
+    with patch(
+        f"{TaskSignature.__module__}.{TaskSignature.__name__}.aio_run_no_wait",
+        new_callable=AsyncMock,
+    ) as mock_aio_run:
+        yield mock_aio_run
+
+
+@dataclass
+class ChainTestData:
+    task_signatures: list
+    chain_signature: ChainTaskSignature
+
+
+@pytest_asyncio.fixture
+async def chain_with_tasks():
+    chain_task_signature_1 = TaskSignature(
+        task_name="chain_task_1", model_validators=ContextMessage
+    )
+    await chain_task_signature_1.save()
+
+    chain_task_signature_2 = TaskSignature(
+        task_name="chain_task_2", model_validators=ContextMessage
+    )
+    await chain_task_signature_2.save()
+
+    chain_task_signature_3 = TaskSignature(
+        task_name="chain_task_3", model_validators=ContextMessage
+    )
+    await chain_task_signature_3.save()
+
+    task_signatures = [
+        chain_task_signature_1,
+        chain_task_signature_2,
+        chain_task_signature_3,
+    ]
+
+    chain_signature = await mageflow.chain([task.key for task in task_signatures])
+
+    return ChainTestData(
+        task_signatures=task_signatures, chain_signature=chain_signature
+    )

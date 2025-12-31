@@ -2,7 +2,7 @@ import pytest
 
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.status import SignatureStatus
-from tests.unit.hatchet.assertions import assert_tasks_changed_status
+from tests.unit.assertions import assert_tasks_changed_status
 
 
 @pytest.mark.asyncio

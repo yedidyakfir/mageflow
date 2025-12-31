@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel
+from rapyer import AtomicRedisModel
 
 
 class SignatureStatus(str, Enum):
@@ -16,7 +16,7 @@ class PauseActionTypes(str, Enum):
     INTERRUPT = "hard"
 
 
-class TaskStatus(BaseModel):
+class TaskStatus(AtomicRedisModel):
     status: SignatureStatus = SignatureStatus.PENDING
     last_status: SignatureStatus = SignatureStatus.PENDING
     worker_task_id: str = ""
