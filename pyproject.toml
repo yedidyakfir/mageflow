@@ -42,7 +42,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "rapyer>=1.1.0,<1.2.0"
+    "rapyer>=1.1.2,<1.2.0"
 ]
 
 [project.optional-dependencies]
