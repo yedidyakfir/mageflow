@@ -244,10 +244,6 @@ class SwarmTaskSignature(TaskSignature):
         await self.current_running_tasks.increase(-1)
         self.current_running_tasks -= 1
 
-    async def pop_task_to_run(self) -> TaskIdentifierType | None:
-        task = await self.tasks_left_to_run.apop()
-        return task
-
     async def add_to_finished_tasks(self, task: TaskIdentifierType):
         await self.finished_tasks.aappend(task)
 
