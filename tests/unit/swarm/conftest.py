@@ -50,3 +50,11 @@ async def swarm_with_tasks():
     return SwarmTestData(
         task_signatures=task_signatures, swarm_signature=swarm_signature
     )
+
+
+@pytest.fixture
+def mock_close_swarm():
+    with patch.object(
+        SwarmTaskSignature, "close_swarm", new_callable=AsyncMock
+    ) as mock_close:
+        yield mock_close
