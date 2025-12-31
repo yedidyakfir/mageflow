@@ -66,17 +66,24 @@ The main swarm class that manages parallel task execution.
 Add a new task to the swarm.
 
 ```python
-async def add_task(self, task: TaskSignatureConvertible) -> BatchItemTaskSignature
+async def add_task(
+    self, 
+    task: TaskSignatureConvertible,
+    close_on_max_task: bool = True
+) -> BatchItemTaskSignature
 ```
 
 **Parameters:**
 - `task`: Task signature, function, or name to add
+- `close_on_max_task`: If `True` and `max_task_allowed` is configured, automatically closes the swarm when the maximum task limit is reached (default: `True`)
 
 **Returns:** `BatchItemTaskSignature` - Wrapper task for the swarm
 
 **Raises:**
 - `TooManyTasksError`: If max_task_allowed limit exceeded
 - `SwarmIsCanceledError`: If swarm is canceled
+
+**Note:** When `close_on_max_task=True` and the swarm reaches its `max_task_allowed` limit after adding this task, the swarm will be automatically closed, preventing any further tasks from being added and triggering completion callbacks once all tasks finish.
 
 #### close_swarm()
 
