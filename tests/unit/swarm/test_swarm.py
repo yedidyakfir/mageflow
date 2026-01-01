@@ -1,7 +1,7 @@
-import pytest
-from unittest.mock import patch, AsyncMock, call
+from unittest.mock import patch
 
-from hatchet_sdk.runnables.types import EmptyModel
+import pytest
+import rapyer
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmTaskSignature, SwarmConfig, BatchItemTaskSignature
 from tests.integration.hatchet.models import ContextMessage
@@ -211,14 +211,11 @@ async def test_fill_running_tasks_sanity(
     num_tasks_left, current_running, max_concurrency, expected_started
 ):
     # Arrange
-    # Create original task signatures
-    original_tasks = []
-    for i in range(num_tasks_left + 2):  # Create extra tasks for the swarm
-        task = TaskSignature(
-            task_name=f"original_task_{i}", model_validators=ContextMessage
-        )
-        await task.save()
-        original_tasks.append(task)
+    # Create original task signatures using list comprehension
+    original_tasks = [
+        TaskSignature(task_name=f"original_task_{i}", model_validators=ContextMessage)
+        for i in range(num_tasks_left + 2)  # Create extra tasks for the swarm
+    ]
 
     # Create swarm with config
     swarm_signature = SwarmTaskSignature(
@@ -227,32 +224,46 @@ async def test_fill_running_tasks_sanity(
         current_running_tasks=current_running,
         config=SwarmConfig(max_concurrency=max_concurrency),
     )
-    await swarm_signature.save()
+    await rapyer.ainsert(swarm_signature, *original_tasks)
 
-    # Add tasks to swarm to create BatchItemTaskSignatures
-    batch_tasks = []
-    for original_task in original_tasks:
-        batch_task = await swarm_signature.add_task(original_task)
-        batch_tasks.append(batch_task)
+    # Add tasks to swarm to create BatchItemTaskSignatures using list comprehension
+    batch_tasks = [
+        await swarm_signature.add_task(original_task)
+        for original_task in original_tasks
+    ]
 
-    # Populate tasks_left_to_run with some batch task IDs
+    # Populate tasks_left_to_run with batch task IDs using aextend
     tasks_to_queue = batch_tasks[:num_tasks_left]
-    for task in tasks_to_queue:
-        await swarm_signature.tasks_left_to_run.aappend(task.key)
+    task_keys_to_queue = [task.key for task in tasks_to_queue]
+    await swarm_signature.tasks_left_to_run.aextend(task_keys_to_queue)
 
     # Act
-    with patch.object(
-        BatchItemTaskSignature, "aio_run_no_wait", new_callable=AsyncMock
-    ) as mock_aio_run:
+    # Track which instances the method was called on
+    called_instances = []
+
+    async def track_calls(self, *args, **kwargs):
+        called_instances.append(self)
+        return None  # Return what the original method would return
+
+    with patch.object(BatchItemTaskSignature, "aio_run_no_wait", new=track_calls):
         await swarm_signature.fill_running_tasks()
 
     # Assert
-    assert mock_aio_run.call_count == expected_started
+    assert len(called_instances) == expected_started
 
-    # Verify it was called with the correct batch task items
-    expected_calls = []
-    for i in range(expected_started):
-        # The tasks are popped from tasks_left_to_run in order
-        expected_calls.append(call(EmptyModel()))
+    # Verify the instances have the correct IDs and no duplicates
+    called_task_ids = [instance.key for instance in called_instances]
 
-    mock_aio_run.assert_has_calls(expected_calls, any_order=True)
+    # Check all IDs are from our expected tasks (tasks that were queued)
+    for task_id in called_task_ids:
+        assert (
+            task_id in task_keys_to_queue
+        ), f"Unexpected task ID: {task_id} not in queued tasks"
+
+    # Check for duplicates
+    assert len(called_task_ids) == len(
+        set(called_task_ids)
+    ), f"Duplicate task IDs found: {called_task_ids}"
+
+    # Verify we called exactly the expected number of unique tasks
+    assert len(set(called_task_ids)) == expected_started
