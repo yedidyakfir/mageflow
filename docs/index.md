@@ -1,13 +1,12 @@
-<div align="center">
-  <img src="logo.png" alt="MageFlow Logo" width="200"/>
+![MageFlow Logo](logo.png){ width="200" style="display: block; margin: 0 auto;" }
 
- [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![codecov](https://codecov.io/gh/imaginary-cherry/mageflow/branch/main/graph/badge.svg)](https://codecov.io/gh/imaginary-cherry/mageflow)
-  [![PyPI version](https://badge.fury.io/py/mageflow.svg)](https://badge.fury.io/py/mageflow)
-  [![Downloads](https://static.pepy.tech/badge/mageflow)](https://pepy.tech/project/mageflow)
-
-</div>
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://codecov.io/gh/imaginary-cherry/mageflow"><img src="https://codecov.io/gh/imaginary-cherry/mageflow/branch/main/graph/badge.svg" alt="codecov"></a>
+  <a href="https://badge.fury.io/py/mageflow"><img src="https://badge.fury.io/py/mageflow.svg" alt="PyPI version"></a>
+  <a href="https://pepy.tech/project/mageflow"><img src="https://static.pepy.tech/badge/mageflow" alt="Downloads"></a>
+</p>
 
 # MageFlow
 
