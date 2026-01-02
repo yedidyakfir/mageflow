@@ -5,7 +5,7 @@ from hatchet_sdk import Hatchet
 from hatchet_sdk.clients.rest import V1TaskStatus, V1TaskSummary
 
 from mageflow.chain.model import ChainTaskSignature
-from mageflow.signature.consts import TASK_ID_PARAM_NAME
+from mageflow.signature.consts import TASK_ID_PARAM_NAME, MAGEFLOW_TASK_INITIALS
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.types import TaskIdentifierType
 from mageflow.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
@@ -13,7 +13,12 @@ from mageflow.workflows import TASK_DATA_PARAM_NAME
 from tests.integration.hatchet.conftest import extract_bad_keys_from_redis
 
 WF_MAPPING_TYPE = dict[str, V1TaskSummary]
+WF_MAPPING_BY_WF_ID_TYPE = dict[str, V1TaskSummary]
 HatchetRuns = list[V1TaskSummary]
+
+
+def is_wf_internal_mageflow(wf: V1TaskSummary) -> bool:
+    return wf.workflow_name.startswith(MAGEFLOW_TASK_INITIALS)
 
 
 async def get_runs(hatchet: Hatchet, ctx_metadata: dict) -> HatchetRuns:
@@ -28,6 +33,10 @@ async def get_runs(hatchet: Hatchet, ctx_metadata: dict) -> HatchetRuns:
     return wf_tasks
 
 
+def map_wf_by_wf_id(runs: HatchetRuns) -> WF_MAPPING_BY_WF_ID_TYPE:
+    return {wf.workflow_id: wf for wf in runs}
+
+
 def map_wf_by_id(
     runs: HatchetRuns, also_not_done: bool = False, ignore_cancel: bool = False
 ) -> WF_MAPPING_TYPE:
@@ -38,6 +47,30 @@ def map_wf_by_id(
         if also_not_done or is_wf_done(wf)
         if not ignore_cancel or not is_task_paused(wf)
     }
+
+
+def find_sub_calls_from_wf(
+    origin_wf: V1TaskSummary, runs: HatchetRuns
+) -> list[V1TaskSummary]:
+    called_tasks = [
+        wf for wf in runs if wf.parent_task_external_id == origin_wf.task_external_id
+    ]
+    for wf in called_tasks[:]:
+        if is_wf_internal_mageflow(wf):
+            called_tasks.remove(wf)
+            called_tasks.extend(find_sub_calls_from_wf(wf, runs))
+
+    return called_tasks
+
+
+def find_sub_calls_by_signature(
+    signature: TaskSignature, runs: HatchetRuns
+) -> list[V1TaskSummary]:
+    wf_by_signature = map_wf_by_id(runs)
+    signature_wf = wf_by_signature[signature.key]
+
+    called_tasks = find_sub_calls_from_wf(signature_wf, runs)
+    return called_tasks
 
 
 def is_wf_done(wf: V1TaskSummary) -> bool:

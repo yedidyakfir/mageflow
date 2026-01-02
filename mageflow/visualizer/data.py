@@ -15,10 +15,10 @@ async def extract_signatures() -> list[TaskSignature]:
     signatures_key = await asyncio.gather(
         *[klass.afind_keys() for klass in signature_models]
     )
-    sigantures = await asyncio.gather(
-        *[rapyer.get(key) for keys in signatures_key for key in keys]
+    signatures = await asyncio.gather(
+        *[rapyer.aget(key) for keys in signatures_key for key in keys]
     )
-    return sigantures
+    return signatures
 
 
 async def create_chain(name: str):

@@ -1,8 +1,8 @@
 site_name: MageFlow
 site_description: A Python package that provides Pydantic models with Redis as the backend storage
-site_url: https://yedidyakfir.github.io/mageflow/
-repo_url: https://github.com/yedidyakfir/mageflow
-repo_name: yedidyakfir/mageflow
+site_url: https://imaginary-cherry.github.io/mageflow/
+repo_url: https://github.com/imaginary-cherry/mageflow
+repo_name: imaginary-cherry/mageflow
 docs_dir: docs
 
 theme:
@@ -104,7 +104,7 @@ markdown_extensions:
   - pymdownx.magiclink:
       normalize_issue_symbols: true
       repo_url_shorthand: true
-      user: yedidyakfir
+      user: imaginary-cherry
       repo: task-mageflow
   - pymdownx.mark
   - pymdownx.smartsymbols
@@ -135,7 +135,7 @@ extra:
     deprecated: Deprecated
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/yedidyakfir/mageflow
+      link: https://github.com/imaginary-cherry/mageflow
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/mageflow/
   version:
