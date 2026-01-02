@@ -4,16 +4,42 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, ready_for_review, reopened, closed, synchronize]
   workflow_dispatch:
 
 jobs:
+  validate-branch-target:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Validate PR target branch
+        run: |
+          SOURCE_BRANCH="${{ github.head_ref }}"
+          TARGET_BRANCH="${{ github.base_ref }}"
+          
+          echo "Source branch: $SOURCE_BRANCH"
+          echo "Target branch: $TARGET_BRANCH"
+          
+          # Rule 1: Only develop branch can merge to main
+          if [[ "$TARGET_BRANCH" == "main" && "$SOURCE_BRANCH" != "develop" ]]; then
+            echo "❌ Error: Only 'develop' branch can merge to 'main'"
+            echo "Your branch '$SOURCE_BRANCH' cannot target 'main' directly"
+            echo "Please target 'develop' branch instead"
+            exit 1
+          fi
+          
+          echo "✅ Branch targeting rules validated successfully"
+
   tests:
     name: Run Tests
     runs-on: ubuntu-latest
+    needs: [ validate-branch-target ]
+    if: always() && (needs.validate-branch-target.result == 'success' || needs.validate-branch-target.result == 'skipped')
+
     strategy:
       matrix:
         python-version:  ['3.11', '3.12', '3.13']
+        hatchet-version: ['1.20', '1.21']
 
     steps:
       - uses: actions/checkout@v4
@@ -24,26 +50,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          virtualenvs-path: .venv
-
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v3
-        id: poetry-cache
-        with:
-          path: ./.venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-${{ matrix.python-version }}-
-
       - name: Install dependencies
         run: |
-          poetry install --with dev --extras hatchet
+          pip install --upgrade pip
+          pip install tox
 
       - name: Deploy Hatch Lite
         run: |
@@ -63,11 +73,16 @@ jobs:
           echo "DYNACONF_REDIS__URL=redis://localhost:6379/" >> $GITHUB_ENV
           echo "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED=True" >> $GITHUB_ENV
 
-      - name: Run Tests
+      - name: Run Tests with Tox
         env:
           PYTHONHASHSEED: 0
         run: |
-          poetry run pytest tests
+          # Map Python and Hatchet versions to tox env
+          PYTHON_VER=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          HATCHET_VER=$(echo "${{ matrix.hatchet-version }}" | tr -d '.')
+          TOX_ENV="py${PYTHON_VER}-hatchet${HATCHET_VER}"
+          echo "Running tox environment: $TOX_ENV"
+          tox -e $TOX_ENV
 
       - name: Clean up credentials
         if: always()

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from hatchet_sdk import Hatchet
 
 from mageflow.callbacks import register_task
@@ -18,8 +20,12 @@ def init_mageflow_hatchet_tasks(hatchet: Hatchet):
     hatchet_chain_done = hatchet.task(
         name=ON_CHAIN_END,
         input_validator=ChainSuccessTaskCommandMessage,
+        retries=3,
+        execution_timeout=timedelta(minutes=5),
     )
-    hatchet_chain_error = hatchet.task(name=ON_CHAIN_ERROR)
+    hatchet_chain_error = hatchet.task(
+        name=ON_CHAIN_ERROR, retries=3, execution_timeout=timedelta(minutes=5)
+    )
     chain_done_task = hatchet_chain_done(chain_end_task)
     on_chain_error_task = hatchet_chain_error(chain_error_task)
     register_chain_done = register_task(ON_CHAIN_END)
@@ -28,12 +34,18 @@ def init_mageflow_hatchet_tasks(hatchet: Hatchet):
     on_chain_error_task = register_chain_error(on_chain_error_task)
 
     # Swarm tasks
-    swarm_start = hatchet.task(name=ON_SWARM_START)
+    swarm_start = hatchet.task(
+        name=ON_SWARM_START, retries=3, execution_timeout=timedelta(minutes=5)
+    )
     swarm_done = hatchet.task(
         name=ON_SWARM_END,
         input_validator=SwarmResultsMessage,
+        retries=3,
+        execution_timeout=timedelta(minutes=5),
     )
-    swarm_error = hatchet.task(name=ON_SWARM_ERROR)
+    swarm_error = hatchet.task(
+        name=ON_SWARM_ERROR, retries=3, execution_timeout=timedelta(minutes=5)
+    )
     swarm_start = swarm_start(swarm_start_tasks)
     swarm_done = swarm_done(swarm_item_done)
     swarm_error = swarm_error(swarm_item_failed)

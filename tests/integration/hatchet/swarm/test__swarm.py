@@ -1,10 +1,12 @@
 import asyncio
 
 import pytest
+from hatchet_sdk.clients.rest import V1TaskStatus
+from hatchet_sdk.runnables.types import EmptyModel
 
 import mageflow
 from mageflow.signature.model import TaskSignature
-from mageflow.swarm.model import SwarmConfig
+from mageflow.swarm.model import SwarmConfig, BatchItemTaskSignature
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
     assert_swarm_task_done,
@@ -12,6 +14,8 @@ from tests.integration.hatchet.assertions import (
     assert_signature_done,
     map_wf_by_id,
     assert_overlaps_leq_k_workflows,
+    is_wf_done,
+    find_sub_calls_by_signature,
 )
 from tests.integration.hatchet.conftest import HatchetInitData
 from tests.integration.hatchet.models import ContextMessage
@@ -307,7 +311,103 @@ async def test_swarm_run_finish_at_fail__still_finish_successfully(
 
     # Assert
     runs = await get_runs(hatchet, ctx_metadata)
-    wf_by_task_id = map_wf_by_id(runs, also_not_done=True)
 
     # Check swarm callback was called
     assert_signature_done(runs, task1_callback_sign, base_data=test_ctx)
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_swarm_fill_running_tasks_with_success_task(
+    hatchet_client_init: HatchetInitData,
+    test_ctx,
+    ctx_metadata,
+    trigger_options,
+    sign_task1,
+):
+    # Arrange
+    redis_client, hatchet = (
+        hatchet_client_init.redis_client,
+        hatchet_client_init.hatchet,
+    )
+    regular_message = ContextMessage(base_data=test_ctx)
+
+    # Create 4 tasks for the swarm
+    swarm_tasks = await sign_task1.duplicate_many(4)
+
+    # Create swarm with max_concurrency=3
+    swarm = await mageflow.swarm(
+        tasks=swarm_tasks,
+        config=SwarmConfig(max_concurrency=3),
+        is_swarm_closed=True,  # Close swarm to prevent new tasks
+        kwargs=regular_message.model_dump(mode="json"),
+    )
+    first_swarm_item = await BatchItemTaskSignature.get_safe(swarm.tasks[0])
+    original_first_task = await mageflow.load_signature(
+        first_swarm_item.original_task_id
+    )
+    await swarm.tasks_left_to_run.aextend(swarm.tasks[1:])
+
+    # Act
+    # Run only the first task directly
+    await first_swarm_item.aio_run_no_wait(EmptyModel(), options=trigger_options)
+    await asyncio.sleep(13)
+
+    # Assert
+    runs = await get_runs(hatchet, ctx_metadata)
+
+    tasks_called_by_first_task = find_sub_calls_by_signature(original_first_task, runs)
+
+    # Verify exactly 3 tasks were started by fill_running_tasks
+    assert (
+        len(tasks_called_by_first_task) == 3
+    ), "fill_running_tasks should start exactly 3 tasks"
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_swarm_fill_running_tasks_with_failed_task(
+    hatchet_client_init: HatchetInitData,
+    test_ctx,
+    ctx_metadata,
+    trigger_options,
+    sign_fail_task,
+    sign_task1,
+    sign_task2,
+    sign_task3,
+):
+    # Arrange
+    redis_client, hatchet = (
+        hatchet_client_init.redis_client,
+        hatchet_client_init.hatchet,
+    )
+
+    # Create swarm with fail_task first and 3 other tasks
+    swarm_tasks = [sign_fail_task, sign_task1, sign_task2, sign_task3]
+
+    # Create swarm with max_concurrency=3
+    regular_message = ContextMessage(base_data=test_ctx)
+    swarm = await mageflow.swarm(
+        tasks=swarm_tasks,
+        config=SwarmConfig(max_concurrency=3),
+        is_swarm_closed=True,  # Close swarm to prevent new tasks
+        kwargs=regular_message.model_dump(mode="json"),
+    )
+    first_swarm_item = await BatchItemTaskSignature.get_safe(swarm.tasks[0])
+    original_first_task = await mageflow.load_signature(
+        first_swarm_item.original_task_id
+    )
+    await swarm.tasks_left_to_run.aextend(swarm.tasks[1:])
+
+    # Act
+    # Run only the first (failing) task directly
+    await first_swarm_item.aio_run_no_wait(regular_message, options=trigger_options)
+    await asyncio.sleep(13)
+
+    # Assert
+    runs = await get_runs(hatchet, ctx_metadata)
+
+    tasks_called_by_first_task = find_sub_calls_by_signature(original_first_task, runs)
+
+    # Verify exactly 3 tasks were started by fill_running_tasks
+    assert (
+        len(tasks_called_by_first_task) == 3
+    ), "fill_running_tasks should start exactly 3 tasks"

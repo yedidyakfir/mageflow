@@ -100,17 +100,10 @@ async def swarm_item_failed(msg: EmptyModel, ctx: Context):
 async def handle_finish_tasks(
     swarm_task: SwarmTaskSignature, ctx: Context, msg: BaseModel
 ):
-    next_task = await swarm_task.pop_task_to_run()
     await swarm_task.decrease_running_tasks_count()
-    if next_task:
-        next_task_signature = await TaskSignature.get_safe(next_task)
-        if next_task_signature is None:
-            raise MissingSwarmItemError(
-                f"swarm item {next_task} was deleted before swarm is done"
-            )
-        # The message is already stored in the task signature
-        await next_task_signature.aio_run_no_wait(EmptyModel())
-        ctx.log(f"Swarm item started new task {next_task}/{swarm_task.key}")
+    num_task_started = await swarm_task.fill_running_tasks()
+    if num_task_started:
+        ctx.log(f"Swarm item started new task {num_task_started}/{swarm_task.key}")
     else:
         ctx.log(f"Swarm item no new task to run in {swarm_task.key}")
 

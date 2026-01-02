@@ -18,3 +18,8 @@ Fixed a bug for running chain in swarms
 ### 🐛 Fixed
 - Support Hatchet retries with signature
 - Error callbacks now wait until all retries are completed or stopped before activation
+
+## [0.0.5]
+
+### ✨ Added
+- Signature TTL (Time-To-Live) set to 1 day for automatic expiration

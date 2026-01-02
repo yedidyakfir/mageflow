@@ -35,7 +35,7 @@ config_obj = ClientConfig(token="your-hatchet-token")
 redis_client = redis.asyncio.from_url(
     "redis-url",
     max_connections=1028,  # Use connection pool 
-    decode_responses=True,  # Mandatory - for redis backend, see https://github.com/yedidyakfir/rapyer docs
+    decode_responses=True,  # Mandatory - for redis backend, see https://github.com/imaginary-cherry/rapyer docs
 )
 
 # Initialize Hatchet

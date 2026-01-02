@@ -3,7 +3,7 @@
 
  [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![codecov](https://codecov.io/gh/yedidyakfir/mageflow/branch/main/graph/badge.svg)](https://codecov.io/gh/yedidyakfir/mageflow)
+  [![codecov](https://codecov.io/gh/imaginary-cherry/mageflow/branch/main/graph/badge.svg)](https://codecov.io/gh/imaginary-cherry/mageflow)
   [![PyPI version](https://badge.fury.io/py/mageflow.svg)](https://badge.fury.io/py/mageflow)
   [![Downloads](https://static.pepy.tech/badge/mageflow)](https://pepy.tech/project/mageflow)
 

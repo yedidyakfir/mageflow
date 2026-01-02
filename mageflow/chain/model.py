@@ -34,7 +34,7 @@ class ChainTaskSignature(TaskSignature):
         await asyncio.gather(*delete_tasks)
 
     async def aupdate_real_task_kwargs(self, **kwargs):
-        first_task = await rapyer.get(self.tasks[0])
+        first_task = await rapyer.aget(self.tasks[0])
         if not isinstance(first_task, TaskSignature):
             raise RuntimeError(f"First task from chain {self.key} must be a signature")
         return await first_task.aupdate_real_task_kwargs(**kwargs)

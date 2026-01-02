@@ -1,9 +1,9 @@
 [project]
 name = "mageflow"
-version = "0.0.4"
+version = "0.0.5"
 description = "Manage Graph Execution Flow - A unified interface for task orchestration across different task managers"
 authors = [
-    {name = "yedidyakfir", email = "yedidyakfir@gmail.com"}
+    {name = "imaginary-cherry", email = "yedidyakfir@gmail.com"}
 ]
 license = {text = "MIT"}
 readme = "README.md"
@@ -42,7 +42,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "rapyer>=1.1.0,<1.2.0"
+    "rapyer>=1.1.3,<1.2.0"
 ]
 
 [project.optional-dependencies]
@@ -56,12 +56,12 @@ display = [
 ]
 
 [project.urls]
-Homepage = "https://yedidyakfir.github.io/mageflow/"
-Documentation = "https://yedidyakfir.github.io/mageflow/"
-Repository = "https://github.com/yedidyakfir/mageflow"
-"Source Code" = "https://github.com/yedidyakfir/mageflow"
-"Bug Tracker" = "https://github.com/yedidyakfir/mageflow/issues"
-"Changelog" = "https://github.com/yedidyakfir/mageflow/releases"
+Homepage = "https://imaginary-cherry.github.io/mageflow/"
+Documentation = "https://imaginary-cherry.github.io/mageflow/"
+Repository = "https://github.com/imaginary-cherry/mageflow"
+"Source Code" = "https://github.com/imaginary-cherry/mageflow"
+"Bug Tracker" = "https://github.com/imaginary-cherry/mageflow/issues"
+"Changelog" = "https://github.com/imaginary-cherry/mageflow/releases"
 
 [tool.poetry]
 packages = [{include = "mageflow"}]

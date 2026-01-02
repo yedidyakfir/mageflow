@@ -218,13 +218,34 @@ class SwarmTaskSignature(TaskSignature):
                 await self.tasks_left_to_run.aappend(task.key)
                 return False
 
+    async def fill_running_tasks(self) -> int:
+        resource_to_run = self.config.max_concurrency - self.current_running_tasks
+        if resource_to_run <= 0:
+            return 0
+        num_of_task_to_run = min(resource_to_run, len(self.tasks_left_to_run))
+        task_ids = await asyncio.gather(
+            *[self.tasks_left_to_run.apop() for i in range(num_of_task_to_run)]
+        )
+        tasks = await asyncio.gather(
+            *[
+                BatchItemTaskSignature.get_safe(task_id)
+                for task_id in task_ids
+                if task_id  # Check not None
+            ]
+        )
+        publish_coroutine = [
+            next_task.aio_run_no_wait(EmptyModel())
+            for next_task in tasks
+            if next_task is not None
+        ]
+        await asyncio.gather(*publish_coroutine)
+        if len(tasks) != len(publish_coroutine):
+            raise MissingSwarmItemError(f"swarm item was deleted before swarm is done")
+        return len(tasks)
+
     async def decrease_running_tasks_count(self):
         await self.current_running_tasks.increase(-1)
         self.current_running_tasks -= 1
-
-    async def pop_task_to_run(self) -> TaskIdentifierType | None:
-        task = await self.tasks_left_to_run.apop()
-        return task
 
     async def add_to_finished_tasks(self, task: TaskIdentifierType):
         await self.finished_tasks.aappend(task)

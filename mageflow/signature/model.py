@@ -1,22 +1,11 @@
 import asyncio
 import contextlib
 from datetime import datetime
-from typing import Optional, Self, Any, TypeAlias, AsyncGenerator
+from typing import Optional, Self, Any, TypeAlias, AsyncGenerator, ClassVar
 
 import rapyer
 from hatchet_sdk.runnables.types import EmptyModel
 from hatchet_sdk.runnables.workflow import Workflow
-from pydantic import (
-    BaseModel,
-    field_validator,
-    Field,
-)
-from rapyer import AtomicRedisModel
-from rapyer.errors.base import KeyNotFound
-from rapyer.types import RedisDict, RedisList, RedisDatetime
-from rapyer.utils.redis import acquire_lock
-from typing_extensions import deprecated
-
 from mageflow.errors import MissingSignatureError
 from mageflow.models.message import ReturnValue
 from mageflow.signature.consts import TASK_ID_PARAM_NAME
@@ -26,6 +15,17 @@ from mageflow.startup import mageflow_config
 from mageflow.task.model import HatchetTaskModel
 from mageflow.utils.models import get_marked_fields
 from mageflow.workflows import MageflowWorkflow
+from pydantic import (
+    BaseModel,
+    field_validator,
+    Field,
+)
+from rapyer import AtomicRedisModel
+from rapyer.config import RedisConfig
+from rapyer.errors.base import KeyNotFound
+from rapyer.types import RedisDict, RedisList, RedisDatetime
+from rapyer.utils.redis import acquire_lock
+from typing_extensions import deprecated
 
 
 class TaskSignature(AtomicRedisModel):
@@ -37,6 +37,8 @@ class TaskSignature(AtomicRedisModel):
     error_callbacks: RedisList[TaskIdentifierType] = Field(default_factory=list)
     task_status: TaskStatus = Field(default_factory=TaskStatus)
     task_identifiers: RedisDict = Field(default_factory=dict)
+
+    Meta: ClassVar[RedisConfig] = RedisConfig(ttl=24 * 60 * 60)
 
     @field_validator("success_callbacks", "error_callbacks", mode="before")
     @classmethod
@@ -77,7 +79,7 @@ class TaskSignature(AtomicRedisModel):
     @classmethod
     async def get_safe(cls, task_key: TaskIdentifierType) -> Optional[Self]:
         try:
-            return await rapyer.get(task_key)
+            return await rapyer.aget(task_key)
         except KeyNotFound:
             return None
 
@@ -312,7 +314,7 @@ async def lock_from_key(
     cls, key: str, action: str = "default", save_at_end: bool = False
 ) -> AsyncGenerator[TaskSignature, None]:
     async with acquire_lock(cls.Meta.redis, f"{key}/{action}"):
-        redis_model = await rapyer.get(key)
+        redis_model = await rapyer.aget(key)
         yield redis_model
         if save_at_end:
             await redis_model.save()
