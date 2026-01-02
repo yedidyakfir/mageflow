@@ -1,6 +1,6 @@
 [project]
 name = "mageflow"
-version = "0.0.4"
+version = "0.0.5"
 description = "Manage Graph Execution Flow - A unified interface for task orchestration across different task managers"
 authors = [
     {name = "imaginary-cherry", email = "yedidyakfir@gmail.com"}
