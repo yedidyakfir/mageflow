@@ -7,7 +7,8 @@ on:
 
 jobs:
   create-github-release:
-    if: github.ref_type == 'tag' && github.event.base_ref == 'refs/heads/main'
+    environment:
+      name: create-release
     runs-on: ubuntu-22.04
     permissions:
       contents: write  # Required for creating releases
