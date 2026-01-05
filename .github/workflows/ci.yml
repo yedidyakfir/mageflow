@@ -74,52 +74,6 @@ jobs:
         hatchet-version: ['1.20', '1.21']
         group: [1, 2, 3]
 
-    services:
-      postgres:
-        image: postgres:15.6
-        env:
-          POSTGRES_USER: hatchet
-          POSTGRES_PASSWORD: hatchet
-          POSTGRES_DB: hatchet
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis/redis-stack-server:latest
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      hatchet-lite:
-        image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest
-        ports:
-          - 8888:8888
-          - 7077:7077
-        env:
-          DATABASE_URL: postgresql://hatchet:hatchet@postgres:5432/hatchet?sslmode=disable
-          SERVER_AUTH_COOKIE_DOMAIN: localhost
-          SERVER_AUTH_COOKIE_INSECURE: "t"
-          SERVER_GRPC_BIND_ADDRESS: "0.0.0.0"
-          SERVER_GRPC_INSECURE: "t"
-          SERVER_GRPC_BROADCAST_ADDRESS: localhost:7077
-          SERVER_GRPC_PORT: "7077"
-          SERVER_URL: http://localhost:8888
-          SERVER_AUTH_SET_EMAIL_VERIFIED: "t"
-          SERVER_DEFAULT_ENGINE_VERSION: "V1"
-        options: >-
-          --health-cmd "curl -f http://localhost:8888/api/live || exit 1"
-          --health-interval 15s
-          --health-timeout 10s
-          --health-retries 10
-          --health-start-period 30s
-
     steps:
       - uses: actions/checkout@v4
 
@@ -134,12 +88,16 @@ jobs:
           pip install --upgrade pip
           pip install tox
 
-      - name: Wait for services
-        run: sleep 15
+      - name: Deploy Hatchet Lite
+        run: |
+          docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml up -d
 
       - name: Generate Hatchet API Key
+        env:
+          SERVER_AUTH_COOKIE_INSECURE: "t"
         run: |
-          HATCHET_API_KEY=$(docker exec $(docker ps -q -f "ancestor=ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest") /hatchet-admin token create --config /config --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)
+          sleep 10
+          HATCHET_API_KEY=$(docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml exec hatchet-lite /hatchet-admin token create --config /config --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)
           echo "DYNACONF_hatchet__api_key=$HATCHET_API_KEY" >> $GITHUB_ENV
           echo "DYNACONF_hatchet__tls_config__strategy=none" >> $GITHUB_ENV
           echo "DYNACONF_REDIS__URL=redis://localhost:6379/" >> $GITHUB_ENV
@@ -156,6 +114,11 @@ jobs:
           TOX_ENV="py${PYTHON_VER}-hatchet${HATCHET_VER}-integration"
           echo "Running tox environment: $TOX_ENV (Group ${{ matrix.group }} of 3)"
           tox -e $TOX_ENV
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml down
 
   test-results:
     runs-on: ubuntu-22.04
