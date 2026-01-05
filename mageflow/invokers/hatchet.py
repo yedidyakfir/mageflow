@@ -38,6 +38,15 @@ class HatchetInvoker(BaseInvoker):
         task_id = self.task_data.get(TASK_ID_PARAM_NAME, None)
         if task_id:
             current_task = await TaskSignature.get_safe(task_id)
+            if current_task is None:
+                # Task was deleted before success callback could be triggered
+                # This can happen if TTL expired or task was manually removed
+                import logging
+                logging.warning(
+                    f"run_success: TaskSignature {task_id} not found in Redis - "
+                    f"success callbacks will not be triggered!"
+                )
+                return False
             task_success_workflows = current_task.activate_success(result)
             success_publish_tasks.append(asyncio.create_task(task_success_workflows))
 
@@ -51,6 +60,14 @@ class HatchetInvoker(BaseInvoker):
         task_id = self.task_data.get(TASK_ID_PARAM_NAME, None)
         if task_id:
             current_task = await TaskSignature.get_safe(task_id)
+            if current_task is None:
+                # Task was deleted before error callback could be triggered
+                import logging
+                logging.warning(
+                    f"run_error: TaskSignature {task_id} not found in Redis - "
+                    f"error callbacks will not be triggered!"
+                )
+                return False
             task_error_workflows = current_task.activate_error(self.message)
             error_publish_tasks.append(asyncio.create_task(task_error_workflows))
 
