@@ -1,12 +1,15 @@
 from datetime import datetime
 from typing import TypeAlias, TypedDict, Any, overload
 
+from mageflow.root.model import RootTaskSignature
 from mageflow.signature.model import (
     TaskSignature,
     TaskIdentifierType,
     HatchetTaskType,
 )
 from mageflow.signature.status import TaskStatus
+from mageflow.swarm.model import SwarmConfig
+from mageflow.task.model import HatchetTaskModel
 
 TaskSignatureConvertible: TypeAlias = (
     TaskIdentifierType | TaskSignature | HatchetTaskType
@@ -49,17 +52,27 @@ async def sign(task: str | HatchetTaskType, **options: Any) -> TaskSignature: ..
 
 
 async def sign(task: str | HatchetTaskType, **options: Any) -> TaskSignature:
-    model_fields = list(TaskSignature.model_fields.keys())
+    task_name = task if isinstance(task, str) else task.name
+
+    task_model = await HatchetTaskModel.safe_get(task_name)
+    is_root = task_model and task_model.is_root_task
+
+    signature_class = RootTaskSignature if is_root else TaskSignature
+
+    model_fields = list(signature_class.model_fields.keys())
     kwargs = {
         field_name: options.pop(field_name)
         for field_name in model_fields
         if field_name in options
     }
 
+    if is_root and task_model.root_task_config:
+        kwargs["swarm_config"] = SwarmConfig(**task_model.root_task_config)
+
     if isinstance(task, str):
-        return await TaskSignature.from_task_name(task, kwargs=options, **kwargs)
+        return await signature_class.from_task_name(task, kwargs=options, **kwargs)
     else:
-        return await TaskSignature.from_task(task, kwargs=options, **kwargs)
+        return await signature_class.from_task(task, kwargs=options, **kwargs)
 
 
 load_signature = TaskSignature.get_safe
