@@ -15,10 +15,10 @@ jobs:
         run: |
           SOURCE_BRANCH="${{ github.head_ref }}"
           TARGET_BRANCH="${{ github.base_ref }}"
-          
+
           echo "Source branch: $SOURCE_BRANCH"
           echo "Target branch: $TARGET_BRANCH"
-          
+
           # Rule 1: Only develop branch can merge to main
           if [[ "$TARGET_BRANCH" == "main" && "$SOURCE_BRANCH" != "develop" ]]; then
             echo "❌ Error: Only 'develop' branch can merge to 'main'"
@@ -26,19 +26,19 @@ jobs:
             echo "Please target 'develop' branch instead"
             exit 1
           fi
-          
+
           echo "✅ Branch targeting rules validated successfully"
 
-  tests:
-    name: Run Tests
+  unit-tests:
+    name: Unit Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-    needs: [ validate-branch-target ]
+    needs: [validate-branch-target]
     if: always() && (needs.validate-branch-target.result == 'success' || needs.validate-branch-target.result == 'skipped')
 
     strategy:
+      fail-fast: false
       matrix:
-        python-version:  ['3.11', '3.12', '3.13']
-        hatchet-version: ['1.20', '1.21']
+        python-version: ['3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -54,51 +54,122 @@ jobs:
           pip install --upgrade pip
           pip install tox
 
-      - name: Deploy Hatch Lite
+      - name: Run Unit Tests
         run: |
-          docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml up -d
+          PYTHON_VER=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          TOX_ENV="py${PYTHON_VER}-unit"
+          echo "Running tox environment: $TOX_ENV"
+          tox -e $TOX_ENV
 
-      - name: Generate Env File
+  integration-tests:
+    name: Integration (Py${{ matrix.python-version }}/H${{ matrix.hatchet-version }}/G${{ matrix.group }})
+    runs-on: ubuntu-latest
+    needs: [validate-branch-target]
+    if: always() && (needs.validate-branch-target.result == 'success' || needs.validate-branch-target.result == 'skipped')
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+        hatchet-version: ['1.20', '1.21']
+        group: [1, 2, 3]
+
+    services:
+      postgres:
+        image: postgres:15.6
         env:
+          POSTGRES_USER: hatchet
+          POSTGRES_PASSWORD: hatchet
+          POSTGRES_DB: hatchet
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis/redis-stack-server:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      hatchet-lite:
+        image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest
+        ports:
+          - 8888:8888
+          - 7077:7077
+        env:
+          DATABASE_URL: postgresql://hatchet:hatchet@postgres:5432/hatchet?sslmode=disable
+          SERVER_AUTH_COOKIE_DOMAIN: localhost
           SERVER_AUTH_COOKIE_INSECURE: "t"
-        working-directory: .
+          SERVER_GRPC_BIND_ADDRESS: "0.0.0.0"
+          SERVER_GRPC_INSECURE: "t"
+          SERVER_GRPC_BROADCAST_ADDRESS: localhost:7077
+          SERVER_GRPC_PORT: "7077"
+          SERVER_URL: http://localhost:8888
+          SERVER_AUTH_SET_EMAIL_VERIFIED: "t"
+          SERVER_DEFAULT_ENGINE_VERSION: "V1"
+        options: >-
+          --health-cmd "curl -f http://localhost:8888/api/live || exit 1"
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 30s
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
         run: |
-          sleep 10
-          HATCHET_API_KEY=$(docker compose -f tests/integration/hatchet/docker-compose.hatchet.yml exec hatchet-lite /hatchet-admin token create --config /config --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)
-          echo "HATCHET_API_KEY=$HATCHET_API_KEY"
-          echo "HATCHET_API_KEY=$HATCHET_API_KEY" >> $GITHUB_ENV
+          pip install --upgrade pip
+          pip install tox
+
+      - name: Wait for services
+        run: sleep 15
+
+      - name: Generate Hatchet API Key
+        run: |
+          HATCHET_API_KEY=$(docker exec $(docker ps -q -f "ancestor=ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest") /hatchet-admin token create --config /config --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)
           echo "DYNACONF_hatchet__api_key=$HATCHET_API_KEY" >> $GITHUB_ENV
           echo "DYNACONF_hatchet__tls_config__strategy=none" >> $GITHUB_ENV
           echo "DYNACONF_REDIS__URL=redis://localhost:6379/" >> $GITHUB_ENV
           echo "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED=True" >> $GITHUB_ENV
 
-      - name: Run Tests with Tox
+      - name: Run Integration Tests
         env:
           PYTHONHASHSEED: 0
+          PYTEST_SPLITS: 3
+          PYTEST_GROUP: ${{ matrix.group }}
         run: |
-          # Map Python and Hatchet versions to tox env
           PYTHON_VER=$(echo "${{ matrix.python-version }}" | tr -d '.')
           HATCHET_VER=$(echo "${{ matrix.hatchet-version }}" | tr -d '.')
-          TOX_ENV="py${PYTHON_VER}-hatchet${HATCHET_VER}"
-          echo "Running tox environment: $TOX_ENV"
+          TOX_ENV="py${PYTHON_VER}-hatchet${HATCHET_VER}-integration"
+          echo "Running tox environment: $TOX_ENV (Group ${{ matrix.group }} of 3)"
           tox -e $TOX_ENV
-
-      - name: Clean up credentials
-        if: always()
-        run: |
-          rm -f ~/.git-credentials
-          docker stop hatchet-lite || true
-          docker rm hatchet-lite || true
 
   test-results:
     runs-on: ubuntu-22.04
-    needs: [ tests ]
+    needs: [unit-tests, integration-tests]
     if: always()
     steps:
       - name: Check test results
         run: |
-          if [[ "${{ needs.tests.result }}" != "success" ]]; then
-            echo "Test job failed"
+          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+            echo "Unit tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.integration-tests.result }}" != "success" ]]; then
+            echo "Integration tests failed"
             exit 1
           fi
           echo "All checks passed successfully!"
