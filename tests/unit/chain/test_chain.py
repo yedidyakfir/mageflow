@@ -1,5 +1,6 @@
-import mageflow
 import pytest
+
+import mageflow
 from mageflow.chain.consts import ON_CHAIN_ERROR, ON_CHAIN_END
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature

@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import Optional, Any
 
-import mageflow
 import pytest
+from pydantic import BaseModel
+
+import mageflow
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.types import TaskIdentifierType
-from pydantic import BaseModel
 
 
 class SignParamOptions(BaseModel):

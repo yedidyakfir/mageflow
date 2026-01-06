@@ -1,5 +1,6 @@
-import mageflow
 import pytest
+
+import mageflow
 from mageflow.errors import TooManyTasksError
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmConfig
