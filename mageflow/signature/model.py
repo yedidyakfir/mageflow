@@ -233,7 +233,7 @@ class TaskSignature(AtomicRedisModel):
     async def should_run(self):
         return self.task_status.should_run()
 
-    async def change_status(self, status: SignatureStatus) -> bool:
+    async def change_status(self, status: SignatureStatus):
         await self.task_status.aupdate(
             last_status=self.task_status.status, status=status
         )
