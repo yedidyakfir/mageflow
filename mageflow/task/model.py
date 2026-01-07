@@ -1,4 +1,4 @@
-from typing import Optional, Annotated, Self
+from typing import Optional, Self
 
 from hatchet_sdk import NonRetryableException
 from pydantic import BaseModel
@@ -8,7 +8,7 @@ from rapyer.fields import Key
 
 
 class HatchetTaskModel(AtomicRedisModel):
-    mageflow_task_name: Annotated[str, Key()]
+    mageflow_task_name: Key[str]
     task_name: str
     input_validator: Optional[type[BaseModel]] = None
     retries: Optional[int] = None
