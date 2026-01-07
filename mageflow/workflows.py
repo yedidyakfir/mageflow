@@ -5,9 +5,8 @@ from hatchet_sdk.clients.admin import TriggerWorkflowOptions, WorkflowRunTrigger
 from hatchet_sdk.runnables.types import TWorkflowInput, EmptyModel
 from hatchet_sdk.runnables.workflow import Workflow
 from hatchet_sdk.utils.typing import JSONSerializableMapping
-from pydantic import BaseModel
-
 from mageflow.utils.pythonic import deep_merge
+from pydantic import BaseModel
 
 TASK_DATA_PARAM_NAME = "task_data"
 

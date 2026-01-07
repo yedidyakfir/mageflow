@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from hatchet_sdk import Hatchet
-
 from mageflow.callbacks import register_task
 from mageflow.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
 from mageflow.chain.messages import ChainSuccessTaskCommandMessage

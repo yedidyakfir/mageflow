@@ -2,6 +2,7 @@ from mageflow.callbacks import register_task, handle_task_callback
 from mageflow.chain.creator import chain
 from mageflow.client import Mageflow
 from mageflow.init import init_mageflow_hatchet_tasks
+from mageflow.root.model import RootTaskSignature
 from mageflow.signature.creator import (
     sign,
     load_signature,
@@ -27,4 +28,5 @@ __all__ = [
     "Mageflow",
     "chain",
     "swarm",
+    "RootTaskSignature",
 ]

@@ -1,8 +1,7 @@
 import asyncio
 
-import pytest
-
 import mageflow
+import pytest
 from tests.integration.hatchet.assertions import (
     assert_task_done,
     assert_redis_is_clean,

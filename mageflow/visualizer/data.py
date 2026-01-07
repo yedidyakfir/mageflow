@@ -1,8 +1,7 @@
 import asyncio
 
-import rapyer
-
 import mageflow
+import rapyer
 from mageflow.signature.model import TaskSignature
 
 

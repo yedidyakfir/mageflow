@@ -1,10 +1,8 @@
 import asyncio
 
-import pytest
-from hatchet_sdk.clients.rest import V1TaskStatus
-from hatchet_sdk.runnables.types import EmptyModel
-
 import mageflow
+import pytest
+from hatchet_sdk.runnables.types import EmptyModel
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmConfig, BatchItemTaskSignature
 from tests.integration.hatchet.assertions import (
@@ -14,7 +12,6 @@ from tests.integration.hatchet.assertions import (
     assert_signature_done,
     map_wf_by_id,
     assert_overlaps_leq_k_workflows,
-    is_wf_done,
     find_sub_calls_by_signature,
 )
 from tests.integration.hatchet.conftest import HatchetInitData

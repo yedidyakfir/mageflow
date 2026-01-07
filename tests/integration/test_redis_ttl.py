@@ -1,10 +1,8 @@
 import pytest
-import pytest_asyncio
-
-from mageflow.signature.creator import sign
 from mageflow.chain.creator import chain
-from mageflow.swarm.creator import swarm
+from mageflow.signature.creator import sign
 from mageflow.startup import mageflow_config, init_mageflow
+from mageflow.swarm.creator import swarm
 
 
 @pytest.fixture
@@ -27,7 +25,7 @@ async def test_redis_ttl_verification_sanity(real_redis, dummy_task, entity_type
     redis_client = real_redis
     mageflow_config.redis_client = redis_client
     await init_mageflow()
-    
+
     expected_ttl = 24 * 60 * 60  # 1 day in seconds
     ttl_tolerance = 100  # seconds tolerance for test execution time
 
@@ -51,5 +49,9 @@ async def test_redis_ttl_verification_sanity(real_redis, dummy_task, entity_type
     ttl_result = await redis_client.ttl(key)
 
     # Assert
-    assert ttl_result > expected_ttl - ttl_tolerance, f"TTL for {entity_type} is too low: {ttl_result}"
-    assert ttl_result <= expected_ttl, f"TTL for {entity_type} is too high: {ttl_result}"
+    assert (
+        ttl_result > expected_ttl - ttl_tolerance
+    ), f"TTL for {entity_type} is too low: {ttl_result}"
+    assert (
+        ttl_result <= expected_ttl
+    ), f"TTL for {entity_type} is too high: {ttl_result}"

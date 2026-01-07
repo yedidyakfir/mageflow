@@ -1,11 +1,10 @@
 import asyncio
 
 import rapyer
-from pydantic import field_validator, Field
-
 from mageflow.errors import MissingSignatureError
 from mageflow.signature.model import TaskSignature, TaskIdentifierType
 from mageflow.signature.status import SignatureStatus
+from pydantic import field_validator, Field
 
 
 class ChainTaskSignature(TaskSignature):

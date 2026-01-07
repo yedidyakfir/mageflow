@@ -1,8 +1,7 @@
 import asyncio
 
-import pytest
-
 import mageflow
+import pytest
 from mageflow.signature.model import TaskSignature
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,

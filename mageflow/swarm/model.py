@@ -2,19 +2,20 @@ import asyncio
 from typing import Self, Any, Optional
 
 from hatchet_sdk.runnables.types import EmptyModel
+from pydantic import Field, field_validator, BaseModel
+from rapyer import AtomicRedisModel
+from rapyer.types import RedisList, RedisInt
+
 from mageflow.errors import (
     MissingSignatureError,
     MissingSwarmItemError,
     TooManyTasksError,
     SwarmIsCanceledError,
 )
-from mageflow.signature.creator import (
-    TaskSignatureConvertible,
-    resolve_signature_key,
-)
 from mageflow.signature.model import TaskSignature
+from mageflow.signature.resolve import resolve_signature_key
 from mageflow.signature.status import SignatureStatus
-from mageflow.signature.types import TaskIdentifierType
+from mageflow.signature.types import TaskIdentifierType, TaskSignatureConvertible
 from mageflow.swarm.consts import (
     BATCH_TASK_NAME_INITIALS,
     SWARM_TASK_ID_PARAM_NAME,
@@ -25,9 +26,6 @@ from mageflow.swarm.consts import (
 )
 from mageflow.swarm.messages import SwarmResultsMessage
 from mageflow.utils.pythonic import deep_merge
-from pydantic import Field, field_validator, BaseModel
-from rapyer import AtomicRedisModel
-from rapyer.types import RedisList, RedisInt
 
 
 class BatchItemTaskSignature(TaskSignature):
@@ -115,8 +113,7 @@ class SwarmTaskSignature(TaskSignature):
 
     async def aio_run_no_wait(self, msg: BaseModel, **kwargs):
         await self.kwargs.aupdate(**msg.model_dump(mode="json"))
-        workflow = await self.workflow(use_return_field=False)
-        return await workflow.aio_run_no_wait(msg, **kwargs)
+        return await super().aio_run_no_wait(msg, **kwargs)
 
     async def workflow(self, use_return_field: bool = True, **task_additional_params):
         # Use on swarm start task name for wf
@@ -160,7 +157,7 @@ class SwarmTaskSignature(TaskSignature):
         await asyncio.gather(pause_chain, *paused_chain_tasks, return_exceptions=True)
 
     async def add_task(
-        self, task: TaskSignatureConvertible, close_on_max_task: bool = True
+        self, task: "TaskSignatureConvertible", close_on_max_task: bool = True
     ) -> BatchItemTaskSignature:
         """
         task - task signature to add to swarm
@@ -207,7 +204,7 @@ class SwarmTaskSignature(TaskSignature):
 
         return batch_task
 
-    async def add_to_running_tasks(self, task: TaskSignatureConvertible) -> bool:
+    async def add_to_running_tasks(self, task: "TaskSignatureConvertible") -> bool:
         async with self.lock() as swarm_task:
             task = await resolve_signature_key(task)
             if self.current_running_tasks < self.config.max_concurrency:

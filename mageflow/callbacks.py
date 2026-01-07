@@ -7,11 +7,10 @@ from typing import Any
 from hatchet_sdk import Context
 from hatchet_sdk.runnables.types import EmptyModel
 from hatchet_sdk.runnables.workflow import Standalone
-from pydantic import BaseModel
-
 from mageflow.invokers.hatchet import HatchetInvoker
 from mageflow.task.model import HatchetTaskModel
 from mageflow.utils.pythonic import flexible_call
+from pydantic import BaseModel
 
 
 class AcceptParams(Enum):
@@ -55,6 +54,7 @@ def handle_task_callback(
                     await invoker.remove_task(with_error=False)
                 raise
             else:
+                await invoker.end_task()
                 task_results = HatchetResult(hatchet_results=result)
                 dumped_results = task_results.model_dump(mode="json")
                 await invoker.run_success(dumped_results["hatchet_results"])
@@ -70,11 +70,15 @@ def handle_task_callback(
     return task_decorator
 
 
-def register_task(register_name: str):
+def register_task(
+    register_name: str,
+    is_root_task: bool = False,
+    root_task_config=None,
+):
     from mageflow.startup import REGISTERED_TASKS
 
     def decorator(func: Standalone):
-        REGISTERED_TASKS.append((func, register_name))
+        REGISTERED_TASKS.append((func, register_name, is_root_task, root_task_config))
         return func
 
     return decorator

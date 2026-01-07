@@ -2,7 +2,6 @@ import asyncio
 
 from hatchet_sdk import Context
 from hatchet_sdk.runnables.types import EmptyModel
-
 from mageflow.chain.consts import CHAIN_TASK_ID_NAME
 from mageflow.chain.messages import ChainSuccessTaskCommandMessage
 from mageflow.chain.model import ChainTaskSignature

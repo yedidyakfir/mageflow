@@ -2,9 +2,6 @@ import asyncio
 
 from hatchet_sdk import Context
 from hatchet_sdk.runnables.types import EmptyModel
-from pydantic import BaseModel
-
-from mageflow.errors import MissingSwarmItemError
 from mageflow.invokers.hatchet import HatchetInvoker
 from mageflow.signature.consts import TASK_ID_PARAM_NAME
 from mageflow.signature.model import TaskSignature
@@ -15,6 +12,7 @@ from mageflow.swarm.consts import (
 )
 from mageflow.swarm.messages import SwarmResultsMessage
 from mageflow.swarm.model import SwarmTaskSignature
+from pydantic import BaseModel
 
 
 async def swarm_start_tasks(msg: EmptyModel, ctx: Context):

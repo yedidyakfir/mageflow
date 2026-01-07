@@ -2,15 +2,16 @@ from dataclasses import dataclass
 from unittest.mock import AsyncMock, patch
 
 import fakeredis
-import mageflow
 import pytest
 import pytest_asyncio
 import rapyer
 from hatchet_sdk import Hatchet, ClientConfig
+
+import mageflow
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature
 from mageflow.startup import update_register_signature_models, mageflow_config
-from tests.integration.hatchet.worker import ContextMessage
+from tests.integration.hatchet.models import ContextMessage
 
 pytest.register_assert_rewrite("tests.assertions")
 

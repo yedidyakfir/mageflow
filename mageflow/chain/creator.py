@@ -3,15 +3,13 @@ import asyncio
 from mageflow.chain.consts import ON_CHAIN_END, ON_CHAIN_ERROR
 from mageflow.chain.messages import ChainSuccessTaskCommandMessage
 from mageflow.chain.model import ChainTaskSignature
-from mageflow.signature.creator import (
-    TaskSignatureConvertible,
-    resolve_signature_key,
-)
 from mageflow.signature.model import (
     TaskIdentifierType,
     TaskSignature,
     TaskInputType,
 )
+from mageflow.signature.resolve import resolve_signature_key
+from mageflow.signature.types import TaskSignatureConvertible
 
 
 async def chain(
