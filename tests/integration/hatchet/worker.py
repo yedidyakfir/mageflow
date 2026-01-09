@@ -146,6 +146,25 @@ async def cancel_retry(msg):
     raise NonRetryableException("Test exception")
 
 
+@hatchet.task(name="simple_root_task", input_validator=ContextMessage)
+@hatchet.root_task(max_concurrency=4, stop_after_n_failures=2)
+async def simple_root_task(msg: ContextMessage):
+    return msg
+
+
+@hatchet.task(name="root_with_chain_and_swarm", input_validator=ContextMessage)
+@hatchet.root_task(stop_after_n_failures=2)
+async def root_with_chain_and_swarm(msg: ContextMessage):
+    chain_sig = await hatchet.chain([task1, task2])
+    callback_sign = await hatchet.sign(chain_callback)
+    swarm_sig = await hatchet.swarm(
+        tasks=[task2, task3], success_callbacks=[callback_sign], is_swarm_closed=True
+    )
+    await chain_sig.aio_run_no_wait(msg)
+    await swarm_sig.aio_run_no_wait(msg)
+    return msg
+
+
 workflows = [
     task1,
     task2,
@@ -163,6 +182,8 @@ workflows = [
     retry_once,
     retry_to_failure,
     cancel_retry,
+    simple_root_task,
+    root_with_chain_and_swarm,
 ]
 
 
