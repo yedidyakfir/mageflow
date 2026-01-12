@@ -145,6 +145,14 @@ class TaskSignature(AtomicRedisModel):
         workflow = await self.workflow(use_return_field=False)
         return await workflow.aio_run_no_wait(msg, **kwargs)
 
+    async def aio_run(self, msg: BaseModel, **kwargs):
+        root_swarm = current_root_swarm.get()
+        if root_swarm:
+            batch_item = await root_swarm.add_task(self)
+            return await batch_item.aio_run(msg, **kwargs)
+        workflow = await self.workflow(use_return_field=False)
+        return await workflow.aio_run(msg, **kwargs)
+
     async def callback_workflows(
         self, with_success: bool = True, with_error: bool = True, **kwargs
     ) -> list[Workflow]:
