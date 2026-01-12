@@ -1,6 +1,5 @@
-import pytest
-
 import mageflow
+import pytest
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.status import SignatureStatus, TaskStatus

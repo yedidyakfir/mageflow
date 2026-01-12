@@ -50,7 +50,9 @@ async def update_register_signature_models():
 async def register_workflows():
     for reg_task in REGISTERED_TASKS:
         workflow, mageflow_task_name, is_root_task, root_task_config = reg_task
-        config_dict = root_task_config.model_dump(mode="json") if root_task_config else None
+        config_dict = (
+            root_task_config.model_dump(mode="json") if root_task_config else None
+        )
         hatchet_task = HatchetTaskModel(
             mageflow_task_name=mageflow_task_name,
             task_name=workflow.name,

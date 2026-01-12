@@ -3,11 +3,10 @@ import json
 import os
 from datetime import datetime
 
-from rapyer.types.base import REDIS_DUMP_FLAG_NAME
-
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
+from rapyer.types.base import REDIS_DUMP_FLAG_NAME
 
 # Start coverage if COVERAGE_PROCESS_START is set
 if os.environ.get("COVERAGE_PROCESS_START"):

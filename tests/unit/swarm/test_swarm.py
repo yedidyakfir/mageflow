@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pytest
 import rapyer
-
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmTaskSignature, SwarmConfig, BatchItemTaskSignature
 from tests.integration.hatchet.models import ContextMessage

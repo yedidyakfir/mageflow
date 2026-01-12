@@ -1,6 +1,5 @@
-import pytest
-
 import mageflow
+import pytest
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.status import SignatureStatus
 from mageflow.swarm.model import SwarmTaskSignature

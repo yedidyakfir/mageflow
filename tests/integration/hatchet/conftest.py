@@ -283,7 +283,7 @@ async def sign_chain_callback():
 
 
 def convert_signature_mapping_to_list(
-    tasks: dict[str, TaskSignature]
+    tasks: dict[str, TaskSignature],
 ) -> list[TaskSignature]:
     final_tasks = []
     for sign_key, sign in tasks.items():

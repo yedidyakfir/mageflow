@@ -1,12 +1,11 @@
 from typing import Any, overload
 
-from rapyer.typing_support import Unpack
-
 from mageflow.root.model import RootTaskSignature
 from mageflow.signature.model import TaskSignature, HatchetTaskType
 from mageflow.signature.types import TaskSignatureOptions
 from mageflow.swarm.model import SwarmConfig
 from mageflow.task.model import HatchetTaskModel
+from rapyer.typing_support import Unpack
 
 
 @overload

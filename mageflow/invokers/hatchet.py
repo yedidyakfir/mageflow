@@ -4,14 +4,13 @@ from typing import Any
 import rapyer
 from hatchet_sdk import Context
 from hatchet_sdk.runnables.contextvars import ctx_additional_metadata
-from pydantic import BaseModel
-
 from mageflow.invokers.base import BaseInvoker
 from mageflow.signature.consts import TASK_ID_PARAM_NAME
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.status import SignatureStatus
 from mageflow.utils.mageflow import rapyer_aget_safe
 from mageflow.workflows import TASK_DATA_PARAM_NAME
+from pydantic import BaseModel
 
 
 class HatchetInvoker(BaseInvoker):
