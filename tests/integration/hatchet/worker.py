@@ -3,7 +3,11 @@ import json
 import os
 from datetime import datetime
 
+from rapyer.types.base import REDIS_DUMP_FLAG_NAME
+
+from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
 
 # Start coverage if COVERAGE_PROCESS_START is set
 if os.environ.get("COVERAGE_PROCESS_START"):
@@ -29,6 +33,7 @@ from tests.integration.hatchet.models import (
     MessageWithResult,
     CommandMessageWithResult,
     SleepTaskMessage,
+    SavedSignaturesResults,
 )
 
 settings = Dynaconf(
@@ -156,13 +161,25 @@ async def simple_root_task(msg: ContextMessage):
 @hatchet.root_task(stop_after_n_failures=2)
 async def root_with_chain_and_swarm(msg: ContextMessage):
     chain_sig = await hatchet.chain([task1, task2])
-    callback_sign = await hatchet.sign(chain_callback)
+    callback_sign = await hatchet.sign(task1_callback)
     swarm_sig = await hatchet.swarm(
         tasks=[task2, task3], success_callbacks=[callback_sign], is_swarm_closed=True
     )
+    swarms, chains, signatures, batch_items = await asyncio.gather(
+        SwarmTaskSignature.afind(),
+        ChainTaskSignature.afind(),
+        TaskSignature.afind(),
+        BatchItemTaskSignature.afind(),
+    )
     await chain_sig.aio_run_no_wait(msg)
     await swarm_sig.aio_run_no_wait(msg)
-    return msg
+    results = SavedSignaturesResults(
+        signatures={sign.key: sign for sign in signatures},
+        batch_items={item.key: item for item in batch_items},
+        chains={chain.key: chain for chain in chains},
+        swarms={swarm.key: swarm for swarm in swarms},
+    )
+    return results.model_dump(mode="json", context={REDIS_DUMP_FLAG_NAME: True})
 
 
 workflows = [

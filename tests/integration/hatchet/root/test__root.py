@@ -1,16 +1,27 @@
 import asyncio
 
+from rapyer.types.base import REDIS_DUMP_FLAG_NAME
+
 import mageflow
 import pytest
+from mageflow.callbacks import HatchetResult
+from mageflow.chain.model import ChainTaskSignature
+from mageflow.signature.model import TaskSignature
+from mageflow.swarm.model import SwarmTaskSignature, BatchItemTaskSignature
 from tests.integration.hatchet.assertions import (
     assert_redis_is_clean,
     get_runs,
     assert_signature_done,
     map_wf_by_id,
     assert_signature_not_called,
+    assert_swarm_task_done,
+    assert_chain_done,
 )
-from tests.integration.hatchet.conftest import HatchetInitData
-from tests.integration.hatchet.models import ContextMessage
+from tests.integration.hatchet.conftest import (
+    HatchetInitData,
+    convert_signature_mapping_to_list,
+)
+from tests.integration.hatchet.models import ContextMessage, SavedSignaturesResults
 from tests.integration.hatchet.worker import (
     root_with_chain_and_swarm,
     simple_root_task,
@@ -74,10 +85,28 @@ async def test_root_task_with_chain_and_swarm__callback_called_after_both_done__
     )
 
     # Act
-    await root_signature.aio_run_no_wait(message, options=trigger_options)
+    root_res: HatchetResult = await root_signature.aio_run(
+        message, options=trigger_options
+    )
+    signatures = root_res["root_with_chain_and_swarm"]["hatchet_results"]
+    saved_signs = SavedSignaturesResults.model_validate(
+        signatures, context={REDIS_DUMP_FLAG_NAME: True}
+    )
+
+    # Take swarm and chain created by tasks
+    swarms, chains, signatures, batch_items = (
+        saved_signs.swarms,
+        saved_signs.chains,
+        saved_signs.signatures,
+        saved_signs.batch_items,
+    )
+    signatures = convert_signature_mapping_to_list(signatures)
+    chains = convert_signature_mapping_to_list(chains)
+    swarms = convert_signature_mapping_to_list(swarms)
+    batch_items = convert_signature_mapping_to_list(batch_items)
 
     # Assert
-    await asyncio.sleep(60)
+    await asyncio.sleep(30)
     runs = await get_runs(hatchet, ctx_metadata)
     wf_map = map_wf_by_id(runs)
 
@@ -89,6 +118,14 @@ async def test_root_task_with_chain_and_swarm__callback_called_after_both_done__
     assert wf_map[root_callback.key].started_at >= latest_start_time
 
     # Check inner tasks were called and done, also check input are good
+    assert len(swarms) == 2
+    assert len(chains) == 1
+    for swarm in swarms:
+        if swarm.task_name.startswith("root-swarm"):
+            continue
+        assert_swarm_task_done(runs, swarm, batch_items, signatures)
+
+    assert_chain_done(runs, chains[0], signatures)
 
     await assert_redis_is_clean(redis_client)
 

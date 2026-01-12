@@ -21,6 +21,7 @@ from hatchet_sdk import Hatchet
 from hatchet_sdk.clients.admin import TriggerWorkflowOptions
 from mageflow import Mageflow
 from mageflow.client import HatchetMageflow
+from mageflow.signature.model import TaskSignature
 from mageflow.startup import mageflow_config, init_mageflow
 from mageflow.task.model import HatchetTaskModel
 from redis.asyncio.client import Redis
@@ -279,3 +280,13 @@ async def sign_fail_task():
 async def sign_chain_callback():
     signature = await mageflow.sign(chain_callback)
     return signature
+
+
+def convert_signature_mapping_to_list(
+    tasks: dict[str, TaskSignature]
+) -> list[TaskSignature]:
+    final_tasks = []
+    for sign_key, sign in tasks.items():
+        sign.key = sign_key
+        final_tasks.append(sign)
+    return final_tasks
