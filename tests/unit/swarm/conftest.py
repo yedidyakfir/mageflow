@@ -8,7 +8,7 @@ import mageflow
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmTaskSignature
-from tests.integration.hatchet.worker import ContextMessage
+from tests.integration.hatchet.models import ContextMessage
 
 
 @dataclass
