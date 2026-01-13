@@ -12,19 +12,18 @@ from pathlib import Path
 from threading import Thread
 from typing import Generator, Callable, AsyncGenerator
 
+import mageflow
 import psutil
 import pytest
 import pytest_asyncio
 import requests
 from hatchet_sdk import Hatchet
 from hatchet_sdk.clients.admin import TriggerWorkflowOptions
-from redis.asyncio.client import Redis
-
-import mageflow
 from mageflow import Mageflow
 from mageflow.client import HatchetMageflow
 from mageflow.startup import mageflow_config, init_mageflow
 from mageflow.task.model import HatchetTaskModel
+from redis.asyncio.client import Redis
 from tests.integration.hatchet.worker import (
     config_obj,
     task1,

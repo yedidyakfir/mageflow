@@ -3,7 +3,6 @@ from datetime import datetime
 
 from hatchet_sdk import Hatchet
 from hatchet_sdk.clients.rest import V1TaskStatus, V1TaskSummary
-
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.consts import TASK_ID_PARAM_NAME, MAGEFLOW_TASK_INITIALS
 from mageflow.signature.model import TaskSignature
