@@ -1,5 +1,5 @@
 import asyncio
-from unittest.mock import MagicMock
+from unittest.mock import ANY, call
 import pytest
 from hatchet_sdk.runnables.types import EmptyModel
 
@@ -54,15 +54,11 @@ async def test_swarm_start_tasks_sanity_basic_flow(
     await swarm_start_tasks(msg, ctx)
 
     # Assert
-    assert mock_task_aio_run_no_wait.call_count == 2
+    assert mock_task_aio_run_no_wait.await_count == 2
+    mock_task_aio_run_no_wait.assert_has_awaits([call(msg), call(msg)])
 
     reloaded_swarm = await SwarmTaskSignature.get_safe(swarm_task.key)
     assert len(reloaded_swarm.tasks_left_to_run) == 3
-
-    assert ctx.log.called
-    assert any(
-        "Swarm task started with tasks" in str(call) for call in ctx.log.call_args_list
-    )
 
 
 @pytest.mark.asyncio
@@ -93,7 +89,8 @@ async def test_swarm_start_tasks_sanity_all_tasks_start(
     await swarm_start_tasks(msg, ctx)
 
     # Assert
-    assert mock_task_aio_run_no_wait.call_count == 3
+    assert mock_task_aio_run_no_wait.await_count == 3
+    mock_task_aio_run_no_wait.assert_has_awaits([call(msg), call(msg), call(msg)])
 
     reloaded_swarm = await SwarmTaskSignature.get_safe(swarm_task.key)
     assert len(reloaded_swarm.tasks_left_to_run) == 0
@@ -133,11 +130,7 @@ async def test_swarm_start_tasks_already_started_edge_case(
     await swarm_start_tasks(msg, ctx)
 
     # Assert
-    assert mock_task_aio_run_no_wait.call_count == 0
-
-    assert any(
-        "already running" in str(call).lower() for call in ctx.log.call_args_list
-    )
+    mock_task_aio_run_no_wait.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -168,7 +161,7 @@ async def test_swarm_start_tasks_max_concurrency_zero_edge_case(
     await swarm_start_tasks(msg, ctx)
 
     # Assert
-    assert mock_task_aio_run_no_wait.call_count == 0
+    mock_task_aio_run_no_wait.assert_not_awaited()
 
     reloaded_swarm = await SwarmTaskSignature.get_safe(swarm_task.key)
     assert len(reloaded_swarm.tasks_left_to_run) == 3
@@ -290,7 +283,7 @@ async def test_swarm_item_done_sanity_basic_flow(
     assert len(reloaded_swarm.tasks_results) == 1
     assert reloaded_swarm.tasks_results[0] == msg.results
 
-    assert mock_fill_running_tasks.called
+    mock_fill_running_tasks.assert_called_once_with()
 
 
 @pytest.mark.asyncio
@@ -331,7 +324,7 @@ async def test_swarm_item_done_sanity_last_item_completes(
     await swarm_item_done(msg, ctx)
 
     # Assert
-    assert mock_activate_success.called or mock_activate_success.call_count >= 0
+    mock_activate_success.assert_awaited_once_with(msg)
 
 
 # ============================================================================
@@ -423,6 +416,8 @@ async def test_swarm_item_done_exception_during_handle_finish_edge_case(
     with pytest.raises(RuntimeError, match="Finish tasks error"):
         await swarm_item_done(msg, ctx)
 
+    mock_handle_finish_tasks_error.assert_called_once_with(ANY, ctx, msg)
+
 
 # ============================================================================
 # swarm_item_failed - SANITY TESTS
@@ -473,7 +468,7 @@ async def test_swarm_item_failed_sanity_continue_after_failure(
 
     assert reloaded_swarm.task_status.status != SignatureStatus.CANCELED
 
-    assert mock_fill_running_tasks.called
+    mock_fill_running_tasks.assert_called_once_with()
 
 
 @pytest.mark.asyncio
@@ -518,8 +513,8 @@ async def test_swarm_item_failed_sanity_stop_after_threshold(
     if reloaded_swarm:
         assert reloaded_swarm.task_status.status == SignatureStatus.CANCELED
 
-    assert mock_activate_error.called
-    assert mock_swarm_remove.called
+    mock_activate_error.assert_awaited_once()
+    mock_swarm_remove.assert_awaited_once_with(with_error=False)
 
 
 # ============================================================================
@@ -564,9 +559,9 @@ async def test_swarm_item_failed_stop_after_n_failures_none_edge_case(
     await swarm_item_failed(msg, ctx)
 
     # Assert
-    assert not mock_activate_error.called
+    mock_activate_error.assert_not_awaited()
 
-    assert mock_fill_running_tasks_zero.called
+    mock_fill_running_tasks_zero.assert_called_once_with()
 
     reloaded_swarm = await SwarmTaskSignature.get_safe(swarm_task.key)
     assert reloaded_swarm.task_status.status != SignatureStatus.CANCELED
@@ -602,8 +597,8 @@ async def test_swarm_item_failed_stop_after_n_failures_zero_edge_case(
     await swarm_item_failed(msg, ctx)
 
     # Assert
-    assert mock_activate_error.called
-    assert mock_swarm_remove.called
+    mock_activate_error.assert_awaited_once()
+    mock_swarm_remove.assert_awaited_once_with(with_error=False)
 
 
 @pytest.mark.asyncio
@@ -636,7 +631,7 @@ async def test_swarm_item_failed_stop_after_one_failure_edge_case(
     await swarm_item_failed(msg, ctx)
 
     # Assert
-    assert mock_activate_error.called
+    mock_activate_error.assert_awaited_once()
 
 
 @pytest.mark.asyncio
@@ -667,8 +662,8 @@ async def test_swarm_item_failed_below_threshold_edge_case(
     await swarm_item_failed(msg, ctx)
 
     # Assert
-    assert not mock_activate_error.called
-    assert mock_fill_running_tasks_zero.called
+    mock_activate_error.assert_not_awaited()
+    mock_fill_running_tasks_zero.assert_called_once_with()
 
 
 @pytest.mark.asyncio
@@ -723,9 +718,9 @@ async def test_handle_finish_tasks_sanity_starts_next_task(
 
     assert reloaded_swarm.current_running_tasks == 1
 
-    assert not mock_activate_success.called
+    mock_activate_success.assert_not_awaited()
 
-    assert mock_fill_running_tasks.called
+    mock_fill_running_tasks.assert_called_once_with()
 
 
 @pytest.mark.asyncio
@@ -755,7 +750,7 @@ async def test_handle_finish_tasks_sanity_swarm_completes(
         await handle_finish_tasks(locked_swarm, mock_context, msg)
 
     # Assert
-    assert mock_activate_success.called
+    mock_activate_success.assert_awaited_once_with(msg)
 
 
 # ============================================================================
@@ -785,8 +780,8 @@ async def test_handle_finish_tasks_no_tasks_left_edge_case(mock_context):
     reloaded_swarm = await SwarmTaskSignature.get_safe(swarm_task.key)
     assert reloaded_swarm.current_running_tasks == 0
 
-    assert any(
-        "no new task" in str(call).lower() for call in mock_context.log.call_args_list
+    mock_context.log.assert_any_call(
+        f"Swarm item no new task to run in {swarm_task.key}"
     )
 
 
@@ -808,6 +803,8 @@ async def test_handle_finish_tasks_exception_during_decrease_edge_case(
     with pytest.raises(RuntimeError):
         async with swarm_task.lock(save_at_end=False) as locked_swarm:
             await handle_finish_tasks(locked_swarm, mock_context, msg)
+
+    mock_redis_int_increase_error.assert_called_once_with(-1)
 
 
 @pytest.mark.asyncio
@@ -836,6 +833,8 @@ async def test_handle_finish_tasks_exception_during_activate_success_edge_case(
     with pytest.raises(RuntimeError):
         async with swarm_task.lock(save_at_end=False) as locked_swarm:
             await handle_finish_tasks(locked_swarm, mock_context, msg)
+
+    mock_activate_success_error.assert_awaited_once_with(msg)
 
 
 # ============================================================================
