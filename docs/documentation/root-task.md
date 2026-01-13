@@ -1,5 +1,10 @@
 # Root Tasks
 
+<div style="background: linear-gradient(135deg, #7c4dff 0%, #b388ff 100%); color: white; padding: 16px 20px; border-radius: 8px; margin-bottom: 20px;">
+  <strong style="font-size: 1.1em;">🧪 Beta Feature</strong><br>
+  <span style="opacity: 0.95;">Root tasks are currently experimental. The API may change in future releases based on feedback.</span>
+</div>
+
 Root tasks in MageFlow provide a convenient way to manage multiple parallel task executions by automatically creating and managing an internal swarm. When you need a task that spawns other tasks dynamically and wants to wait for all of them to complete before triggering callbacks, root tasks simplify this pattern significantly.
 
 ## What is a Root Task?
