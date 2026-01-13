@@ -218,7 +218,7 @@ class SwarmTaskSignature(TaskSignature):
                 await self.tasks_left_to_run.aappend(task.key)
                 return False
 
-    async def fill_running_tasks(self) -> int:
+    async def fill_running_tasks(self, logger=None) -> int:
         resource_to_run = self.config.max_concurrency - self.current_running_tasks
         if resource_to_run <= 0:
             return 0
@@ -226,22 +226,49 @@ class SwarmTaskSignature(TaskSignature):
         task_ids = await asyncio.gather(
             *[self.tasks_left_to_run.apop() for i in range(num_of_task_to_run)]
         )
+
+        # Log popped task IDs for debugging
+        valid_task_ids = [tid for tid in task_ids if tid]
+        if logger:
+            logger(f"fill_running_tasks: popped {len(valid_task_ids)} task IDs from queue: {valid_task_ids}")
+
         tasks = await asyncio.gather(
             *[
                 BatchItemTaskSignature.get_safe(task_id)
-                for task_id in task_ids
-                if task_id  # Check not None
+                for task_id in valid_task_ids
             ]
         )
+
+        # Identify and log missing tasks
+        missing_task_ids = []
+        valid_tasks = []
+        for task_id, task in zip(valid_task_ids, tasks):
+            if task is None:
+                missing_task_ids.append(task_id)
+                if logger:
+                    logger(f"WARN: BatchItemTaskSignature {task_id} not found in Redis - task lost!")
+            else:
+                valid_tasks.append(task)
+
+        if missing_task_ids and logger:
+            logger(f"MAJOR: {len(missing_task_ids)} tasks were popped but not found: {missing_task_ids}")
+
         publish_coroutine = [
             next_task.aio_run_no_wait(EmptyModel())
-            for next_task in tasks
-            if next_task is not None
+            for next_task in valid_tasks
         ]
+
+        if logger:
+            logger(f"fill_running_tasks: publishing {len(publish_coroutine)} tasks")
+
         await asyncio.gather(*publish_coroutine)
+
         if len(tasks) != len(publish_coroutine):
-            raise MissingSwarmItemError(f"swarm item was deleted before swarm is done")
-        return len(tasks)
+            raise MissingSwarmItemError(
+                f"swarm item was deleted before swarm is done. "
+                f"Missing: {missing_task_ids}"
+            )
+        return len(valid_tasks)
 
     async def decrease_running_tasks_count(self):
         await self.current_running_tasks.increase(-1)

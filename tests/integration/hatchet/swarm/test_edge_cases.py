@@ -1,8 +1,7 @@
 import asyncio
 
-import pytest
-
 import mageflow
+import pytest
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import BatchItemTaskSignature, SwarmConfig
 from tests.integration.hatchet.assertions import get_runs, assert_swarm_task_done

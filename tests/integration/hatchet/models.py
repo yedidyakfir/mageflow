@@ -1,8 +1,7 @@
 from typing import Any, Annotated
 
-from pydantic import BaseModel, Field
-
 from mageflow.models.message import ReturnValue
+from pydantic import BaseModel, Field
 
 
 class ContextMessage(BaseModel):

@@ -1,13 +1,12 @@
 import asyncio
-from hatchet_sdk import Context
 from datetime import timedelta
 from unittest.mock import MagicMock, AsyncMock
 
 import pytest
+from hatchet_sdk import Context
 from hatchet_sdk import Hatchet
-from redis import Redis
-
 from mageflow.client import HatchetMageflow
+from redis import Redis
 from tests.integration.hatchet.models import ContextMessage
 
 

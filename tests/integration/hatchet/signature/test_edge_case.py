@@ -1,9 +1,8 @@
 import asyncio
 from datetime import datetime
 
-import pytest
-
 import mageflow
+import pytest
 from tests.integration.hatchet.assertions import (
     get_runs,
     assert_signature_done,

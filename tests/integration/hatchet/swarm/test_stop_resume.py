@@ -1,9 +1,8 @@
 import asyncio
 from datetime import datetime
 
-import pytest
-
 import mageflow
+import pytest
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmConfig, BatchItemTaskSignature
 from tests.integration.hatchet.assertions import (

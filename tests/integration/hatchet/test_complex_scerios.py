@@ -1,7 +1,6 @@
 import asyncio
 
 import pytest
-
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import BatchItemTaskSignature, SwarmConfig
