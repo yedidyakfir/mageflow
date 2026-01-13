@@ -66,6 +66,7 @@ nav:
     - Callbacks: documentation/callbacks.md
     - Chain: documentation/chain.md
     - Swarm: documentation/swarm.md
+    - Root Task: documentation/root-task.md
     - Task Lifecycle: documentation/task-lifecycle.md
   - API Reference:
       - Client: api/client.md
