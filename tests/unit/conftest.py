@@ -10,7 +10,7 @@ from hatchet_sdk import Hatchet, ClientConfig
 from mageflow.chain.model import ChainTaskSignature
 from mageflow.signature.model import TaskSignature
 from mageflow.startup import update_register_signature_models, mageflow_config
-from tests.integration.hatchet.worker import ContextMessage
+from tests.integration.hatchet.models import ContextMessage
 
 pytest.register_assert_rewrite("tests.assertions")
 
