@@ -50,7 +50,7 @@ async def test_signature_resume_with_various_statuses_sanity(
     signature = await TaskSignature.from_task(test_task)
     signature.task_status.status = initial_status
     signature.task_status.last_status = last_status
-    await signature.save()
+    await signature.asave()
 
     # Act
     await signature.resume()

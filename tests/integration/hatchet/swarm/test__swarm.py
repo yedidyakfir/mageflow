@@ -93,7 +93,7 @@ async def test_swarm_with_mixed_success_failed_tasks_integration_edge_case(
     )
 
     # Create task signatures: 3 success tasks only
-    fail_tasks = await sign_fail_task.duplicate_many(3)
+    fail_tasks = await sign_fail_task.aduplicate_many(3)
     await sign_fail_task.remove()
 
     swarm_callback_sig = await mageflow.sign(callback_with_redis)
@@ -258,7 +258,7 @@ async def test_swarm_run_concurrently(
         hatchet_client_init.redis_client,
         hatchet_client_init.hatchet,
     )
-    swarm_tasks = await sign_task2.duplicate_many(8)
+    swarm_tasks = await sign_task2.aduplicate_many(8)
     max_concurrency = 4
     swarm = await mageflow.swarm(
         tasks=swarm_tasks,
@@ -330,7 +330,7 @@ async def test_swarm_fill_running_tasks_with_success_task(
     regular_message = ContextMessage(base_data=test_ctx)
 
     # Create 4 tasks for the swarm
-    swarm_tasks = await sign_task1.duplicate_many(4)
+    swarm_tasks = await sign_task1.aduplicate_many(4)
 
     # Create swarm with max_concurrency=3
     swarm = await mageflow.swarm(

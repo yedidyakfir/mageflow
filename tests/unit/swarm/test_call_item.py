@@ -63,7 +63,7 @@ async def test_simple_task_kwargs_saved_sanity(test_message, test_swarm):
         kwargs=task_kwargs,
         model_validators=ContextMessage,
     )
-    await original_task.save()
+    await original_task.asave()
 
     swarm_signature, swarm_kwargs = test_swarm
     batch_item = await swarm_signature.add_task(original_task)
@@ -115,7 +115,7 @@ async def test_nested_chain_kwargs_saved_in_first_task_of_first_chain_sanity(
         kwargs=first_chain_task1_kwargs,
         model_validators=ContextMessage,
     )
-    await first_chain_task1.save()
+    await first_chain_task1.asave()
 
     first_chain_task2_kwargs = {"first_chain_task2_param": "first_chain_task2_value"}
     first_chain_task2 = TaskSignature(
@@ -123,7 +123,7 @@ async def test_nested_chain_kwargs_saved_in_first_task_of_first_chain_sanity(
         kwargs=first_chain_task2_kwargs,
         model_validators=ContextMessage,
     )
-    await first_chain_task2.save()
+    await first_chain_task2.asave()
 
     first_chain = await mageflow.chain([first_chain_task1.key, first_chain_task2.key])
 
@@ -134,7 +134,7 @@ async def test_nested_chain_kwargs_saved_in_first_task_of_first_chain_sanity(
         kwargs=second_chain_task1_kwargs,
         model_validators=ContextMessage,
     )
-    await second_chain_task1.save()
+    await second_chain_task1.asave()
 
     second_chain_task2_kwargs = {"second_chain_task2_param": "second_chain_task2_value"}
     second_chain_task2 = TaskSignature(
@@ -142,7 +142,7 @@ async def test_nested_chain_kwargs_saved_in_first_task_of_first_chain_sanity(
         kwargs=second_chain_task2_kwargs,
         model_validators=ContextMessage,
     )
-    await second_chain_task2.save()
+    await second_chain_task2.asave()
 
     second_chain = await mageflow.chain(
         [second_chain_task1.key, second_chain_task2.key]

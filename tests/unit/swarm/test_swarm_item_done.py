@@ -23,20 +23,20 @@ async def test_swarm_item_done_sanity_basic_flow(
         current_running_tasks=1,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     tasks = [
         TaskSignature(task_name=f"test_task_{i}", model_validators=ContextMessage)
         for i in range(3)
     ]
     for task in tasks:
-        await task.save()
+        await task.asave()
 
     await swarm_task.tasks.aextend([t.key for t in tasks])
     await swarm_task.tasks_left_to_run.aextend([tasks[1].key, tasks[2].key])
 
     item_task = TaskSignature(task_name="item_task", model_validators=ContextMessage)
-    await item_task.save()
+    await item_task.asave()
 
     ctx = create_mock_context_with_metadata(
         task_id=item_task.key,
@@ -73,20 +73,20 @@ async def test_swarm_item_done_sanity_last_item_completes(
         is_swarm_closed=True,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     tasks = [
         TaskSignature(task_name=f"test_task_{i}", model_validators=ContextMessage)
         for i in range(2)
     ]
     for task in tasks:
-        await task.save()
+        await task.asave()
 
     await swarm_task.tasks.aextend([t.key for t in tasks])
     await swarm_task.finished_tasks.aappend(tasks[0].key)
 
     item_task = TaskSignature(task_name="item_task", model_validators=ContextMessage)
-    await item_task.save()
+    await item_task.asave()
 
     ctx = create_mock_context_with_metadata(
         task_id=item_task.key,
@@ -128,7 +128,7 @@ async def test_swarm_item_done_missing_swarm_item_id_edge_case(
         model_validators=ContextMessage,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     ctx = create_mock_context_with_metadata(
         task_id="some_task",
@@ -147,7 +147,7 @@ async def test_swarm_item_done_swarm_not_found_edge_case(
 ):
     # Arrange
     item_task = TaskSignature(task_name="item_task", model_validators=ContextMessage)
-    await item_task.save()
+    await item_task.asave()
 
     ctx = create_mock_context_with_metadata(
         task_id=item_task.key,
@@ -172,13 +172,13 @@ async def test_swarm_item_done_exception_during_handle_finish_edge_case(
         current_running_tasks=1,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     task = TaskSignature(task_name="test_task", model_validators=ContextMessage)
-    await task.save()
+    await task.asave()
 
     item_task = TaskSignature(task_name="item_task", model_validators=ContextMessage)
-    await item_task.save()
+    await item_task.asave()
 
     ctx = create_mock_context_with_metadata(
         task_id=item_task.key, swarm_task_id=swarm_task.key, swarm_item_id=task.key
@@ -204,7 +204,7 @@ async def test_swarm_item_done_concurrent_completions_edge_case(
         current_running_tasks=3,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     tasks = []
     item_tasks = []
@@ -212,13 +212,13 @@ async def test_swarm_item_done_concurrent_completions_edge_case(
         task = TaskSignature(
             task_name=f"test_task_{i}", model_validators=ContextMessage
         )
-        await task.save()
+        await task.asave()
         tasks.append(task)
 
         item_task = TaskSignature(
             task_name=f"item_task_{i}", model_validators=ContextMessage
         )
-        await item_task.save()
+        await item_task.asave()
         item_tasks.append(item_task)
 
     await swarm_task.tasks.aextend([t.key for t in tasks])

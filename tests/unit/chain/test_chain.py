@@ -39,7 +39,7 @@ async def test__chain_signature_create_save_load__input_output_same__sanity(
         kwargs=kwargs,
         tasks=tasks,
     )
-    await original_chain_signature.save()
+    await original_chain_signature.asave()
     loaded_chain_signature = await TaskSignature.get_safe(original_chain_signature.key)
 
     # Assert
@@ -106,7 +106,7 @@ async def test_chain_creation_with_various_task_types_loads_correctly_from_redis
     # Arrange
     tasks = []
     for task_signature in task_signatures:
-        await task_signature.save()
+        await task_signature.asave()
         tasks.append(task_signature)
 
     # Act
@@ -153,21 +153,21 @@ async def test_chain_success_callbacks_contain_next_task_ids_sanity(
         kwargs={"arg1": "value1"},
         model_validators=ContextMessage,
     )
-    await task1.save()
+    await task1.asave()
 
     task2 = TaskSignature(
         task_name="second_task",
         kwargs={"arg2": "value2"},
         model_validators=ContextMessage,
     )
-    await task2.save()
+    await task2.asave()
 
     task3 = TaskSignature(
         task_name="third_task",
         kwargs={"arg3": "value3"},
         model_validators=ContextMessage,
     )
-    await task3.save()
+    await task3.asave()
 
     # Act
     chain_signature = await mageflow.chain([task1.key, task2.key, task3.key])
@@ -192,14 +192,14 @@ async def test_chain_error_callbacks_contain_unique_chain_error_task_ids_sanity(
         kwargs={"arg1": "value1"},
         model_validators=ContextMessage,
     )
-    await task1.save()
+    await task1.asave()
 
     task2 = TaskSignature(
         task_name="second_task",
         kwargs={"arg2": "value2"},
         model_validators=ContextMessage,
     )
-    await task2.save()
+    await task2.asave()
 
     # Act
     chain_signature = await mageflow.chain([task1.key, task2.key])
@@ -224,14 +224,14 @@ async def test_chain_with_existing_callbacks_preserves_and_adds_new_ones_edge_ca
         kwargs={},
         model_validators=ContextMessage,
     )
-    await existing_success.save()
+    await existing_success.asave()
 
     existing_error = TaskSignature(
         task_name="existing_error",
         kwargs={},
         model_validators=ContextMessage,
     )
-    await existing_error.save()
+    await existing_error.asave()
 
     # Create task with existing callbacks
     task_with_callbacks = TaskSignature(
@@ -241,14 +241,14 @@ async def test_chain_with_existing_callbacks_preserves_and_adds_new_ones_edge_ca
         error_callbacks=[existing_error.key],
         model_validators=ContextMessage,
     )
-    await task_with_callbacks.save()
+    await task_with_callbacks.asave()
 
     simple_task = TaskSignature(
         task_name="simple_task",
         kwargs={"param": "param_value"},
         model_validators=ContextMessage,
     )
-    await simple_task.save()
+    await simple_task.asave()
 
     # Act
     chain_signature = await mageflow.chain([task_with_callbacks.key, simple_task.key])

@@ -36,17 +36,17 @@ async def swarm_with_tasks(publish_state):
     swarm_task_signature_1 = TaskSignature(
         task_name="swarm_task_1", model_validators=ContextMessage
     )
-    await swarm_task_signature_1.save()
+    await swarm_task_signature_1.asave()
 
     swarm_task_signature_2 = TaskSignature(
         task_name="swarm_task_2", model_validators=ContextMessage
     )
-    await swarm_task_signature_2.save()
+    await swarm_task_signature_2.asave()
 
     swarm_task_signature_3 = TaskSignature(
         task_name="swarm_task_3", model_validators=ContextMessage
     )
-    await swarm_task_signature_3.save()
+    await swarm_task_signature_3.asave()
 
     task_signatures = [
         swarm_task_signature_1,
@@ -60,7 +60,7 @@ async def swarm_with_tasks(publish_state):
         tasks=[task.key for task in task_signatures],
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
 
     return SwarmTestData(
         task_signatures=task_signatures, swarm_signature=swarm_signature

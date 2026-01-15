@@ -21,7 +21,7 @@ async def test_add_to_finished_tasks_sanity(task_ids, publish_state):
         finished_tasks=[],
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
     original_finished_tasks = swarm_signature.finished_tasks.copy()
 
     # Act
@@ -48,7 +48,7 @@ async def test_add_to_failed_tasks_sanity(task_ids, publish_state):
         failed_tasks=[],
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
     original_failed_tasks = swarm_signature.failed_tasks.copy()
 
     # Act
@@ -74,7 +74,7 @@ async def test_add_to_running_tasks_sanity(
     task_signature = TaskSignature(
         task_name="test_task", model_validators=ContextMessage
     )
-    await task_signature.save()
+    await task_signature.asave()
 
     swarm_signature = SwarmTaskSignature(
         task_name="test_swarm",
@@ -83,7 +83,7 @@ async def test_add_to_running_tasks_sanity(
         config=SwarmConfig(max_concurrency=max_concurrency),
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
     original_tasks_left_to_run = swarm_signature.tasks_left_to_run.copy()
 
     # Act
@@ -126,13 +126,13 @@ async def test_add_task_reaches_max_and_closes_swarm(mock_close_swarm, publish_s
         config=SwarmConfig(max_task_allowed=2),
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
 
     task_signature_1 = TaskSignature(task_name="test_task_1")
-    await task_signature_1.save()
+    await task_signature_1.asave()
 
     task_signature_2 = TaskSignature(task_name="test_task_2")
-    await task_signature_2.save()
+    await task_signature_2.asave()
 
     # Act
     mock_close_swarm.return_value = swarm_signature
@@ -151,10 +151,10 @@ async def test_add_task_not_reaching_max(mock_close_swarm, publish_state):
         config=SwarmConfig(max_task_allowed=3),
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
 
     task_signature = TaskSignature(task_name="test_task")
-    await task_signature.save()
+    await task_signature.asave()
 
     # Act
     await swarm_signature.add_task(task_signature, close_on_max_task=True)
@@ -171,13 +171,13 @@ async def test_add_task_reaches_max_but_no_close(mock_close_swarm, publish_state
         config=SwarmConfig(max_task_allowed=2),
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
 
     task_signature_1 = TaskSignature(task_name="test_task_1")
-    await task_signature_1.save()
+    await task_signature_1.asave()
 
     task_signature_2 = TaskSignature(task_name="test_task_2")
-    await task_signature_2.save()
+    await task_signature_2.asave()
 
     # Act
     await swarm_signature.add_task(task_signature_1, close_on_max_task=False)

@@ -75,7 +75,7 @@ async def test_chain_change_status_with_optional_deleted_sub_tasks_edge_case(
     # Save task signatures
     task_signatures = []
     for task_signature in task_signatures_to_create:
-        await task_signature.save()
+        await task_signature.asave()
         task_signatures.append(task_signature)
 
     # Create a chain
@@ -200,7 +200,7 @@ async def test_chain_resume_with_optional_deleted_sub_tasks_sanity(
     expected_statuses = []
     num_of_aio_run = 0
     for task_signature in task_signatures_to_create:
-        await task_signature.save()
+        await task_signature.asave()
         task_signatures.append(task_signature)
         last_status = task_signature.task_status.last_status
         expected_statuses.append(last_status)

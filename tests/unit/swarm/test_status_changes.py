@@ -24,12 +24,12 @@ async def test_swarm_pause_signature_changes_all_swarm_and_chain_tasks_status_to
     swarm_task_signature_1 = TaskSignature(
         task_name="swarm_task_1", model_validators=ContextMessage
     )
-    await swarm_task_signature_1.save()
+    await swarm_task_signature_1.asave()
 
     swarm_task_signature_2 = TaskSignature(
         task_name="swarm_task_2", model_validators=ContextMessage
     )
-    await swarm_task_signature_2.save()
+    await swarm_task_signature_2.asave()
 
     # Create a swarm with both chain and individual tasks
     swarm_signature = SwarmTaskSignature(
@@ -42,7 +42,7 @@ async def test_swarm_pause_signature_changes_all_swarm_and_chain_tasks_status_to
         ],
         publishing_state_id=publish_state.key,
     )
-    await swarm_signature.save()
+    await swarm_signature.asave()
     expected_paused_tasks = [
         swarm_signature,
         chain_signature,
@@ -105,7 +105,7 @@ async def test_swarm_change_status_with_optional_deleted_sub_tasks_edge_case(
     # Save task signatures
     task_signatures = []
     for task_signature in task_signatures_to_create:
-        await task_signature.save()
+        await task_signature.asave()
         task_signatures.append(task_signature)
 
     # Create a swarm with task signatures
@@ -168,7 +168,7 @@ async def test_add_task_raises_runtime_error_when_swarm_not_active_edge_case(
         kwargs={},
         model_validators=ContextMessage,
     )
-    await task_signature.save()
+    await task_signature.asave()
 
     swarm_signature = SwarmTaskSignature(
         task_name="test_swarm",
@@ -177,7 +177,7 @@ async def test_add_task_raises_runtime_error_when_swarm_not_active_edge_case(
         publishing_state_id=publish_state.key,
     )
     swarm_signature.task_status.status = status
-    await swarm_signature.save()
+    await swarm_signature.asave()
 
     # Act & Assert
     with pytest.raises(RuntimeError):
@@ -228,7 +228,7 @@ async def test_swarm_resume_with_status_changes_sanity(
     for task_signature in swarm_data.task_signatures:
         task_signature.task_status.status = initial_status
         task_signature.task_status.last_status = last_status
-        await task_signature.save()
+        await task_signature.asave()
 
     swarm_data.swarm_signature.task_status.status = initial_status
     swarm_data.swarm_signature.task_status.last_status = last_status

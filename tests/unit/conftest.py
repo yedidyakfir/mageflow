@@ -71,17 +71,17 @@ async def chain_with_tasks():
     chain_task_signature_1 = TaskSignature(
         task_name="chain_task_1", model_validators=ContextMessage
     )
-    await chain_task_signature_1.save()
+    await chain_task_signature_1.asave()
 
     chain_task_signature_2 = TaskSignature(
         task_name="chain_task_2", model_validators=ContextMessage
     )
-    await chain_task_signature_2.save()
+    await chain_task_signature_2.asave()
 
     chain_task_signature_3 = TaskSignature(
         task_name="chain_task_3", model_validators=ContextMessage
     )
-    await chain_task_signature_3.save()
+    await chain_task_signature_3.asave()
 
     task_signatures = [
         chain_task_signature_1,

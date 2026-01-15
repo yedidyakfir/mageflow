@@ -20,10 +20,10 @@ async def test_handle_finish_tasks_sanity_starts_next_task(
         is_swarm_closed=False,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     task = TaskSignature(task_name="test_task", model_validators=ContextMessage)
-    await task.save()
+    await task.asave()
 
     await swarm_task.tasks_left_to_run.aappend(task.key)
 
@@ -56,10 +56,10 @@ async def test_handle_finish_tasks_sanity_swarm_completes(
         is_swarm_closed=True,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     task = TaskSignature(task_name="test_task", model_validators=ContextMessage)
-    await task.save()
+    await task.asave()
 
     await swarm_task.tasks.aappend(task.key)
     await swarm_task.finished_tasks.aappend(task.key)
@@ -85,7 +85,7 @@ async def test_handle_finish_tasks_no_tasks_left_edge_case(mock_context, publish
         is_swarm_closed=False,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     msg = EmptyModel()
 
@@ -113,7 +113,7 @@ async def test_handle_finish_tasks_exception_during_decrease_edge_case(
         current_running_tasks=1,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     msg = EmptyModel()
 
@@ -138,10 +138,10 @@ async def test_handle_finish_tasks_exception_during_activate_success_edge_case(
         is_swarm_closed=True,
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     task = TaskSignature(task_name="test_task", model_validators=ContextMessage)
-    await task.save()
+    await task.asave()
 
     await swarm_task.tasks.aappend(task.key)
     await swarm_task.finished_tasks.aappend(task.key)

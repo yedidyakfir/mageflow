@@ -26,14 +26,14 @@ async def test_chain_with_swarm_task_creates_callbacks_correctly_edge_case(
         model_validators=ContextMessage,
         publishing_state_id="",
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     simple_task = TaskSignature(
         task_name="simple_task",
         kwargs={"param": "value"},
         model_validators=ContextMessage,
     )
-    await simple_task.save()
+    await simple_task.asave()
 
     # Act
     chain_signature = await mageflow.chain([swarm_task.key, simple_task.key])
@@ -55,7 +55,7 @@ async def test_chain_with_batch_item_task_creates_callbacks_correctly_edge_case(
         model_validators=ContextMessage,
         publishing_state_id="",
     )
-    await parent_swarm.save()
+    await parent_swarm.asave()
 
     # Create an original task for a batch item
     original_task = TaskSignature(
@@ -63,7 +63,7 @@ async def test_chain_with_batch_item_task_creates_callbacks_correctly_edge_case(
         kwargs={},
         model_validators=ContextMessage,
     )
-    await original_task.save()
+    await original_task.asave()
 
     # Create batch item task
     batch_item_task = BatchItemTaskSignature(
@@ -73,14 +73,14 @@ async def test_chain_with_batch_item_task_creates_callbacks_correctly_edge_case(
         original_task_id=original_task.key,
         model_validators=ContextMessage,
     )
-    await batch_item_task.save()
+    await batch_item_task.asave()
 
     simple_task = TaskSignature(
         task_name="simple_task_after_batch",
         kwargs={},
         model_validators=ContextMessage,
     )
-    await simple_task.save()
+    await simple_task.asave()
 
     # Act
     chain_signature = await mageflow.chain([batch_item_task.key, simple_task.key])
@@ -104,7 +104,7 @@ async def test_chain_with_mixed_task_types_loads_and_chains_correctly_sanity(
         kwargs={"simple_arg": "simple_value"},
         model_validators=ContextMessage,
     )
-    await simple_task.save()
+    await simple_task.asave()
 
     swarm_task = SwarmTaskSignature(
         task_name="swarm_task",
@@ -112,7 +112,7 @@ async def test_chain_with_mixed_task_types_loads_and_chains_correctly_sanity(
         model_validators=ContextMessage,
         publishing_state_id="",
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     # Create another simple task
     final_task = TaskSignature(
@@ -120,7 +120,7 @@ async def test_chain_with_mixed_task_types_loads_and_chains_correctly_sanity(
         kwargs={"final_arg": "final_value"},
         model_validators=ContextMessage,
     )
-    await final_task.save()
+    await final_task.asave()
 
     # Act
     chain_signature = await mageflow.chain(
@@ -154,14 +154,14 @@ async def test_chain_creation_with_custom_name_and_callbacks_sanity(hatchet_mock
         kwargs={},
         model_validators=ContextMessage,
     )
-    await custom_success.save()
+    await custom_success.asave()
 
     custom_error = TaskSignature(
         task_name="custom_error_callback",
         kwargs={},
         model_validators=ContextMessage,
     )
-    await custom_error.save()
+    await custom_error.asave()
 
     # Create tasks for a chain
     task1 = TaskSignature(
@@ -169,14 +169,14 @@ async def test_chain_creation_with_custom_name_and_callbacks_sanity(hatchet_mock
         kwargs={},
         model_validators=ContextMessage,
     )
-    await task1.save()
+    await task1.asave()
 
     task2 = TaskSignature(
         task_name="task2",
         kwargs={},
         model_validators=ContextMessage,
     )
-    await task2.save()
+    await task2.asave()
 
     # Act
     chain_signature = await mageflow.chain(

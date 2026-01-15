@@ -20,14 +20,14 @@ async def test_swarm_start_tasks_sanity_basic_flow(
         config=SwarmConfig(max_concurrency=2),
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     tasks = [
         TaskSignature(task_name=f"test_task_{i}", model_validators=ContextMessage)
         for i in range(5)
     ]
     for task in tasks:
-        await task.save()
+        await task.asave()
 
     await swarm_task.tasks.aextend([t.key for t in tasks])
 
@@ -56,14 +56,14 @@ async def test_swarm_start_tasks_sanity_all_tasks_start(
         config=SwarmConfig(max_concurrency=5),
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     tasks = [
         TaskSignature(task_name=f"test_task_{i}", model_validators=ContextMessage)
         for i in range(3)
     ]
     for task in tasks:
-        await task.save()
+        await task.asave()
 
     await swarm_task.tasks.aextend([t.key for t in tasks])
 
@@ -93,14 +93,14 @@ async def test_swarm_start_tasks_already_started_edge_case(
         config=SwarmConfig(max_concurrency=2),
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     tasks = [
         TaskSignature(task_name=f"test_task_{i}", model_validators=ContextMessage)
         for i in range(3)
     ]
     for task in tasks:
-        await task.save()
+        await task.asave()
 
     await swarm_task.tasks.aextend([t.key for t in tasks])
 
@@ -125,14 +125,14 @@ async def test_swarm_start_tasks_max_concurrency_zero_edge_case(
         config=SwarmConfig(max_concurrency=0),
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     tasks = [
         TaskSignature(task_name=f"test_task_{i}", model_validators=ContextMessage)
         for i in range(3)
     ]
     for task in tasks:
-        await task.save()
+        await task.asave()
 
     await swarm_task.tasks.aextend([t.key for t in tasks])
 
@@ -160,7 +160,7 @@ async def test_swarm_start_tasks_empty_tasks_list_edge_case(
         config=SwarmConfig(max_concurrency=2),
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     ctx = create_mock_context_with_metadata(swarm_task_id=swarm_task.key)
     msg = EmptyModel()
@@ -205,7 +205,7 @@ async def test_swarm_start_tasks_task_not_found_edge_case(
         config=SwarmConfig(max_concurrency=2),
         publishing_state_id=publish_state.key,
     )
-    await swarm_task.save()
+    await swarm_task.asave()
 
     await swarm_task.tasks.aextend(["nonexistent_task_1", "nonexistent_task_2"])
 
