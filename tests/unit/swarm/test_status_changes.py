@@ -232,7 +232,7 @@ async def test_swarm_resume_with_status_changes_sanity(
 
     swarm_data.swarm_signature.task_status.status = initial_status
     swarm_data.swarm_signature.task_status.last_status = last_status
-    await swarm_data.swarm_signature.save()
+    await swarm_data.swarm_signature.asave()
 
     # Act
     await swarm_data.swarm_signature.resume()

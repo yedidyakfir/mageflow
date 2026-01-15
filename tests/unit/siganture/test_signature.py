@@ -55,7 +55,7 @@ async def test__from_signature__create_signature_from_existing__all_data_same_ex
     )
 
     # Act
-    new_signature = await original_signature.duplicate()
+    new_signature = await original_signature.aduplicate()
 
     # Assert
     original_data = original_signature.model_dump(exclude={"pk"})

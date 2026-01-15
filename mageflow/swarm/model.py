@@ -209,8 +209,8 @@ class SwarmTaskSignature(TaskSignature):
         )
         task.success_callbacks.append(on_success_swarm_item.key)
         task.error_callbacks.append(on_error_swarm_item.key)
-        await task.save()
-        await batch_task.save()
+        await task.asave()
+        await batch_task.asave()
         await self.tasks.aappend(batch_task.key)
 
         if close_on_max_task and not self.config.can_add_task(self):

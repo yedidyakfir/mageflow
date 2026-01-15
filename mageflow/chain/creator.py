@@ -30,7 +30,7 @@ async def chain(
         error_callbacks=[error] if error else [],
         tasks=tasks,
     )
-    await chain_task_signature.save()
+    await chain_task_signature.asave()
 
     callback_kwargs = dict(chain_task_id=chain_task_signature.key)
     on_chain_error = TaskSignature(
@@ -61,10 +61,10 @@ async def _chain_task_to_previous_success(
 
     total_tasks = tasks + [success]
     error_tasks = await error.duplicate_many(len(tasks))
-    store_errors = [error.save() for error in error_tasks]
+    store_errors = [error.asave() for error in error_tasks]
 
     # Store tasks
-    await asyncio.gather(success.save(), *store_errors)
+    await asyncio.gather(success.asave(), *store_errors)
     update_tasks = [
         task.add_callbacks(success=[total_tasks[i + 1]], errors=[error_tasks[i]])
         for i, task in enumerate(tasks)

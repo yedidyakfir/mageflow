@@ -73,7 +73,7 @@ class TaskSignature(AtomicRedisModel):
             error_callbacks=error_callbacks or [],
             **kwargs,
         )
-        await signature.save()
+        await signature.asave()
         return signature
 
     @classmethod
@@ -94,7 +94,7 @@ class TaskSignature(AtomicRedisModel):
         signature = cls(
             task_name=task_name, model_validators=model_validators, **kwargs
         )
-        await signature.save()
+        await signature.asave()
         return signature
 
     @classmethod
@@ -317,7 +317,7 @@ async def lock_from_key(
         redis_model = await rapyer.aget(key)
         yield redis_model
         if save_at_end:
-            await redis_model.save()
+            await redis_model.asave()
 
 
 SIGNATURES_NAME_MAPPING: dict[str, type[TaskSignature]] = {}
