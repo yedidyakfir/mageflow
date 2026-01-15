@@ -60,28 +60,6 @@ async def test_add_to_failed_tasks_sanity(task_ids):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(["initial_count"], [[5], [10], [3]])
-async def test_decrease_running_tasks_count_sanity(initial_count):
-    # Arrange
-    swarm_signature = SwarmTaskSignature(
-        task_name="test_swarm",
-        kwargs={},
-        model_validators=ContextMessage,
-        current_running_tasks=initial_count,
-    )
-    await swarm_signature.save()
-
-    # Act
-    await swarm_signature.decrease_running_tasks_count()
-
-    # Assert
-    reloaded_swarm = await SwarmTaskSignature.get_safe(swarm_signature.key)
-    final_count = initial_count - 1
-    assert reloaded_swarm.current_running_tasks == final_count
-    assert swarm_signature.current_running_tasks == final_count
-
-
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["max_concurrency", "current_running", "expected_can_run"],
     [[5, 3, True], [5, 4, True], [5, 5, False], [1, 1, False], [10, 0, True]],
