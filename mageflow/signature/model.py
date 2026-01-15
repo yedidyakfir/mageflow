@@ -211,7 +211,7 @@ class TaskSignature(AtomicRedisModel):
             *[TaskSignature.get_safe(task_id) for task_id in addition_tasks_to_delete]
         )
 
-        delete_tasks = [self.delete()]
+        delete_tasks = [self.adelete()]
         delete_tasks.extend(
             [
                 signature_to_delete.remove()

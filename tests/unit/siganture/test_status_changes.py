@@ -18,7 +18,7 @@ async def test__safe_change_status__signature_deleted_from_redis__raises_error__
     task_id = signature.key
 
     # Delete signature from Redis directly
-    await redis_client.delete(signature.key)
+    await redis_client.adelete(signature.key)
 
     # Act & Assert
     await TaskSignature.safe_change_status(task_id, SignatureStatus.ACTIVE)
