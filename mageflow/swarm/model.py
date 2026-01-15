@@ -2,6 +2,10 @@ import asyncio
 from typing import Self, Any, Optional
 
 from hatchet_sdk.runnables.types import EmptyModel
+from pydantic import Field, field_validator, BaseModel
+from rapyer import AtomicRedisModel
+from rapyer.types import RedisList, RedisInt
+
 from mageflow.errors import (
     MissingSignatureError,
     MissingSwarmItemError,
@@ -24,6 +28,7 @@ from mageflow.swarm.consts import (
     ON_SWARM_START,
 )
 from mageflow.swarm.messages import SwarmResultsMessage
+from mageflow.swarm.state import PublishState
 from mageflow.utils.pythonic import deep_merge
 from pydantic import Field, field_validator, BaseModel
 from rapyer import AtomicRedisModel
@@ -100,6 +105,7 @@ class SwarmTaskSignature(TaskSignature):
     is_swarm_closed: bool = False
     # How many tasks can be added to the swarm at a time
     current_running_tasks: RedisInt = 0
+    publishing_state_id: str
     config: SwarmConfig = Field(default_factory=SwarmConfig)
 
     @field_validator(
@@ -219,33 +225,39 @@ class SwarmTaskSignature(TaskSignature):
                 return False
 
     async def fill_running_tasks(self) -> int:
-        resource_to_run = self.config.max_concurrency - self.current_running_tasks
-        if resource_to_run <= 0:
-            return 0
-        num_of_task_to_run = min(resource_to_run, len(self.tasks_left_to_run))
-        task_ids = await asyncio.gather(
-            *[self.tasks_left_to_run.apop() for i in range(num_of_task_to_run)]
-        )
-        tasks = await asyncio.gather(
-            *[
-                BatchItemTaskSignature.get_safe(task_id)
-                for task_id in task_ids
-                if task_id  # Check not None
-            ]
-        )
-        publish_coroutine = [
-            next_task.aio_run_no_wait(EmptyModel())
-            for next_task in tasks
-            if next_task is not None
-        ]
-        await asyncio.gather(*publish_coroutine)
-        if len(tasks) != len(publish_coroutine):
-            raise MissingSwarmItemError(f"swarm item was deleted before swarm is done")
-        return len(tasks)
+        async with self.alock() as swarm_task:
+            publish_state = await PublishState.aget(swarm_task.publishing_state_id)
+            if not publish_state.task_ids:
+                resource_to_run = (
+                    swarm_task.config.max_concurrency - swarm_task.current_running_tasks
+                )
+                if resource_to_run <= 0:
+                    return 0
+                num_of_task_to_run = min(resource_to_run, len(self.tasks_left_to_run))
+                batch_ids = self.tasks_left_to_run[:num_of_task_to_run]
+                publish_state.task_ids.aappend(batch_ids)
 
-    async def decrease_running_tasks_count(self):
-        await self.current_running_tasks.increase(-1)
-        self.current_running_tasks -= 1
+            if publish_state.task_ids:
+                # TODO - add afind with keys
+                tasks = await asyncio.gather(
+                    *[
+                        BatchItemTaskSignature.get_safe(task_id)
+                        for task_id in batch_ids
+                        if task_id  # Check ±not None
+                    ]
+                )
+                # TODO - use aio_run_many_no_wait
+                publish_coroutine = [
+                    next_task.aio_run_no_wait(EmptyModel()) for next_task in tasks
+                ]
+                await asyncio.gather(*publish_coroutine, return_exceptions=True)
+                async with publish_state.apipeline():
+                    publish_state.task_ids.clear()
+                    left_tasks = swarm_task.tasks_left_to_run[num_of_task_to_run:]
+                    swarm_task.tasks_left_to_run = left_tasks
+                    # swarm_task.tasks_left_to_run.remove_range(0, num_of_task_to_run)
+                    # TODO - add rapyer function for list remove_range - pipeline support
+            return len(tasks)
 
     async def add_to_finished_tasks(self, task: TaskIdentifierType):
         await self.finished_tasks.aappend(task)

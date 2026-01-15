@@ -1,6 +1,8 @@
 import asyncio
 import uuid
 
+import rapyer
+
 from mageflow.signature.creator import (
     TaskSignatureConvertible,
     TaskSignatureOptions,
@@ -23,7 +25,10 @@ async def swarm(
 ) -> SwarmTaskSignature:
     tasks = tasks or []
     task_name = task_name or f"swarm-task-{uuid.uuid4()}"
-    swarm_signature = SwarmTaskSignature(**kwargs, task_name=task_name)
-    await swarm_signature.save()
+    publish_state = PublishState()
+    swarm_signature = SwarmTaskSignature(
+        **kwargs, task_name=task_name, publishing_state_id=publish_state.key
+    )
+    await rapyer.ainsert(publish_state, swarm_signature)
     await asyncio.gather(*[swarm_signature.add_task(task) for task in tasks])
     return swarm_signature
