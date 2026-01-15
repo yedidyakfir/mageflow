@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any
 
-from hatchet_sdk import Context
+from hatchet_sdk import Context, Hatchet
 from hatchet_sdk.runnables.contextvars import ctx_additional_metadata
 from pydantic import BaseModel
 
@@ -13,6 +13,9 @@ from mageflow.workflows import TASK_DATA_PARAM_NAME
 
 
 class HatchetInvoker(BaseInvoker):
+    # TODO - This should be in init, and the entire class created via factory in mageflow_config
+    client: Hatchet = None
+
     def __init__(self, message: BaseModel, ctx: Context):
         self.message = message
         self.task_data = ctx.additional_metadata.get(TASK_DATA_PARAM_NAME, {})
@@ -83,3 +86,9 @@ class HatchetInvoker(BaseInvoker):
             await signature.handle_inactive_task(self.message)
             return False
         return True
+
+    async def wait_task(
+        self, task_name: str, msg: BaseModel, validator: type[BaseModel] = None
+    ):
+        wf = self.client.workflow(name=task_name, input_validator=validator)
+        return await wf.aio_run(msg)

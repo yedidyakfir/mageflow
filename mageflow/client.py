@@ -16,6 +16,7 @@ from typing_extensions import override
 from mageflow.callbacks import AcceptParams, register_task, handle_task_callback
 from mageflow.chain.creator import chain
 from mageflow.init import init_mageflow_hatchet_tasks
+from mageflow.invokers.hatchet import HatchetInvoker
 from mageflow.signature.creator import sign, TaskSignatureConvertible
 from mageflow.signature.model import TaskSignature, TaskInputType
 from mageflow.signature.types import HatchetTaskType
@@ -185,6 +186,8 @@ def Mageflow(
     config.namespace = ""
     hatchet_caller = Hatchet(config=config, debug=hatchet_client._client.debug)
     mageflow_config.hatchet_client = hatchet_caller
+    # TODO - we should get rid of the hatchet caller, just use a unify namespace, this is hatchet pattern, use it
+    HatchetInvoker.client = hatchet_client
 
     if redis_client is None:
         redis_url = os.getenv("REDIS_URL")

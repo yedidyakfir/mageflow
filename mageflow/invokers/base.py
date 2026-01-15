@@ -2,6 +2,8 @@ import abc
 from abc import ABC
 from typing import Any
 
+from pydantic import BaseModel
+
 from mageflow.signature.model import TaskSignature
 
 
@@ -31,4 +33,10 @@ class BaseInvoker(ABC):
 
     @abc.abstractmethod
     async def should_run_task(self) -> bool:
+        pass
+
+    @abc.abstractmethod
+    async def wait_task(
+        self, task_name: str, msg: BaseModel, validator: type[BaseModel] = None
+    ):
         pass
