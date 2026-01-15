@@ -60,7 +60,7 @@ async def _chain_task_to_previous_success(
         )
 
     total_tasks = tasks + [success]
-    error_tasks = await error.duplicate_many(len(tasks))
+    error_tasks = await error.aduplicate_many(len(tasks))
     store_errors = [error.asave() for error in error_tasks]
 
     # Store tasks
