@@ -33,7 +33,7 @@ def handle_task_callback(
         @functools.wraps(func)
         async def wrapper(message: EmptyModel, ctx: Context, *args, **kwargs):
             invoker = HatchetInvoker(message, ctx)
-            task_model = await HatchetTaskModel.get(ctx.action.job_name)
+            task_model = await HatchetTaskModel.aget(ctx.action.job_name)
             if not await invoker.should_run_task():
                 await ctx.aio_cancel()
                 await asyncio.sleep(10)

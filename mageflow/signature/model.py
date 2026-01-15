@@ -109,7 +109,7 @@ class TaskSignature(AtomicRedisModel):
             success = [self.validate_task_key(s) for s in success]
         if errors:
             errors = [self.validate_task_key(e) for e in errors]
-        async with self.pipeline() as signature:
+        async with self.apipeline() as signature:
             await signature.success_callbacks.aextend(success)
             await signature.error_callbacks.aextend(errors)
 

@@ -31,7 +31,7 @@ async def swarm_start_tasks(msg: EmptyModel, ctx: Context):
             return
         tasks_ids_to_run = swarm_task.tasks[: swarm_task.config.max_concurrency]
         tasks_left_to_run = swarm_task.tasks[swarm_task.config.max_concurrency :]
-        async with swarm_task.pipeline() as swarm_task:
+        async with swarm_task.apipeline() as swarm_task:
             await swarm_task.tasks_left_to_run.aclear()
             await swarm_task.tasks_left_to_run.aextend(tasks_left_to_run)
         tasks_to_run = await asyncio.gather(

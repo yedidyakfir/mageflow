@@ -16,7 +16,7 @@ class HatchetTaskModel(AtomicRedisModel):
     @classmethod
     async def safe_get(cls, key: str) -> Self | None:
         try:
-            return await cls.get(key)
+            return await cls.aget(key)
         except KeyNotFound:
             return None
 
