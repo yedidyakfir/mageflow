@@ -30,7 +30,7 @@ async def test_handle_finish_tasks_sanity_starts_next_task(
     msg = EmptyModel()
 
     # Act
-    async with swarm_task.lock(save_at_end=False) as locked_swarm:
+    async with swarm_task.alock(save_at_end=False) as locked_swarm:
         await fill_swarm_running_tasks(locked_swarm, mock_context, msg)
 
     # Assert
@@ -67,7 +67,7 @@ async def test_handle_finish_tasks_sanity_swarm_completes(
     msg = EmptyModel()
 
     # Act
-    async with swarm_task.lock(save_at_end=False) as locked_swarm:
+    async with swarm_task.alock(save_at_end=False) as locked_swarm:
         await fill_swarm_running_tasks(locked_swarm, mock_context, msg)
 
     # Assert
@@ -90,7 +90,7 @@ async def test_handle_finish_tasks_no_tasks_left_edge_case(mock_context, publish
     msg = EmptyModel()
 
     # Act
-    async with swarm_task.lock(save_at_end=False) as locked_swarm:
+    async with swarm_task.alock(save_at_end=False) as locked_swarm:
         await fill_swarm_running_tasks(locked_swarm, mock_context, msg)
 
     # Assert
@@ -119,7 +119,7 @@ async def test_handle_finish_tasks_exception_during_decrease_edge_case(
 
     # Act & Assert
     with pytest.raises(RuntimeError):
-        async with swarm_task.lock(save_at_end=False) as locked_swarm:
+        async with swarm_task.alock(save_at_end=False) as locked_swarm:
             await fill_swarm_running_tasks(locked_swarm, mock_context, msg)
 
     mock_redis_int_increase_error.assert_called_once_with(-1)
@@ -150,7 +150,7 @@ async def test_handle_finish_tasks_exception_during_activate_success_edge_case(
 
     # Act & Assert
     with pytest.raises(RuntimeError):
-        async with swarm_task.lock(save_at_end=False) as locked_swarm:
+        async with swarm_task.alock(save_at_end=False) as locked_swarm:
             await fill_swarm_running_tasks(locked_swarm, mock_context, msg)
 
     mock_activate_success_error.assert_awaited_once_with(msg)

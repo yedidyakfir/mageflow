@@ -83,7 +83,7 @@ async def swarm_item_failed(msg: EmptyModel, ctx: Context):
         ctx.log(f"Swarm item failed {swarm_item_key}")
         # Check if the swarm should end
         swarm_task = await SwarmTaskSignature.get_safe(swarm_task_key)
-        async with swarm_task.lock(save_at_end=False) as swarm_task:
+        async with swarm_task.alock(save_at_end=False) as swarm_task:
             await swarm_task.add_to_failed_tasks(swarm_item_key)
             should_stop_after_failures = (
                 swarm_task.config.stop_after_n_failures is not None

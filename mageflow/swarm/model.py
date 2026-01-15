@@ -42,7 +42,7 @@ class BatchItemTaskSignature(TaskSignature):
     item_status: str = IN_QUEUE
 
     async def aio_run_no_wait(self, msg: BaseModel, **orig_task_kwargs):
-        async with self.lock() as swarm_item:
+        async with self.alock() as swarm_item:
             swarm_task = await SwarmTaskSignature.get_safe(self.swarm_id)
             original_task = await TaskSignature.get_safe(self.original_task_id)
             if swarm_task is None:
@@ -219,7 +219,7 @@ class SwarmTaskSignature(TaskSignature):
         return batch_task
 
     async def add_to_running_tasks(self, task: TaskSignatureConvertible) -> bool:
-        async with self.lock() as swarm_task:
+        async with self.alock() as swarm_task:
             task = await resolve_signature_key(task)
             if self.current_running_tasks < self.config.max_concurrency:
                 await self.current_running_tasks.aincrease()
@@ -304,7 +304,7 @@ class SwarmTaskSignature(TaskSignature):
         await super().change_status(self.task_status.last_status)
 
     async def close_swarm(self) -> Self:
-        async with self.lock() as swarm_task:
+        async with self.alock() as swarm_task:
             await swarm_task.aupdate(is_swarm_closed=True)
             should_finish_swarm = await swarm_task.is_swarm_done()
             if should_finish_swarm:
