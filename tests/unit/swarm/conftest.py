@@ -4,14 +4,17 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 from hatchet_sdk import Context
+from rapyer.types import RedisInt
 
-import mageflow
 from mageflow.signature.consts import TASK_ID_PARAM_NAME
 from mageflow.signature.model import TaskSignature
-from mageflow.swarm.consts import SWARM_TASK_ID_PARAM_NAME, SWARM_ITEM_TASK_ID_PARAM_NAME
-from mageflow.swarm.model import SwarmTaskSignature
 from mageflow.swarm import workflows
-from rapyer.types import RedisInt
+from mageflow.swarm.consts import (
+    SWARM_TASK_ID_PARAM_NAME,
+    SWARM_ITEM_TASK_ID_PARAM_NAME,
+)
+from mageflow.swarm.model import SwarmTaskSignature
+from mageflow.swarm.state import PublishState
 from tests.integration.hatchet.models import ContextMessage
 
 
@@ -22,7 +25,14 @@ class SwarmTestData:
 
 
 @pytest_asyncio.fixture
-async def swarm_with_tasks():
+async def publish_state():
+    state = PublishState()
+    await state.asave()
+    return state
+
+
+@pytest_asyncio.fixture
+async def swarm_with_tasks(publish_state):
     swarm_task_signature_1 = TaskSignature(
         task_name="swarm_task_1", model_validators=ContextMessage
     )
@@ -48,6 +58,7 @@ async def swarm_with_tasks():
         task_name="test_swarm",
         model_validators=ContextMessage,
         tasks=[task.key for task in task_signatures],
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
 

@@ -1,7 +1,6 @@
 import asyncio
 
 import pytest
-from hatchet_sdk.clients.rest import V1TaskStatus
 from hatchet_sdk.runnables.types import EmptyModel
 
 import mageflow
@@ -14,7 +13,6 @@ from tests.integration.hatchet.assertions import (
     assert_signature_done,
     map_wf_by_id,
     assert_overlaps_leq_k_workflows,
-    is_wf_done,
     find_sub_calls_by_signature,
 )
 from tests.integration.hatchet.conftest import HatchetInitData

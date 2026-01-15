@@ -1,6 +1,6 @@
 import asyncio
+
 import pytest
-import pytest_asyncio
 
 from mageflow.task.model import HatchetTaskModel
 from tests.integration.hatchet.conftest import HatchetInitData

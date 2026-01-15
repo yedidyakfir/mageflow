@@ -1,7 +1,8 @@
 import asyncio
 
-import mageflow
 import pytest
+
+import mageflow
 from mageflow.signature.model import TaskSignature
 from tests.integration.hatchet.assertions import (
     assert_signature_not_called,

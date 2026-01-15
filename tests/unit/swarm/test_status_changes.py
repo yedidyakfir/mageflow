@@ -1,5 +1,6 @@
-import mageflow
 import pytest
+
+import mageflow
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.status import SignatureStatus
 from mageflow.swarm.model import SwarmTaskSignature
@@ -14,7 +15,7 @@ from tests.unit.conftest import ChainTestData
 
 @pytest.mark.asyncio
 async def test_swarm_pause_signature_changes_all_swarm_and_chain_tasks_status_to_paused_sanity(
-    chain_with_tasks: ChainTestData,
+    chain_with_tasks: ChainTestData, publish_state
 ):
     # Arrange
     chain_signature = chain_with_tasks.chain_signature
@@ -39,6 +40,7 @@ async def test_swarm_pause_signature_changes_all_swarm_and_chain_tasks_status_to
             swarm_task_signature_1.key,
             swarm_task_signature_2.key,
         ],
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
     expected_paused_tasks = [
@@ -158,7 +160,7 @@ async def test_swarm_change_status_with_optional_deleted_sub_tasks_edge_case(
     [SignatureStatus.CANCELED],
 )
 async def test_add_task_raises_runtime_error_when_swarm_not_active_edge_case(
-    status: SignatureStatus,
+    status: SignatureStatus, publish_state
 ):
     # Arrange
     task_signature = TaskSignature(
@@ -172,6 +174,7 @@ async def test_add_task_raises_runtime_error_when_swarm_not_active_edge_case(
         task_name="test_swarm",
         kwargs={},
         model_validators=ContextMessage,
+        publishing_state_id=publish_state.key,
     )
     swarm_signature.task_status.status = status
     await swarm_signature.save()
@@ -182,13 +185,16 @@ async def test_add_task_raises_runtime_error_when_swarm_not_active_edge_case(
 
 
 @pytest.mark.asyncio
-async def test_swarm_safe_change_status_on_deleted_signature_does_not_create_redis_entry_sanity():
+async def test_swarm_safe_change_status_on_deleted_signature_does_not_create_redis_entry_sanity(
+    publish_state,
+):
     # Arrange
     swarm_signature = SwarmTaskSignature(
         task_name="test_swarm_unsaved",
         kwargs={},
         model_validators=ContextMessage,
         tasks=["task_1", "task_2"],
+        publishing_state_id=publish_state.key,
     )
 
     # Act

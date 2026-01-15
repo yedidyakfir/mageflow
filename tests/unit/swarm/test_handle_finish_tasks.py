@@ -9,7 +9,7 @@ from tests.integration.hatchet.models import ContextMessage
 
 @pytest.mark.asyncio
 async def test_handle_finish_tasks_sanity_starts_next_task(
-    mock_context, mock_fill_running_tasks, mock_activate_success
+    mock_context, mock_fill_running_tasks, mock_activate_success, publish_state
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -18,6 +18,7 @@ async def test_handle_finish_tasks_sanity_starts_next_task(
         config=SwarmConfig(max_concurrency=2),
         current_running_tasks=2,
         is_swarm_closed=False,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -44,7 +45,7 @@ async def test_handle_finish_tasks_sanity_starts_next_task(
 
 @pytest.mark.asyncio
 async def test_handle_finish_tasks_sanity_swarm_completes(
-    mock_context, mock_activate_success
+    mock_context, mock_activate_success, publish_state
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -53,6 +54,7 @@ async def test_handle_finish_tasks_sanity_swarm_completes(
         config=SwarmConfig(max_concurrency=1),
         current_running_tasks=1,
         is_swarm_closed=True,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -73,7 +75,7 @@ async def test_handle_finish_tasks_sanity_swarm_completes(
 
 
 @pytest.mark.asyncio
-async def test_handle_finish_tasks_no_tasks_left_edge_case(mock_context):
+async def test_handle_finish_tasks_no_tasks_left_edge_case(mock_context, publish_state):
     # Arrange
     swarm_task = SwarmTaskSignature(
         task_name="test_swarm",
@@ -81,6 +83,7 @@ async def test_handle_finish_tasks_no_tasks_left_edge_case(mock_context):
         config=SwarmConfig(max_concurrency=2),
         current_running_tasks=1,
         is_swarm_closed=False,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -101,13 +104,14 @@ async def test_handle_finish_tasks_no_tasks_left_edge_case(mock_context):
 
 @pytest.mark.asyncio
 async def test_handle_finish_tasks_exception_during_decrease_edge_case(
-    mock_context, mock_redis_int_increase_error
+    mock_context, mock_redis_int_increase_error, publish_state
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
         task_name="test_swarm",
         model_validators=ContextMessage,
         current_running_tasks=1,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -123,7 +127,7 @@ async def test_handle_finish_tasks_exception_during_decrease_edge_case(
 
 @pytest.mark.asyncio
 async def test_handle_finish_tasks_exception_during_activate_success_edge_case(
-    mock_context, mock_activate_success_error
+    mock_context, mock_activate_success_error, publish_state
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -132,6 +136,7 @@ async def test_handle_finish_tasks_exception_during_activate_success_edge_case(
         config=SwarmConfig(max_concurrency=1),
         current_running_tasks=1,
         is_swarm_closed=True,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 

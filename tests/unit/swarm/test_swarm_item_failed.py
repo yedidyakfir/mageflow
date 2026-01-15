@@ -5,7 +5,10 @@ from hatchet_sdk.runnables.types import EmptyModel
 
 from mageflow.signature.model import TaskSignature
 from mageflow.signature.status import SignatureStatus
-from mageflow.swarm.consts import SWARM_TASK_ID_PARAM_NAME, SWARM_ITEM_TASK_ID_PARAM_NAME
+from mageflow.swarm.consts import (
+    SWARM_TASK_ID_PARAM_NAME,
+    SWARM_ITEM_TASK_ID_PARAM_NAME,
+)
 from mageflow.swarm.model import SwarmTaskSignature, SwarmConfig
 from mageflow.swarm.workflows import swarm_item_failed
 from tests.integration.hatchet.models import ContextMessage
@@ -13,7 +16,7 @@ from tests.integration.hatchet.models import ContextMessage
 
 @pytest.mark.asyncio
 async def test_swarm_item_failed_sanity_continue_after_failure(
-    create_mock_context_with_metadata, mock_fill_running_tasks
+    create_mock_context_with_metadata, mock_fill_running_tasks, publish_state
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -21,6 +24,7 @@ async def test_swarm_item_failed_sanity_continue_after_failure(
         model_validators=ContextMessage,
         config=SwarmConfig(max_concurrency=1, stop_after_n_failures=2),
         current_running_tasks=1,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -60,7 +64,10 @@ async def test_swarm_item_failed_sanity_continue_after_failure(
 
 @pytest.mark.asyncio
 async def test_swarm_item_failed_sanity_stop_after_threshold(
-    create_mock_context_with_metadata, mock_activate_error, mock_swarm_remove
+    create_mock_context_with_metadata,
+    mock_activate_error,
+    mock_swarm_remove,
+    publish_state,
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -68,6 +75,7 @@ async def test_swarm_item_failed_sanity_stop_after_threshold(
         model_validators=ContextMessage,
         config=SwarmConfig(max_concurrency=1, stop_after_n_failures=2),
         current_running_tasks=1,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -106,7 +114,10 @@ async def test_swarm_item_failed_sanity_stop_after_threshold(
 
 @pytest.mark.asyncio
 async def test_swarm_item_failed_stop_after_n_failures_none_edge_case(
-    create_mock_context_with_metadata, mock_activate_error, mock_fill_running_tasks_zero
+    create_mock_context_with_metadata,
+    mock_activate_error,
+    mock_fill_running_tasks_zero,
+    publish_state,
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -114,6 +125,7 @@ async def test_swarm_item_failed_stop_after_n_failures_none_edge_case(
         model_validators=ContextMessage,
         config=SwarmConfig(max_concurrency=1, stop_after_n_failures=None),
         current_running_tasks=1,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -151,7 +163,10 @@ async def test_swarm_item_failed_stop_after_n_failures_none_edge_case(
 
 @pytest.mark.asyncio
 async def test_swarm_item_failed_stop_after_n_failures_zero_edge_case(
-    create_mock_context_with_metadata, mock_activate_error, mock_swarm_remove
+    create_mock_context_with_metadata,
+    mock_activate_error,
+    mock_swarm_remove,
+    publish_state,
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -159,6 +174,7 @@ async def test_swarm_item_failed_stop_after_n_failures_zero_edge_case(
         model_validators=ContextMessage,
         config=SwarmConfig(max_concurrency=1, stop_after_n_failures=0),
         current_running_tasks=1,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -185,7 +201,7 @@ async def test_swarm_item_failed_stop_after_n_failures_zero_edge_case(
 
 @pytest.mark.asyncio
 async def test_swarm_item_failed_stop_after_one_failure_edge_case(
-    create_mock_context_with_metadata, mock_activate_error
+    create_mock_context_with_metadata, mock_activate_error, publish_state
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -193,6 +209,7 @@ async def test_swarm_item_failed_stop_after_one_failure_edge_case(
         model_validators=ContextMessage,
         config=SwarmConfig(max_concurrency=1, stop_after_n_failures=1),
         current_running_tasks=1,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -218,7 +235,10 @@ async def test_swarm_item_failed_stop_after_one_failure_edge_case(
 
 @pytest.mark.asyncio
 async def test_swarm_item_failed_below_threshold_edge_case(
-    create_mock_context_with_metadata, mock_activate_error, mock_fill_running_tasks_zero
+    create_mock_context_with_metadata,
+    mock_activate_error,
+    mock_fill_running_tasks_zero,
+    publish_state,
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -226,6 +246,7 @@ async def test_swarm_item_failed_below_threshold_edge_case(
         model_validators=ContextMessage,
         config=SwarmConfig(max_concurrency=1, stop_after_n_failures=3),
         current_running_tasks=1,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 
@@ -267,7 +288,7 @@ async def test_swarm_item_failed_missing_task_key_edge_case(mock_context):
 
 @pytest.mark.asyncio
 async def test_swarm_item_failed_concurrent_failures_edge_case(
-    create_mock_context_with_metadata,
+    create_mock_context_with_metadata, publish_state
 ):
     # Arrange
     swarm_task = SwarmTaskSignature(
@@ -275,6 +296,7 @@ async def test_swarm_item_failed_concurrent_failures_edge_case(
         model_validators=ContextMessage,
         config=SwarmConfig(max_concurrency=3, stop_after_n_failures=5),
         current_running_tasks=3,
+        publishing_state_id=publish_state.key,
     )
     await swarm_task.save()
 

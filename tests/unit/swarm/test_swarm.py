@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 import rapyer
+
 from mageflow.signature.model import TaskSignature
 from mageflow.swarm.model import SwarmTaskSignature, SwarmConfig, BatchItemTaskSignature
 from tests.integration.hatchet.models import ContextMessage
@@ -11,13 +12,14 @@ from tests.integration.hatchet.models import ContextMessage
 @pytest.mark.parametrize(
     "task_ids", [["task_1"], ["task_1", "task_2"], ["task_1", "task_2", "task_3"]]
 )
-async def test_add_to_finished_tasks_sanity(task_ids):
+async def test_add_to_finished_tasks_sanity(task_ids, publish_state):
     # Arrange
     swarm_signature = SwarmTaskSignature(
         task_name="test_swarm",
         kwargs={},
         model_validators=ContextMessage,
         finished_tasks=[],
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
     original_finished_tasks = swarm_signature.finished_tasks.copy()
@@ -37,13 +39,14 @@ async def test_add_to_finished_tasks_sanity(task_ids):
 @pytest.mark.parametrize(
     "task_ids", [["task_1"], ["task_1", "task_2"], ["task_1", "task_2", "task_3"]]
 )
-async def test_add_to_failed_tasks_sanity(task_ids):
+async def test_add_to_failed_tasks_sanity(task_ids, publish_state):
     # Arrange
     swarm_signature = SwarmTaskSignature(
         task_name="test_swarm",
         kwargs={},
         model_validators=ContextMessage,
         failed_tasks=[],
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
     original_failed_tasks = swarm_signature.failed_tasks.copy()
@@ -65,7 +68,7 @@ async def test_add_to_failed_tasks_sanity(task_ids):
     [[5, 3, True], [5, 4, True], [5, 5, False], [1, 1, False], [10, 0, True]],
 )
 async def test_add_to_running_tasks_sanity(
-    max_concurrency, current_running, expected_can_run
+    max_concurrency, current_running, expected_can_run, publish_state
 ):
     # Arrange
     task_signature = TaskSignature(
@@ -78,6 +81,7 @@ async def test_add_to_running_tasks_sanity(
         model_validators=ContextMessage,
         current_running_tasks=current_running,
         config=SwarmConfig(max_concurrency=max_concurrency),
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
     original_tasks_left_to_run = swarm_signature.tasks_left_to_run.copy()
@@ -115,10 +119,12 @@ async def test_add_to_running_tasks_sanity(
 
 
 @pytest.mark.asyncio
-async def test_add_task_reaches_max_and_closes_swarm(mock_close_swarm):
+async def test_add_task_reaches_max_and_closes_swarm(mock_close_swarm, publish_state):
     # Arrange
     swarm_signature = SwarmTaskSignature(
-        task_name="test_swarm", config=SwarmConfig(max_task_allowed=2)
+        task_name="test_swarm",
+        config=SwarmConfig(max_task_allowed=2),
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
 
@@ -138,10 +144,12 @@ async def test_add_task_reaches_max_and_closes_swarm(mock_close_swarm):
 
 
 @pytest.mark.asyncio
-async def test_add_task_not_reaching_max(mock_close_swarm):
+async def test_add_task_not_reaching_max(mock_close_swarm, publish_state):
     # Arrange
     swarm_signature = SwarmTaskSignature(
-        task_name="test_swarm", config=SwarmConfig(max_task_allowed=3)
+        task_name="test_swarm",
+        config=SwarmConfig(max_task_allowed=3),
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
 
@@ -156,10 +164,12 @@ async def test_add_task_not_reaching_max(mock_close_swarm):
 
 
 @pytest.mark.asyncio
-async def test_add_task_reaches_max_but_no_close(mock_close_swarm):
+async def test_add_task_reaches_max_but_no_close(mock_close_swarm, publish_state):
     # Arrange
     swarm_signature = SwarmTaskSignature(
-        task_name="test_swarm", config=SwarmConfig(max_task_allowed=2)
+        task_name="test_swarm",
+        config=SwarmConfig(max_task_allowed=2),
+        publishing_state_id=publish_state.key,
     )
     await swarm_signature.save()
 
@@ -186,7 +196,7 @@ async def test_add_task_reaches_max_but_no_close(mock_close_swarm):
     ],
 )
 async def test_fill_running_tasks_sanity(
-    num_tasks_left, current_running, max_concurrency, expected_started
+    num_tasks_left, current_running, max_concurrency, expected_started, publish_state
 ):
     # Arrange
     # Create original task signatures using list comprehension
@@ -201,6 +211,7 @@ async def test_fill_running_tasks_sanity(
         model_validators=ContextMessage,
         current_running_tasks=current_running,
         config=SwarmConfig(max_concurrency=max_concurrency),
+        publishing_state_id=publish_state.key,
     )
     await rapyer.ainsert(swarm_signature, *original_tasks)
 

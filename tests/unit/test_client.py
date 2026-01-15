@@ -1,9 +1,9 @@
 import asyncio
-from hatchet_sdk import Context
 from datetime import timedelta
 from unittest.mock import MagicMock, AsyncMock
 
 import pytest
+from hatchet_sdk import Context
 from hatchet_sdk import Hatchet
 from redis import Redis
 
